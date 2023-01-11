@@ -1,14 +1,14 @@
 API
 ===
 
-.. automodule:: python3_pip_skeleton
+.. automodule:: xchemalign
 
-    ``python3_pip_skeleton``
+    ``xchemalign``
     -----------------------------------
 
-This is the internal API reference for python3_pip_skeleton
+This is the internal API reference for xchemalign
 
-.. data:: python3_pip_skeleton.__version__
+.. data:: xchemalign.__version__
     :type: str
 
     Version number as calculated by https://github.com/pypa/setuptools_scm
