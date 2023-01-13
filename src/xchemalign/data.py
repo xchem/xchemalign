@@ -5,6 +5,15 @@ class LigandID(BaseModel):
     dtag: str
     id: int
 
+    def __eq__(self, other) -> bool:
+        if self.dtag == other.dtag:
+            if self.id == other.id:
+                return True
+        return False
+
+    def __hash__(self):
+        return hash((self.dtag, self.id))
+
 
 class SymOp(BaseModel):
     operation: str
@@ -15,6 +24,17 @@ class AtomID(BaseModel):
     chain: str
     residue: int
     atom: str
+
+    def __eq__(self, other) -> bool:
+        if self.atom == other.atom:
+            if self.residue == other.residue:
+                if self.chain == other.chain:
+                    return True
+
+        return False
+
+    def __hash__(self):
+        return hash((self.chain, self.residue, self.atom))
 
 
 class Atom(BaseModel):
