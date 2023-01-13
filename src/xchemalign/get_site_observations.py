@@ -27,6 +27,7 @@ def get_site_observations(
                 # TODO: Fix dataset field
                 site_observation: SiteObservation = SiteObservation(
                     id=ligand_id,
+                    ligand_id=ligand_id,
                     xtal_form_site_id=xtal_form_site_id,
                     fragalysis_label="",
                     description="",

@@ -1,8 +1,17 @@
-from xchemalign.data import CanonicalSite, LigandNeighbourhood
+from xchemalign.data import Atom, CanonicalSite, LigandNeighbourhood
 
 
-def match_atom(canonical_site_atom, ligand_neighbourhood_atom) -> bool:
-    # TODO: Makre sure that these have sensible types
+def match_atom(
+    canonical_site_atom: Atom, ligand_neighbourhood_atom: Atom
+) -> bool:
+    id_1 = canonical_site_atom.atom_id
+    id_2 = ligand_neighbourhood_atom.atom_id
+
+    if id_1.atom == id_2.atom:
+        if id_1.residue == id_2.residue:
+            if id_1.chain == id_2.chain:
+                return True
+
     return False
 
 

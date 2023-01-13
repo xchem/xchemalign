@@ -1,7 +1,14 @@
 import gemmi
 
 # import loguru
-from xchemalign.data import Dataset, LigandID, LigandNeighbourhood, SystemData
+from xchemalign.data import (
+    Atom,
+    AtomID,
+    Dataset,
+    LigandID,
+    LigandNeighbourhood,
+    SystemData,
+)
 
 
 def get_structure_fragments(
@@ -41,6 +48,7 @@ def get_model_and_artefact_atoms(
 
 
 def get_ligand_neighbourhood(
+    structure: gemmi.Structure,
     ns: gemmi.NeighborSearch,
     fragment: gemmi.Residue,
     min_dist: float = 0.01,
@@ -65,9 +73,43 @@ def get_ligand_neighbourhood(
             ] = neighbour
 
     # Seperate out model and artefact atoms
-    model_atoms, artefact_atoms = get_model_and_artefact_atoms(
+    _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
         residue_neighbours
     )
+
+    # Model atoms
+    model_atoms: dict[AtomID, Atom] = {}
+    for atom in _model_atoms:
+        cra = atom.to_cra(structure[0])
+        model_atom_id: AtomID = AtomID(
+            chain=cra.chain.name,
+            residue=cra.residue.seqid.num,
+            atom=cra.atom.name,
+        )
+        model_atoms[model_atom_id] = Atom(
+            element=atom.element.name,
+            atom_id=model_atom_id,
+            x=atom.x,
+            y=atom.y,
+            z=atom.z,
+        )
+
+    # Artefact atoms
+    artefact_atoms: dict[AtomID, Atom] = {}
+    for atom in _artefact_atoms:
+        artefact_cra = atom.to_cra(structure[0])
+        artefact_atom_id: AtomID = AtomID(
+            chain=artefact_cra.chain.name,
+            residue=artefact_cra.residue.seqid.num,
+            atom=artefact_cra.atom.name,
+        )
+        artefact_atoms[artefact_atom_id] = Atom(
+            element=atom.element.name,
+            atom_id=artefact_atom_id,
+            x=atom.x,
+            y=atom.y,
+            z=atom.z,
+        )
 
     # Cosntruct the neighbourhood
     ligand_neighbourhood: LigandNeighbourhood = LigandNeighbourhood(
@@ -101,7 +143,7 @@ def get_dataset_neighbourhoods(
     fragment_neighbourhoods: dict[LigandID, LigandNeighbourhood] = {}
     for ligand_id, fragment in fragments.items():
         fragment_neighbourhoods[ligand_id] = get_ligand_neighbourhood(
-            ns, fragment
+            structure, ns, fragment
         )
 
     return fragment_neighbourhoods

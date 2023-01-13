@@ -2,7 +2,8 @@ import argparse
 from pathlib import Path
 
 # import gemmi
-# import loguru
+from loguru import logger
+
 from xchemalign.data import (
     CanonicalSite,
     LigandID,
@@ -19,21 +20,42 @@ from xchemalign.get_xtal_form_sites import get_xtal_form_sites
 
 
 def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
+    logger.info(f"System sites json path is: {system_sites_json_path}")
+    logger.info(f"Data json path is: {data_json_path}")
+
     # Load the input data
     initial_system_sites: SystemSites = SystemSites.parse_file(
         str(system_sites_json_path)
     )
     system_data: SystemData = SystemData.parse_file(str(data_json_path))
 
+    num_canonical_sites = len(initial_system_sites.canonical_site)
+    num_xtal_form_sites = len(initial_system_sites.xtal_form_site)
+    num_site_observations = len(initial_system_sites.site_observation)
+
+    logger.debug(f"Got {num_canonical_sites} existinging canonical sites")
+    logger.debug(f"Got {num_xtal_form_sites} existinging xtal form sites")
+    logger.debug(f"Got {num_site_observations} existinging site observations")
+
+    num_input_datasets = len(system_data.dataset)
+
+    logger.debug(f"Got {num_input_datasets} datasets")
+
     # Identify sites in the input data
     ligand_neighbourhoods: dict[
         LigandID, LigandNeighbourhood
     ] = get_ligand_neighbourhoods(system_data)
 
+    num_neighbourhoods = len(ligand_neighbourhoods)
+    logger.info(f"Found {num_neighbourhoods} ligand neighbourhoods")
+
     # Get the canonical sites
     canonical_sites: dict[int, CanonicalSite] = get_canonical_sites(
         initial_system_sites, ligand_neighbourhoods
     )
+
+    num_new_canon_sites = len(canonical_sites)
+    logger.info(f"New number of canonical sites is {num_new_canon_sites}")
 
     # Identify the xtalform sites
     xtal_form_sites: dict[int, XtalFormSite] = get_xtal_form_sites(
@@ -42,11 +64,19 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
         canonical_sites,
     )
 
+    new_num_xtal_form_sites = len(xtal_form_sites)
+    logger.info(f"New number of xtal form sites is {new_num_xtal_form_sites}")
+
     # Construct the observed sites
     site_observations: dict[LigandID, SiteObservation] = get_site_observations(
         initial_system_sites,
         xtal_form_sites,
         ligand_neighbourhoods,
+    )
+
+    new_num_site_observations = len(site_observations)
+    logger.info(
+        f"New number of site observations is {new_num_site_observations}"
     )
 
     # Construct the new system sites
@@ -57,6 +87,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     )
 
     # Output the new system_sites
+    logger.info(f"Updating sites json at {system_sites_json_path}")
     with open(system_sites_json_path, "w") as f:
         f.write(system_sites.json())
 
@@ -64,6 +95,8 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
 # Press the green button in the gutter to run the script.
 if __name__ == "__main__":
     # Parse args
+    logger.info("Parsing args...")
+
     parser = argparse.ArgumentParser(
         description="",
         formatter_class=argparse.RawDescriptionHelpFormatter,
