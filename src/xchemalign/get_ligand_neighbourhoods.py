@@ -144,7 +144,7 @@ def get_dataset_neighbourhoods(
     # Construct the neighbourhood search
     ns: gemmi.NeighborSearch = gemmi.NeighborSearch(
         structure[0], structure.cell, max_radius
-    )
+    ).populate()
 
     # For each bound fragment, identify the neighbourhood atoms and
     # partition them into model and artefact
