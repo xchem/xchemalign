@@ -99,6 +99,7 @@ def __get_model_and_artefact_atoms(
 def get_model_and_artefact_atoms(
     residue_neighbours: list[tuple[gemmi.Position, gemmi.CRA]],
     structure: Structure,
+    fragment,
 ) -> tuple[
     list[tuple[gemmi.Position, gemmi.CRA]],
     list[tuple[gemmi.Position, gemmi.CRA]],
@@ -155,7 +156,30 @@ def get_model_and_artefact_atoms(
             ):
                 artefact_atoms.append((pos, cra))
 
-    return model_atoms, artefact_atoms
+    updated_model_atoms = [
+        atom
+        for atom in model_atoms
+        if all(
+            [
+                fragment_atom.pos.dist(atom[0]) > 0.1
+                for fragment_atom in fragment
+            ]
+        )
+    ]
+
+    updated_artefact_atoms = [
+        atom
+        for atom in artefact_atoms
+        if all(
+            [
+                fragment_atom.pos.dist(atom[0]) > 0.1
+                for fragment_atom in fragment
+            ]
+        )
+    ]
+
+    # return model_atoms, artefact_atoms
+    return updated_model_atoms, updated_artefact_atoms
 
 
 def get_ligand_neighbourhood(
@@ -262,7 +286,7 @@ def get_ligand_neighbourhood(
 
     # # Seperate out model and artefact atoms
     _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
-        residue_neighbours, structure
+        residue_neighbours, structure, fragment
     )
     logger.debug(f"Got {len(_model_atoms)} model atoms")
     logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
