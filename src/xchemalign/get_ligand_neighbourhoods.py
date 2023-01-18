@@ -52,6 +52,9 @@ def get_model_and_artefact_atoms(
             mark.pos(), cra.atom.pos, mark.image_idx
         )
         logger.debug(f"{nearest_image}")
+        logger.debug(f"{nearest_image.sym_idx}")
+        logger.debug(f"{nearest_image.pbc_shift}")
+
         exit()
 
         if (nearest_image.sym_idx != 0) or (
