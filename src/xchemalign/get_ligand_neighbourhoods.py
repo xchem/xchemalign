@@ -74,6 +74,8 @@ def get_ligand_neighbourhood(
                 round(neighbour.z, 2),
             ] = neighbour
 
+    logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
+
     # Seperate out model and artefact atoms
     _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
         residue_neighbours
