@@ -29,6 +29,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
             str(system_sites_json_path)
         )
     else:
+        logger.info("No system site json: Creating new one!")
         initial_system_sites: SystemSites = SystemSites(
             canonical_site={}, xtal_form_site={}, site_observation={}
         )
