@@ -83,10 +83,8 @@ def get_ligand_neighbourhood(
         )
         for neighbour in atom_neighbours:
             cra = neighbour.to_cra(structure[0])
-            nearest_image = (
-                nearest_image
-            ) = structure.cell.find_nearest_pbc_image(
-                atom.pos(), cra.atom.pos, neighbour.image_idx
+            nearest_image = structure.cell.find_nearest_pbc_image(
+                atom.pos, cra.atom.pos, neighbour.image_idx
             )
             logger.debug(f"{nearest_image}")
             logger.debug(f"{nearest_image.sym_idx}")
