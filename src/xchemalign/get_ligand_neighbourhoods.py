@@ -72,9 +72,11 @@ def get_ligand_neighbourhood(
 ) -> LigandNeighbourhood:
     # For each atom, get the neighbouring atoms, and filter them on their
     # real space position
-    residue_neighbours: dict[
-        tuple[float, float, float], gemmi.NeighborSearch.Mark
-    ] = {}
+    # residue_neighbours: dict[
+    #     tuple[float, float, float], gemmi.NeighborSearch.Mark
+    # ] = {}
+    _artefact_atoms = []
+    _model_atoms = []
     for atom in fragment:
         atom_neighbours: list[gemmi.NeighborSearch.Mark] = ns.find_neighbors(
             atom,
@@ -89,19 +91,25 @@ def get_ligand_neighbourhood(
             logger.debug(f"{nearest_image}")
             logger.debug(f"{nearest_image.sym_idx}")
             logger.debug(f"{nearest_image.pbc_shift}")
-            residue_neighbours[
-                round(neighbour.x, 1),
-                round(neighbour.y, 1),
-                round(neighbour.z, 1),
-            ] = neighbour
 
-    exit()
-    logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
+            if nearest_image.sym_idx != 0:
+                _artefact_atoms.append(neighbour)
+            else:
+                _model_atoms.append(neighbour)
 
-    # Seperate out model and artefact atoms
-    _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
-        residue_neighbours, structure
-    )
+    #         residue_neighbours[
+    #             round(neighbour.x, 1),
+    #             round(neighbour.y, 1),
+    #             round(neighbour.z, 1),
+    #         ] = neighbour
+
+    # exit()
+    # logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
+
+    # # Seperate out model and artefact atoms
+    # _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
+    #     residue_neighbours, structure
+    # )
     logger.debug(f"Got {len(_model_atoms)} model atoms")
     logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
 
