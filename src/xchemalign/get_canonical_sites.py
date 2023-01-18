@@ -11,13 +11,13 @@ from xchemalign.matching import (
 
 
 def get_canonical_sites(
-    initial_system_sites: SystemSites,
+    initial_system_sites: SystemSites | None,
     ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood],
 ) -> dict[int, CanonicalSite]:
     # Get the existing canonical sites
-    canonical_sites: dict[
-        int, CanonicalSite
-    ] = initial_system_sites.canonical_site
+    canonical_sites: dict[int, CanonicalSite] = {}
+    if initial_system_sites:
+        canonical_sites = initial_system_sites.canonical_site
 
     # Get the number of canonical sites
     if len(canonical_sites) == 0:

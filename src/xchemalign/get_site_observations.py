@@ -10,14 +10,15 @@ from xchemalign.data import (
 
 
 def get_site_observations(
-    system_sites: SystemSites,
+    system_sites: SystemSites | None,
     xtal_form_sites: dict[int, XtalFormSite],
     ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood],
 ) -> dict[LigandID, SiteObservation]:
     # Get the current site observations
-    site_observations: dict[
-        LigandID, SiteObservation
-    ] = system_sites.site_observation
+
+    site_observations: dict[LigandID, SiteObservation] = {}
+    if system_sites:
+        site_observations = system_sites.site_observation
 
     # For each member of each xtalformsite, create a new
     for xtal_form_site_id, xtal_form_site in xtal_form_sites.items():

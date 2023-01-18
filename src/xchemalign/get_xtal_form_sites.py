@@ -10,14 +10,14 @@ from xchemalign.matching import match_atoms
 
 
 def get_xtal_form_sites(
-    initial_system_sites: SystemSites,
+    initial_system_sites: SystemSites | None,
     ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood],
     canonical_sites: dict[int, CanonicalSite],
 ) -> dict[int, XtalFormSite]:
     # Get the current xtalform sites
-    xtal_form_sites: dict[
-        int, XtalFormSite
-    ] = initial_system_sites.xtal_form_site
+    xtal_form_sites: dict[int, XtalFormSite] = {}
+    if initial_system_sites:
+        xtal_form_sites = initial_system_sites.xtal_form_site
 
     # Get the number of xtalform sites
     if len(xtal_form_sites) == 0:

@@ -24,25 +24,25 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     logger.info(f"Data json path is: {data_json_path}")
 
     # Load the input data
+    initial_system_sites: SystemSites | None = None
     if system_sites_json_path.exists():
-        initial_system_sites: SystemSites = SystemSites.parse_file(
+        initial_system_sites = SystemSites.parse_file(
             str(system_sites_json_path)
         )
-    else:
-        logger.info("No system site json: Creating new one!")
-        initial_system_sites: SystemSites = SystemSites(
-            canonical_site={}, xtal_form_site={}, site_observation={}
-        )
+
     logger.info(initial_system_sites)
     system_data: SystemData = SystemData.parse_file(str(data_json_path))
 
-    num_canonical_sites = len(initial_system_sites.canonical_site)
-    num_xtal_form_sites = len(initial_system_sites.xtal_form_site)
-    num_site_observations = len(initial_system_sites.site_observation)
+    if initial_system_sites:
+        num_canonical_sites = len(initial_system_sites.canonical_site)
+        num_xtal_form_sites = len(initial_system_sites.xtal_form_site)
+        num_site_observations = len(initial_system_sites.site_observation)
 
-    logger.debug(f"Got {num_canonical_sites} existinging canonical sites")
-    logger.debug(f"Got {num_xtal_form_sites} existinging xtal form sites")
-    logger.debug(f"Got {num_site_observations} existinging site observations")
+        logger.debug(f"Got {num_canonical_sites} existinging canonical sites")
+        logger.debug(f"Got {num_xtal_form_sites} existinging xtal form sites")
+        logger.debug(
+            f"Got {num_site_observations} existinging site observations"
+        )
 
     num_input_datasets = len(system_data.dataset)
 
