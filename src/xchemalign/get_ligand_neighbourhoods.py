@@ -7,12 +7,13 @@ from xchemalign.data import (
     Dataset,
     LigandID,
     LigandNeighbourhood,
+    Structure,
     SystemData,
 )
 
 
 def get_structure_fragments(
-    dataset: Dataset, structure: gemmi.Structure
+    dataset: Dataset, structure: Structure
 ) -> dict[LigandID, gemmi.Residue]:
     fragments: dict[LigandID, gemmi.Residue] = {}
     lig_number: int = 0
@@ -48,7 +49,7 @@ def get_model_and_artefact_atoms(
 
 
 def get_ligand_neighbourhood(
-    structure: gemmi.Structure,
+    structure: Structure,
     ns: gemmi.NeighborSearch,
     fragment: gemmi.Residue,
     min_dist: float = 0.01,
@@ -124,9 +125,7 @@ def get_dataset_neighbourhoods(
     dataset: Dataset, max_radius: float = 5.0
 ) -> dict[LigandID, LigandNeighbourhood]:
     # Load the structure
-    structure: gemmi.Structure = gemmi.read_structure(
-        dataset.pdb, format="pdb"
-    )
+    structure: Structure = gemmi.read_structure(dataset.pdb, format="pdb")
 
     # Get the bound fragments
     fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(

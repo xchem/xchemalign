@@ -1,4 +1,7 @@
+import gemmi
 from pydantic import BaseModel, validator
+
+Structure = gemmi.Structure
 
 
 class LigandID(BaseModel):
