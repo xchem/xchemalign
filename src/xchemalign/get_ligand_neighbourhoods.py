@@ -142,13 +142,13 @@ def get_ligand_neighbourhood(
             logger.debug(f"--Transformed FPos: {fpos_transformed}")
 
             pos = structure.cell.orthogonalize(fpos_transformed)
-            # logger.debug(
-            #     f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
-            # )
+            logger.debug(
+                f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
+            )
 
-            # nearest_image_dist = nearest_image.dist()
-            # dist = atom.pos.dist(pos)
-            # logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
+            nearest_image_dist = nearest_image.dist()
+            dist = atom.pos.dist(pos)
+            logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
 
             rounded_pos = (
                 round(pos.x, 1),
