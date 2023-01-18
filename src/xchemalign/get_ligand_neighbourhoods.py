@@ -84,6 +84,8 @@ def get_model_and_artefact_atoms(
         # logger.debug(f"Image idx: {mark.image_idx}")
         pos_gemmi = gemmi.Position(*pos)
 
+        logger.debug(f"{pos_gemmi.dist(cra.atom.pos)}")
+
         if pos_gemmi.dist(cra.atom.pos) > 0.1:
             artefact_atoms[pos] = cra
         else:
