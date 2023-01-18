@@ -254,6 +254,7 @@ def get_dataset_neighbourhoods(
     logger.debug(dataset.pdb)
     structure: Structure = gemmi.read_structure(dataset.pdb)
     logger.debug(f"{structure.cell}")
+    exit()
 
     # Get the bound fragments
     fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(
