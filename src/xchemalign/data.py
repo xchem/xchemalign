@@ -96,8 +96,8 @@ class SystemData(BaseModel):
 
 
 class LigandNeighbourhood(BaseModel):
-    atoms: list[tuple[AtomID, Atom]]
-    artefact_atoms: list[tuple[AtomID, Atom]]
+    atoms: dict[AtomID, Atom]
+    artefact_atoms: dict[AtomID, Atom]
 
 
 class DatasetID:
