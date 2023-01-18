@@ -136,6 +136,8 @@ def get_dataset_neighbourhoods(
     fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(
         dataset, structure
     )
+    logger.debug(f"Get {len(fragments)} fragment neighbourhoods")
+    logger.debug(fragments)
 
     # Construct the neighbourhood search
     ns: gemmi.NeighborSearch = gemmi.NeighborSearch(
