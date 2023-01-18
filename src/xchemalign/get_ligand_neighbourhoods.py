@@ -125,7 +125,7 @@ def get_dataset_neighbourhoods(
     dataset: Dataset, max_radius: float = 5.0
 ) -> dict[LigandID, LigandNeighbourhood]:
     # Load the structure
-    structure: Structure = gemmi.read_structure(dataset.pdb, format="pdb")
+    structure: Structure = gemmi.read_structure(dataset.pdb)
 
     # Get the bound fragments
     fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(

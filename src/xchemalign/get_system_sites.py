@@ -29,8 +29,8 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
         initial_system_sites = SystemSites.parse_file(
             str(system_sites_json_path)
         )
-
-    logger.info(initial_system_sites)
+    if initial_system_sites:
+        logger.info(initial_system_sites)
     system_data: SystemData = SystemData.parse_file(str(data_json_path))
 
     if initial_system_sites:
