@@ -86,7 +86,7 @@ def get_ligand_neighbourhood(
 
     # Seperate out model and artefact atoms
     _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
-        residue_neighbours
+        residue_neighbours, structure
     )
     logger.debug(f"Got {len(_model_atoms)} model atoms")
     logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
