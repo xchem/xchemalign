@@ -102,9 +102,9 @@ def get_ligand_neighbourhood(
             logger.debug(f"--Transform: {ftransform}")
 
             fpos_transformed = ftransform.apply(fpos)
-            fpos.x = fpos_transformed + nearest_image.pbc_shift[0]
-            fpos.y = fpos_transformed + nearest_image.pbc_shift[1]
-            fpos.z = fpos_transformed + nearest_image.pbc_shift[2]
+            fpos.x = fpos_transformed.x + nearest_image.pbc_shift[0]
+            fpos.y = fpos_transformed.y + nearest_image.pbc_shift[1]
+            fpos.z = fpos_transformed.z + nearest_image.pbc_shift[2]
 
             logger.debug(f"--Transformed FPos: {fpos_transformed}")
 
