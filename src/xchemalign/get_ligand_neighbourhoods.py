@@ -178,39 +178,39 @@ def get_ligand_neighbourhood(
         )
         for neighbour in atom_neighbours:
             cra = neighbour.to_cra(structure[0])
-            logger.debug(f"CRA: {cra}")
+            # logger.debug(f"CRA: {cra}")
 
             nearest_image = structure.cell.find_nearest_pbc_image(
                 atom.pos, cra.atom.pos, neighbour.image_idx
             )
-            logger.debug(f"{nearest_image}")
-            logger.debug(f"{nearest_image.sym_idx}")
-            logger.debug(f"{nearest_image.pbc_shift}")
+            # logger.debug(f"{nearest_image}")
+            # logger.debug(f"{nearest_image.sym_idx}")
+            # logger.debug(f"{nearest_image.pbc_shift}")
 
             fpos = structure.cell.fractionalize(cra.atom.pos)
-            logger.debug(f"--FPos: {fpos}")
+            # logger.debug(f"--FPos: {fpos}")
 
             ftransform = ns.get_image_transformation(neighbour.image_idx)
-            logger.debug(f"--Transform: {ftransform}")
+            # logger.debug(f"--Transform: {ftransform}")
 
             fpos_transformed = ftransform.apply(fpos)
             fpos.x = fpos_transformed.x + nearest_image.pbc_shift[0]
             fpos.y = fpos_transformed.y + nearest_image.pbc_shift[1]
             fpos.z = fpos_transformed.z + nearest_image.pbc_shift[2]
 
-            logger.debug(f"--Transformed FPos: {fpos_transformed}")
+            # logger.debug(f"--Transformed FPos: {fpos_transformed}")
 
             pos = structure.cell.orthogonalize(fpos_transformed)
-            logger.debug(
-                f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
-            )
-            logger.debug(
-                f"--Transformed pos: {pos} vs Canon pos: {cra.atom.pos}"
-            )
+            # logger.debug(
+            #     f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
+            # )
+            # logger.debug(
+            #     f"--Transformed pos: {pos} vs Canon pos: {cra.atom.pos}"
+            # )
 
-            nearest_image_dist = nearest_image.dist()
-            dist = atom.pos.dist(pos)
-            logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
+            # nearest_image_dist = nearest_image.dist()
+            # dist = atom.pos.dist(pos)
+            # logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
 
             # rounded_pos = ((
             #     round(pos.x, 1),
