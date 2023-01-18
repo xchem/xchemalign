@@ -147,7 +147,13 @@ def get_model_and_artefact_atoms(
     for pos, cra in possible_artefact_atoms:
         # Check it isn't a ncs image by seeing if it overlays a model atom
         if all([model_atom[0].dist(pos) > 0.1 for model_atom in model_atoms]):
-            artefact_atoms.append((pos, cra))
+            if all(
+                [
+                    model_atom[0].dist(pos) > 0.1
+                    for model_atom in artefact_atoms
+                ]
+            ):
+                artefact_atoms.append((pos, cra))
 
     return model_atoms, artefact_atoms
 
