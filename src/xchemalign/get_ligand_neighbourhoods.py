@@ -54,7 +54,7 @@ def get_ligand_neighbourhood(
     ns: gemmi.NeighborSearch,
     fragment: gemmi.Residue,
     min_dist: float = 0.01,
-    max_dist: float = 3.0,
+    max_dist: float = 5.0,
 ) -> LigandNeighbourhood:
     # For each atom, get the neighbouring atoms, and filter them on their
     # real space position
@@ -133,6 +133,7 @@ def get_dataset_neighbourhoods(
 ) -> dict[LigandID, LigandNeighbourhood]:
     # Load the structure
     structure: Structure = gemmi.read_structure(dataset.pdb)
+    logger.debug(f"{structure.cell}")
 
     # Get the bound fragments
     fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(
