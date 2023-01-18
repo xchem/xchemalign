@@ -106,8 +106,9 @@ def get_ligand_neighbourhood(
                 f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
             )
 
+            nearest_image_dist = nearest_image.dist()
             dist = atom.pos.dist(pos)
-            logger.debug(f"--Distance: {dist}")
+            logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
 
             residue_neighbours[
                 round(neighbour.x, 1),
