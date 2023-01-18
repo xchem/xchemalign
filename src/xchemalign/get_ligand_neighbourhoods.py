@@ -43,9 +43,16 @@ def get_model_and_artefact_atoms(
     for pos, mark in residue_neighbours.items():
         # Image 0 is the identity i.e. part of the normal model
         cra = mark.to_cra(structure[0])
+        logger.debug(f"{cra}")
+        logger.debug(f"{mark.pos()}")
+        logger.debug(f"{cra.atom.pos}")
+        logger.debug(f"{mark.image_idx}")
+
         nearest_image = structure.cell.find_nearest_pbc_image(
             mark.pos(), cra.atom.pos, mark.image_idx
         )
+        logger.debug(f"{nearest_image}")
+        exit()
 
         if (nearest_image.sym_idx != 0) or (
             nearest_image.pbc_shift != (0, 0, 0)
