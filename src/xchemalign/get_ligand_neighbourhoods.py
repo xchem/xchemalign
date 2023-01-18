@@ -31,7 +31,7 @@ def get_structure_fragments(
     return fragments
 
 
-def get_model_and_artefact_atoms(
+def _get_model_and_artefact_atoms(
     residue_neighbours: dict[
         tuple[float, float, float], gemmi.NeighborSearch.Mark
     ],
@@ -63,6 +63,35 @@ def get_model_and_artefact_atoms(
     return model_atoms, artefact_atoms
 
 
+def get_model_and_artefact_atoms(
+    residue_neighbours: dict[
+        tuple[float, float, float], gemmi.NeighborSearch.Mark
+    ],
+    structure: Structure,
+) -> tuple[
+    dict[gemmi.NeighborSearch.Mark, gemmi.CRA],
+    dict[gemmi.NeighborSearch.Mark, gemmi.CRA],
+]:
+    # Check each mark for its image and partition them on this
+    model_atoms: dict[gemmi.NeighborSearch.Mark, gemmi.CRA] = {}
+    artefact_atoms: dict[gemmi.NeighborSearch.Mark, gemmi.CRA] = {}
+    for pos, cra in residue_neighbours.items():
+        # Image 0 is the identity i.e. part of the normal model
+        # cra = mark.to_cra(structure[0])
+        # logger.debug(f"### CRA: {cra}")
+        # logger.debug(f"Mark pos: {mark.pos()}")
+        # logger.debug(f"Canonical atom pos: {cra.atom.pos}")
+        # logger.debug(f"Image idx: {mark.image_idx}")
+        pos_gemmi = gemmi.Position(*pos)
+
+        if pos_gemmi.dist(cra.atom.pos) > 0.1:
+            artefact_atoms[pos] = cra
+        else:
+            model_atoms[pos] = cra
+
+    return model_atoms, artefact_atoms
+
+
 def get_ligand_neighbourhood(
     structure: Structure,
     ns: gemmi.NeighborSearch,
@@ -75,10 +104,10 @@ def get_ligand_neighbourhood(
     residue_neighbours: dict[
         tuple[float, float, float], gemmi.NeighborSearch.Mark
     ] = {}
-    _artefact_atoms = []
-    _model_atoms = []
-    model_atoms: dict[AtomID, Atom] = {}
-    artefact_atoms: dict[AtomID, Atom] = {}
+    # _artefact_atoms = []
+    # _model_atoms = []
+    # model_atoms: dict[AtomID, Atom] = {}
+    # artefact_atoms: dict[AtomID, Atom] = {}
 
     for atom in fragment:
         atom_neighbours: list[gemmi.NeighborSearch.Mark] = ns.find_neighbors(
@@ -158,11 +187,11 @@ def get_ligand_neighbourhood(
     # logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
 
     # # Seperate out model and artefact atoms
-    # _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
-    #     residue_neighbours, structure
-    # )
-    # logger.debug(f"Got {len(_model_atoms)} model atoms")
-    # logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
+    _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
+        residue_neighbours, structure
+    )
+    logger.debug(f"Got {len(_model_atoms)} model atoms")
+    logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
 
     # Model atoms
     model_atoms: dict[AtomID, Atom] = {}
