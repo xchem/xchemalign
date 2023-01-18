@@ -84,6 +84,7 @@ def get_model_and_artefact_atoms(
         # logger.debug(f"Image idx: {mark.image_idx}")
         pos_gemmi = gemmi.Position(*pos)
 
+        logger.debug(f"{cra}")
         logger.debug(f"{pos_gemmi.dist(cra.atom.pos)}")
         logger.debug(f"{pos_gemmi}")
         logger.debug(f"{cra.atom.pos}")
