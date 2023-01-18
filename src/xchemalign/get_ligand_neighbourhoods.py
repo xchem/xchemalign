@@ -78,6 +78,8 @@ def get_ligand_neighbourhood(
     _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
         residue_neighbours
     )
+    logger.debug(f"Got {len(_model_atoms)} model atoms")
+    logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
 
     # Model atoms
     model_atoms: dict[AtomID, Atom] = {}
@@ -117,7 +119,7 @@ def get_ligand_neighbourhood(
     logger.debug(model_atoms)
     logger.debug(artefact_atoms)
     ligand_neighbourhood: LigandNeighbourhood = LigandNeighbourhood(
-        model_atoms=model_atoms,
+        atoms=model_atoms,
         artefact_atoms=artefact_atoms,
     )
 
