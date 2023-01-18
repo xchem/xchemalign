@@ -77,6 +77,9 @@ def get_ligand_neighbourhood(
     ] = {}
     _artefact_atoms = []
     _model_atoms = []
+    model_atoms: dict[AtomID, Atom] = {}
+    artefact_atoms: dict[AtomID, Atom] = {}
+
     for atom in fragment:
         atom_neighbours: list[gemmi.NeighborSearch.Mark] = ns.find_neighbors(
             atom,
@@ -99,27 +102,57 @@ def get_ligand_neighbourhood(
             logger.debug(f"--Transform: {ftransform}")
 
             fpos_transformed = ftransform.apply(fpos)
+            fpos.x = fpos_transformed + nearest_image.pbc_shift[0]
+            fpos.y = fpos_transformed + nearest_image.pbc_shift[1]
+            fpos.z = fpos_transformed + nearest_image.pbc_shift[2]
+
             logger.debug(f"--Transformed FPos: {fpos_transformed}")
 
             pos = structure.cell.orthogonalize(fpos_transformed)
-            logger.debug(
-                f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
+            # logger.debug(
+            #     f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
+            # )
+
+            # nearest_image_dist = nearest_image.dist()
+            # dist = atom.pos.dist(pos)
+            # logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
+
+            rounded_pos = (
+                round(pos.x, 1),
+                round(pos.y, 1),
+                round(pos.z, 1),
             )
 
-            nearest_image_dist = nearest_image.dist()
-            dist = atom.pos.dist(pos)
-            logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
+            residue_neighbours[rounded_pos] = cra
 
-            residue_neighbours[
-                round(neighbour.x, 1),
-                round(neighbour.y, 1),
-                round(neighbour.z, 1),
-            ] = neighbour
-
-            if nearest_image.sym_idx != 0:
-                _artefact_atoms.append(neighbour)
-            else:
-                _model_atoms.append(neighbour)
+            # if nearest_image.sym_idx != 0:
+            #     artefact_atom_id: AtomID = AtomID(
+            #         chain=cra.chain.name,
+            #         residue=cra.residue.seqid.num,
+            #         atom=cra.atom.name,
+            #     )
+            #     artefact_atoms[artefact_atom_id] = Atom(
+            #         element=cra.atom.element.name,
+            #         atom_id=artefact_atom_id,
+            #         x=pos.x,
+            #         y=pos.y,
+            #         z=pos.z,
+            #     )
+            #     # artefact_atoms[rounded_pos] = pos
+            # else:
+            #     # _model_atoms.append(neighbour)
+            #     model_atom_id: AtomID = AtomID(
+            #         chain=cra.chain.name,
+            #         residue=cra.residue.seqid.num,
+            #         atom=cra.atom.name,
+            #     )
+            #     model_atoms[model_atom_id] = Atom(
+            #         element=atom.element.name,
+            #         atom_id=model_atom_id,
+            #         x=atom.x,
+            #         y=atom.y,
+            #         z=atom.z,
+            #     )
 
     # exit()
     # logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
@@ -128,8 +161,8 @@ def get_ligand_neighbourhood(
     # _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
     #     residue_neighbours, structure
     # )
-    logger.debug(f"Got {len(_model_atoms)} model atoms")
-    logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
+    # logger.debug(f"Got {len(_model_atoms)} model atoms")
+    # logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
 
     # Model atoms
     model_atoms: dict[AtomID, Atom] = {}
