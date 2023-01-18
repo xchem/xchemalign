@@ -35,16 +35,24 @@ def get_model_and_artefact_atoms(
     residue_neighbours: dict[
         tuple[float, float, float], gemmi.NeighborSearch.Mark
     ],
+    structure: Structure,
 ) -> tuple[list[gemmi.NeighborSearch.Mark], list[gemmi.NeighborSearch.Mark]]:
     # Check each mark for its image and partition them on this
     model_atoms: list[gemmi.NeighborSearch.Mark] = []
     artefact_atoms: list[gemmi.NeighborSearch.Mark] = []
     for pos, mark in residue_neighbours.items():
         # Image 0 is the identity i.e. part of the normal model
-        if mark.image_idx == 0:
-            model_atoms.append(mark)
-        else:
+        cra = mark.to_cra(structure[0])
+        nearest_image = structure.cell.find_nearest_pbc_image(
+            mark.pos(), cra.atom.pos, mark.image_idx
+        )
+
+        if (nearest_image.sym_idx != 0) or (
+            nearest_image.pbc_shift != (0, 0, 0)
+        ):
             artefact_atoms.append(mark)
+        else:
+            model_atoms.append(mark)
 
     return model_atoms, artefact_atoms
 
