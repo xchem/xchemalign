@@ -147,6 +147,9 @@ def get_ligand_neighbourhood(
             logger.debug(
                 f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
             )
+            logger.debug(
+                f"--Transformed pos: {pos} vs Canon pos: {cra.atom.pos}"
+            )
 
             nearest_image_dist = nearest_image.dist()
             dist = atom.pos.dist(pos)
