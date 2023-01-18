@@ -1,4 +1,5 @@
 import gemmi
+from loguru import logger
 
 # import loguru
 from xchemalign.data import (
@@ -113,6 +114,8 @@ def get_ligand_neighbourhood(
         )
 
     # Cosntruct the neighbourhood
+    logger.debug(model_atoms)
+    logger.debug(artefact_atoms)
     ligand_neighbourhood: LigandNeighbourhood = LigandNeighbourhood(
         model_atoms=model_atoms,
         artefact_atoms=artefact_atoms,
