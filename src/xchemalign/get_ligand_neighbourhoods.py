@@ -63,7 +63,7 @@ def _get_model_and_artefact_atoms(
     return model_atoms, artefact_atoms
 
 
-def get_model_and_artefact_atoms(
+def __get_model_and_artefact_atoms(
     residue_neighbours: dict[
         tuple[float, float, float], gemmi.NeighborSearch.Mark
     ],
@@ -96,6 +96,62 @@ def get_model_and_artefact_atoms(
     return model_atoms, artefact_atoms
 
 
+def get_model_and_artefact_atoms(
+    residue_neighbours: list[tuple[gemmi.Position, gemmi.CRA]],
+    structure: Structure,
+) -> tuple[
+    list[tuple[gemmi.Position, gemmi.CRA]],
+    list[tuple[gemmi.Position, gemmi.CRA]],
+]:
+    # Check each mark for its image and partition them on this
+    model_atoms: list[tuple[gemmi.Position, gemmi.CRA]] = []
+    artefact_atoms: list[tuple[gemmi.Position, gemmi.CRA]] = []
+    possible_artefact_atoms = []
+    for pos, cra in residue_neighbours:
+        # Image 0 is the identity i.e. part of the normal model
+        # cra = mark.to_cra(structure[0])
+        # logger.debug(f"### CRA: {cra}")
+        # logger.debug(f"Mark pos: {mark.pos()}")
+        # logger.debug(f"Canonical atom pos: {cra.atom.pos}")
+        # logger.debug(f"Image idx: {mark.image_idx}")
+        # pos_gemmi = gemmi.Position(*pos)
+
+        # logger.debug(f"{cra}")
+        # logger.debug(f"{pos_gemmi.dist(cra.atom.pos)}")
+        # logger.debug(f"{pos_gemmi}")
+        # logger.debug(f"{cra.atom.pos}")
+        # if pos_gemmi.dist(cra.atom.pos) > 0.1:
+        #     artefact_atoms[pos] = cra
+        # else:
+        #     model_atoms[pos] = cra
+
+        canon_atom = cra.atom
+        # Possible artefact: Could be sym, ncs or translation
+        if canon_atom.pos.dist(pos) > 0.1:
+            possible_artefact_atoms.append((pos, cra))
+
+        # Canonical/model atom confirnmed: just see if already handled
+        else:
+            # Check there is not already a nearby atom in there
+            if all(
+                [model_atom[0].dist(pos) > 0.1 for model_atom in model_atoms]
+            ):
+                model_atoms.append((pos, cra))
+
+        # rounded_pos = (
+        #         round(pos.x, 1),
+        #         round(pos.y, 1),
+        #         round(pos.z, 1),
+        #     )
+        # if roun
+    for pos, cra in possible_artefact_atoms:
+        # Check it isn't a ncs image by seeing if it overlays a model atom
+        if all([model_atom[0].dist(pos) > 0.1 for model_atom in model_atoms]):
+            artefact_atoms.append((pos, cra))
+
+    return model_atoms, artefact_atoms
+
+
 def get_ligand_neighbourhood(
     structure: Structure,
     ns: gemmi.NeighborSearch,
@@ -105,9 +161,10 @@ def get_ligand_neighbourhood(
 ) -> LigandNeighbourhood:
     # For each atom, get the neighbouring atoms, and filter them on their
     # real space position
-    residue_neighbours: dict[
-        tuple[float, float, float], gemmi.NeighborSearch.Mark
-    ] = {}
+    # residue_neighbours: dict[
+    #     tuple[float, float, float], gemmi.NeighborSearch.Mark
+    # ] = {}
+    residue_neighbours: list[tuple[gemmi.Position, gemmi.CRA]] = []
     # _artefact_atoms = []
     # _model_atoms = []
     # model_atoms: dict[AtomID, Atom] = {}
@@ -155,13 +212,15 @@ def get_ligand_neighbourhood(
             dist = atom.pos.dist(pos)
             logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
 
-            rounded_pos = (
-                round(pos.x, 1),
-                round(pos.y, 1),
-                round(pos.z, 1),
-            )
+            # rounded_pos = ((
+            #     round(pos.x, 1),
+            #     round(pos.y, 1),
+            #     round(pos.z, 1),
+            # ), ()
 
-            residue_neighbours[rounded_pos] = cra
+            # residue_neighbours[rounded_pos] = cra
+
+            residue_neighbours.append((pos, cra))
 
             # if nearest_image.sym_idx != 0:
             #     artefact_atom_id: AtomID = AtomID(
@@ -254,7 +313,6 @@ def get_dataset_neighbourhoods(
     logger.debug(dataset.pdb)
     structure: Structure = gemmi.read_structure(dataset.pdb)
     logger.debug(f"{structure.cell}")
-    exit()
 
     # Get the bound fragments
     fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(
