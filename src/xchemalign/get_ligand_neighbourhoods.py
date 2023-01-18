@@ -69,9 +69,9 @@ def get_ligand_neighbourhood(
         )
         for neighbour in atom_neighbours:
             residue_neighbours[
-                round(neighbour.x, 2),
-                round(neighbour.y, 2),
-                round(neighbour.z, 2),
+                round(neighbour.x, 1),
+                round(neighbour.y, 1),
+                round(neighbour.z, 1),
             ] = neighbour
 
     logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
