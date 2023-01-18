@@ -261,10 +261,44 @@ def get_ligand_neighbourhood(
     logger.debug(f"Got {len(_model_atoms)} model atoms")
     logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
 
+    # # Model atoms
+    # model_atoms: dict[AtomID, Atom] = {}
+    # for atom in _model_atoms:
+    #     cra = atom.to_cra(structure[0])
+    #     model_atom_id: AtomID = AtomID(
+    #         chain=cra.chain.name,
+    #         residue=cra.residue.seqid.num,
+    #         atom=cra.atom.name,
+    #     )
+    #     model_atoms[model_atom_id] = Atom(
+    #         element=atom.element.name,
+    #         atom_id=model_atom_id,
+    #         x=atom.x,
+    #         y=atom.y,
+    #         z=atom.z,
+    #     )
+
+    # # Artefact atoms
+    # artefact_atoms: dict[AtomID, Atom] = {}
+    # for atom in _artefact_atoms:
+    #     artefact_cra = atom.to_cra(structure[0])
+    #     artefact_atom_id: AtomID = AtomID(
+    #         chain=artefact_cra.chain.name,
+    #         residue=artefact_cra.residue.seqid.num,
+    #         atom=artefact_cra.atom.name,
+    #     )
+    #     artefact_atoms[artefact_atom_id] = Atom(
+    #         element=atom.element.name,
+    #         atom_id=artefact_atom_id,
+    #         x=atom.x,
+    #         y=atom.y,
+    #         z=atom.z,
+    #     )
+
     # Model atoms
     model_atoms: dict[AtomID, Atom] = {}
-    for atom in _model_atoms:
-        cra = atom.to_cra(structure[0])
+    for pos, cra in _model_atoms:
+        # cra = atom.to_cra(structure[0])
         model_atom_id: AtomID = AtomID(
             chain=cra.chain.name,
             residue=cra.residue.seqid.num,
@@ -273,26 +307,26 @@ def get_ligand_neighbourhood(
         model_atoms[model_atom_id] = Atom(
             element=atom.element.name,
             atom_id=model_atom_id,
-            x=atom.x,
-            y=atom.y,
-            z=atom.z,
+            x=pos.x,
+            y=pos.y,
+            z=pos.z,
         )
 
     # Artefact atoms
     artefact_atoms: dict[AtomID, Atom] = {}
-    for atom in _artefact_atoms:
-        artefact_cra = atom.to_cra(structure[0])
+    for pos, cra in _artefact_atoms:
+        # artefact_cra = atom.to_cra(structure[0])
         artefact_atom_id: AtomID = AtomID(
-            chain=artefact_cra.chain.name,
-            residue=artefact_cra.residue.seqid.num,
-            atom=artefact_cra.atom.name,
+            chain=cra.chain.name,
+            residue=cra.residue.seqid.num,
+            atom=cra.atom.name,
         )
         artefact_atoms[artefact_atom_id] = Atom(
             element=atom.element.name,
             atom_id=artefact_atom_id,
-            x=atom.x,
-            y=atom.y,
-            z=atom.z,
+            x=pos.x,
+            y=pos.y,
+            z=pos.z,
         )
 
     # Cosntruct the neighbourhood
