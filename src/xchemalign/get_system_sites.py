@@ -66,7 +66,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
 
     num_new_canon_sites = len(canonical_sites)
     logger.info(f"New number of canonical sites is {num_new_canon_sites}")
-    logger.debug(canonical_sites)
+    logger.debug(canonical_sites[1])
 
     # Identify the xtalform sites
     xtal_form_sites: dict[int, XtalFormSite] = get_xtal_form_sites(
