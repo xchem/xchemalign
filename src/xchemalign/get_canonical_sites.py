@@ -1,3 +1,5 @@
+from loguru import logger
+
 from xchemalign.data import (
     CanonicalSite,
     LigandID,
@@ -24,11 +26,13 @@ def get_canonical_sites(
         canonical_site_num = 0
     else:
         canonical_site_num = max(canonical_sites)
+    logger.info(f"Number of canon sites: {canonical_site_num}")
 
     # Iterate neighbourhoods, matching them to existing sites, and
     # creating a new site if necessary
     canonical_site_members: dict[int, list[LigandID]] = {}
     for ligand_id, ligand_neighbourhood in ligand_neighbourhoods.items():
+        logger.debug(f"{ligand_id}")
         # Check if there is a match
         match: int | None = match_neighbourhood_to_sites(
             canonical_sites, ligand_neighbourhood

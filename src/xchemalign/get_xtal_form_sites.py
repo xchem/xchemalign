@@ -1,4 +1,5 @@
-# import loguru
+from loguru import logger
+
 from xchemalign.data import (
     CanonicalSite,
     LigandID,
@@ -24,6 +25,7 @@ def get_xtal_form_sites(
         xtal_form_sites_num = 0
     else:
         xtal_form_sites_num = max(canonical_sites)
+    logger.info(f"Current number of xtalformsites: {xtal_form_sites_num}")
 
     # Iterate through canonical sites, partitioning their members according to
     # whether their artefact atoms can be aligned

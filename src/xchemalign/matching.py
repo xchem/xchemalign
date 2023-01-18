@@ -1,4 +1,4 @@
-from xchemalign.data import Atom, CanonicalSite, LigandNeighbourhood
+from xchemalign.data import Atom, AtomID, CanonicalSite, LigandNeighbourhood
 
 
 def match_atom(
@@ -16,14 +16,17 @@ def match_atom(
 
 
 def match_atoms(
-    site_1_atoms,
-    site_2_atoms,
+    site_1_atoms: dict[AtomID, Atom],
+    site_2_atoms: dict[AtomID, Atom],
     min_alignable_atoms: int = 5,
 ) -> bool:
     # Check if there is an alignable number of atoms shared between the
     num_alignable_atoms: int = 0
-    for canonical_site_atom in site_1_atoms:
-        for ligand_neighbourhood_atom in site_2_atoms:
+    for canonical_site_atom_id, canonical_site_atom in site_1_atoms.items():
+        for (
+            ligand_neighbourhood_atom_id,
+            ligand_neighbourhood_atom,
+        ) in site_2_atoms.items():
             if match_atom(canonical_site_atom, ligand_neighbourhood_atom):
                 num_alignable_atoms += 1
 
