@@ -82,12 +82,22 @@ def get_ligand_neighbourhood(
             max_dist=max_dist,
         )
         for neighbour in atom_neighbours:
+            cra = neighbour.to_cra(structure[0])
+            nearest_image = (
+                nearest_image
+            ) = structure.cell.find_nearest_pbc_image(
+                atom.pos(), cra.atom.pos, neighbour.image_idx
+            )
+            logger.debug(f"{nearest_image}")
+            logger.debug(f"{nearest_image.sym_idx}")
+            logger.debug(f"{nearest_image.pbc_shift}")
             residue_neighbours[
                 round(neighbour.x, 1),
                 round(neighbour.y, 1),
                 round(neighbour.z, 1),
             ] = neighbour
 
+    exit()
     logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
 
     # Seperate out model and artefact atoms
