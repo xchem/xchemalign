@@ -361,7 +361,7 @@ def get_ligand_neighbourhood(
 
     # Cosntruct the neighbourhood
     # logger.debug(model_atoms)
-    logger.debug(artefact_atoms)
+    # logger.debug(artefact_atoms)
     ligand_neighbourhood: LigandNeighbourhood = LigandNeighbourhood(
         atoms=model_atoms,
         artefact_atoms=artefact_atoms,
