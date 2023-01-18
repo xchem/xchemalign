@@ -72,9 +72,9 @@ def get_ligand_neighbourhood(
 ) -> LigandNeighbourhood:
     # For each atom, get the neighbouring atoms, and filter them on their
     # real space position
-    # residue_neighbours: dict[
-    #     tuple[float, float, float], gemmi.NeighborSearch.Mark
-    # ] = {}
+    residue_neighbours: dict[
+        tuple[float, float, float], gemmi.NeighborSearch.Mark
+    ] = {}
     _artefact_atoms = []
     _model_atoms = []
     for atom in fragment:
@@ -92,16 +92,33 @@ def get_ligand_neighbourhood(
             logger.debug(f"{nearest_image.sym_idx}")
             logger.debug(f"{nearest_image.pbc_shift}")
 
+            fpos = structure.cell.fractionalize(cra.atom.pos)
+            logger.debug(f"--FPos: {fpos}")
+
+            ftransform = ns.get_image_transformation(neighbour.image_idx)
+            logger.debug(f"--Transform: {ftransform}")
+
+            fpos_transformed = ftransform.apply(fpos)
+            logger.debug(f"--Transformed FPos: {fpos_transformed}")
+
+            pos = structure.cell.orthogonalize(fpos_transformed)
+            logger.debug(
+                f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
+            )
+
+            dist = atom.pos.dist(pos)
+            logger.debug(f"--Distance: {dist}")
+
+            residue_neighbours[
+                round(neighbour.x, 1),
+                round(neighbour.y, 1),
+                round(neighbour.z, 1),
+            ] = neighbour
+
             if nearest_image.sym_idx != 0:
                 _artefact_atoms.append(neighbour)
             else:
                 _model_atoms.append(neighbour)
-
-    #         residue_neighbours[
-    #             round(neighbour.x, 1),
-    #             round(neighbour.y, 1),
-    #             round(neighbour.z, 1),
-    #         ] = neighbour
 
     # exit()
     # logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
