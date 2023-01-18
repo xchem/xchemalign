@@ -24,9 +24,14 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     logger.info(f"Data json path is: {data_json_path}")
 
     # Load the input data
-    initial_system_sites: SystemSites = SystemSites.parse_file(
-        str(system_sites_json_path)
-    )
+    if system_sites_json_path.exists():
+        initial_system_sites: SystemSites = SystemSites.parse_file(
+            str(system_sites_json_path)
+        )
+    else:
+        initial_system_sites: SystemSites = SystemSites(
+            canonical_site={}, xtal_form_site={}, site_observation={}
+        )
     logger.info(initial_system_sites)
     system_data: SystemData = SystemData.parse_file(str(data_json_path))
 
