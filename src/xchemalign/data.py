@@ -111,6 +111,8 @@ class SystemSites(BaseModel):
 
     @validator("canonical_site")
     def check_canonical_site_ids(cls, v: dict[LigandID, SiteObservation]):
+        if not v:
+            return
         for site_id, site in v.items():
             assert site_id == site.id
 
@@ -119,6 +121,8 @@ class SystemSites(BaseModel):
         cls,
         v: dict[LigandID, SiteObservation],
     ):
+        if not v:
+            return
         num_sites: int = len(v)
         site_nums = [site.id for site in v.values()]
         for site_num in range(num_sites):
@@ -126,6 +130,8 @@ class SystemSites(BaseModel):
 
     @validator("xtal_form_site")
     def check_xtal_form_site_ids(cls, v: dict[int, XtalFormSite]):
+        if not v:
+            return
         for site_id, site in v.items():
             assert site_id == site.id
 
@@ -134,6 +140,8 @@ class SystemSites(BaseModel):
         cls,
         v: dict[int, XtalFormSite],
     ):
+        if not v:
+            return
         num_sites: int = len(v)
         site_nums = [site.id for site in v.values()]
         for site_num in range(num_sites):
@@ -141,6 +149,8 @@ class SystemSites(BaseModel):
 
     @validator("site_observation")
     def check_site_observation_ids(cls, v: dict[LigandID, SiteObservation]):
+        if not v:
+            return
         for site_id, site in v.items():
             assert site_id == site.ligand_id
 
@@ -149,6 +159,8 @@ class SystemSites(BaseModel):
         cls,
         v: dict[LigandID, SiteObservation],
     ):
+        if not v:
+            return
         num_sites: int = len(v)
         site_nums = [site.id for site in v.values()]
         for site_num in range(num_sites):

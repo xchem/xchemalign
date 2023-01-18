@@ -27,6 +27,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     initial_system_sites: SystemSites = SystemSites.parse_file(
         str(system_sites_json_path)
     )
+    logger.info(initial_system_sites)
     system_data: SystemData = SystemData.parse_file(str(data_json_path))
 
     num_canonical_sites = len(initial_system_sites.canonical_site)

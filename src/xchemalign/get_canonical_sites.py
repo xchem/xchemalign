@@ -9,9 +9,6 @@ from xchemalign.matching import (
     match_neighbourhood_to_sites,
 )
 
-# import gemmi
-# import loguru
-
 
 def get_canonical_sites(
     initial_system_sites: SystemSites,
