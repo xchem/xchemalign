@@ -251,6 +251,7 @@ def get_dataset_neighbourhoods(
     dataset: Dataset, max_radius: float = 5.0
 ) -> dict[LigandID, LigandNeighbourhood]:
     # Load the structure
+    logger.debug(dataset.pdb)
     structure: Structure = gemmi.read_structure(dataset.pdb)
     logger.debug(f"{structure.cell}")
 
