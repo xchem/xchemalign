@@ -55,8 +55,6 @@ def get_model_and_artefact_atoms(
         logger.debug(f"{nearest_image.sym_idx}")
         logger.debug(f"{nearest_image.pbc_shift}")
 
-        exit()
-
         if (nearest_image.sym_idx != 0) or (
             nearest_image.pbc_shift != (0, 0, 0)
         ):
