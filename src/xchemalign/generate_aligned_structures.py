@@ -35,6 +35,9 @@ def get_transforms(reference_neighbourhood, neighbourhood):
                         )
                     )
 
+    if len(alignable_cas) < 3:
+        return gemmi.Transform()
+
     sup = gemmi.superpose_positions(
         [alignable_ca[0] for alignable_ca in alignable_cas],
         [alignable_ca[1] for alignable_ca in alignable_cas],
