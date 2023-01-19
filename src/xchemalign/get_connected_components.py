@@ -18,7 +18,7 @@ def get_connected_components(arr):
         if conn:
             g.add_edge(x, y)
 
-    cliques = list(nx.enumerate_all_cliques(g))
+    cliques = list(nx.find_cliques(g))
     logger.debug(f"Cliques are: {cliques}")
 
     fig, ax = plt.subplots()
