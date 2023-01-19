@@ -52,6 +52,7 @@ def get_xtal_form_sites(
             else:
                 xtal_form_sites_num = xtal_form_sites_num + 1
                 xtal_form_sites[xtal_form_sites_num] = XtalFormSite(
+                    id=xtal_form_sites_num,
                     canon_site_id=canonical_site_id,
                     xtal_form_id=0,
                     code="",
@@ -62,5 +63,6 @@ def get_xtal_form_sites(
                         ligand_id,
                     ],
                 )
+                xtal_form_sites_num += 1
 
     return xtal_form_sites
