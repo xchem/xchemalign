@@ -72,6 +72,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     connected_components = get_connected_components(
         alignability_matrix, ligand_neighbourhoods
     )
+    logger.info(f"Found {len(connected_components)} connected components!")
     logger.debug(connected_components)
 
     # Form sites
