@@ -2,13 +2,13 @@ from xchemalign.data import AlignableSite
 
 
 def match_site(containing_site, contained_site):
-    if all(
+    if len(
         [
             ligand_id
             for ligand_id in contained_site
             if ligand_id in containing_site
         ]
-    ):
+    ) == len(contained_site):
         return True
     else:
         return False
