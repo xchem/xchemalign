@@ -20,6 +20,10 @@ def get_site_observations(
     if system_sites:
         site_observations = system_sites.site_observation
 
+    num_site_oservations: int = 0
+    if len(site_observations) != 0:
+        num_site_oservations = len(site_observations)
+
     # For each member of each xtalformsite, create a new
     for xtal_form_site_id, xtal_form_site in xtal_form_sites.items():
         for ligand_id in xtal_form_site.members:
@@ -27,7 +31,7 @@ def get_site_observations(
             if ligand_id not in site_observations:
                 # TODO: Fix dataset field
                 site_observation: SiteObservation = SiteObservation(
-                    id=ligand_id,
+                    id=num_site_oservations,
                     ligand_id=ligand_id,
                     xtal_form_site_id=xtal_form_site_id,
                     fragalysis_label="",
@@ -36,5 +40,6 @@ def get_site_observations(
                     dataset="",
                 )
                 site_observations[ligand_id] = site_observation
+                num_site_oservations += 1
 
     return site_observations

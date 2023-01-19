@@ -50,7 +50,6 @@ def get_canonical_sites(
         # Otherwise create a new canonical site templated on the ligand
         # neighbourhood
         else:
-            canonical_site_num += 1
             canonical_sites[canonical_site_num] = CanonicalSite(
                 id=canonical_site_num,
                 name="",
@@ -64,6 +63,7 @@ def get_canonical_sites(
             canonical_site_members[canonical_site_num] = [
                 ligand_id,
             ]
+            canonical_site_num += 1
 
     # Reiterate neighbourhoods, adding them to any extant sites that they
     # can match

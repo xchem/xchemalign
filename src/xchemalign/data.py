@@ -81,8 +81,8 @@ class SiteObservation(BaseModel):
     fragalysis_label: str
     description: str
     code: str
-    dataset: int
-    compound: int
+    dataset: str
+    # compound: int
 
 
 class Dataset(BaseModel):
