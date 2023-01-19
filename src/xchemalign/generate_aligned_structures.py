@@ -79,7 +79,7 @@ def generate_aligned_structures(
             structures[ligand_id.dtag] for ligand_id in ligand_ids
         ]
         transforms = [
-            get_transforms(neighbourhood, neighbourhoods[0])
+            get_transforms(neighbourhoods[0], neighbourhood)
             for neighbourhood in neighbourhoods
         ]
         superposed_structures = [
