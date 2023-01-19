@@ -75,7 +75,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     logger.debug(connected_components)
 
     # Form sites
-    sites = get_alignable_sites(connected_components)
+    sites = get_alignable_sites(connected_components, [])
     logger.debug(sites)
 
     exit()
