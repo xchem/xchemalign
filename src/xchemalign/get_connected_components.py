@@ -7,6 +7,9 @@ from matplotlib import pyplot as plt
 def get_connected_components(arr):
 
     g = nx.Graph()
+    for x in range(arr.shape[0]):
+        g.add_node(x + 1)
+
     for idx, conn in np.ndenumerate(arr):
         x, y = idx
         if conn:
@@ -17,7 +20,7 @@ def get_connected_components(arr):
 
     fig, ax = plt.subplots()
 
-    nx.draw(g, ax)
+    nx.draw(g, ax=ax)
     fig.savefig("./graph.png")
 
     logger.debug(g)
