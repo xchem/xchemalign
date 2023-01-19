@@ -33,6 +33,7 @@ def get_xtal_form_sites(
         logger.debug(f"Processing canonical site: {canonical_site_id}")
         # Determine whether each member aligns to an existing xtalform site
         logger.debug(f"Num members: {len(canonical_site.members)}")
+        logger.debug(canonical_site.members)
         for ligand_id in canonical_site.members:
             ligand_neighbourhood: LigandNeighbourhood = ligand_neighbourhoods[
                 ligand_id
