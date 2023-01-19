@@ -19,11 +19,11 @@ def get_connected_components(arr):
             g.add_edge(x, y)
 
     cliques = list(nx.enumerate_all_cliques(g))
-    logger.debug(cliques)
+    logger.debug(f"Cliques are: {cliques}")
 
     fig, ax = plt.subplots()
 
     nx.draw(g, ax=ax)
     fig.savefig("./graph.png")
 
-    logger.debug(g)
+    # logger.debug(g)
