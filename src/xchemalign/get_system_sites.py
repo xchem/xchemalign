@@ -79,6 +79,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
 
     new_num_xtal_form_sites = len(xtal_form_sites)
     logger.info(f"New number of xtal form sites is {new_num_xtal_form_sites}")
+    # logger.debug([xtal_form_sites)
 
     # Construct the observed sites
     site_observations: dict[LigandID, SiteObservation] = get_site_observations(
@@ -91,6 +92,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     logger.info(
         f"New number of site observations is {new_num_site_observations}"
     )
+    logger.debug(site_observations)
 
     # Construct the new system sites
     system_sites: SystemSites = SystemSites(

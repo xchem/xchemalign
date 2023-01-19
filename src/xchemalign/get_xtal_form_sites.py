@@ -30,33 +30,37 @@ def get_xtal_form_sites(
     # Iterate through canonical sites, partitioning their members according to
     # whether their artefact atoms can be aligned
     for canonical_site_id, canonical_site in canonical_sites.items():
+        logger.debug(f"Processing canonical site: {canonical_site_id}")
         # Determine whether each member aligns to an existing xtalform site
-        for xtal_form_id, xtal_form_site in xtal_form_sites.items():
-            for ligand_id in canonical_site.members:
-                ligand_neighbourhood: LigandNeighbourhood = (
-                    ligand_neighbourhoods[ligand_id]
-                )
-                match: bool = match_atoms(
+        for ligand_id in canonical_site.members:
+            ligand_neighbourhood: LigandNeighbourhood = ligand_neighbourhoods[
+                ligand_id
+            ]
+
+            # Check if a match to any xtalform site
+            match: bool = False
+            for xtal_form_id, xtal_form_site in xtal_form_sites.items():
+                match = match_atoms(
                     xtal_form_site.artefact_atoms,
                     ligand_neighbourhood.artefact_atoms,
                 )
-                if match:
-                    if ligand_id not in xtal_form_site.members:
-                        xtal_form_site.members.append(ligand_id)
+            if match:
+                if ligand_id not in xtal_form_site.members:
+                    xtal_form_site.members.append(ligand_id)
 
-                # Otherwise create a new xtalform site and add the ligand to it
-                else:
-                    xtal_form_sites_num = xtal_form_sites_num + 1
-                    xtal_form_sites[xtal_form_sites_num] = XtalFormSite(
-                        canon_site_id=canonical_site_id,
-                        xtal_form_id=0,
-                        code="",
-                        refpdb="",
-                        atoms=ligand_neighbourhood.atoms,
-                        artefact_atoms=ligand_neighbourhood.artefact_atoms,
-                        members=[
-                            ligand_id,
-                        ],
-                    )
+            # Otherwise create a new xtalform site and add the ligand to it
+            else:
+                xtal_form_sites_num = xtal_form_sites_num + 1
+                xtal_form_sites[xtal_form_sites_num] = XtalFormSite(
+                    canon_site_id=canonical_site_id,
+                    xtal_form_id=0,
+                    code="",
+                    refpdb="",
+                    atoms=ligand_neighbourhood.atoms,
+                    artefact_atoms=ligand_neighbourhood.artefact_atoms,
+                    members=[
+                        ligand_id,
+                    ],
+                )
 
     return xtal_form_sites
