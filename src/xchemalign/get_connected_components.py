@@ -8,10 +8,13 @@ def get_connected_components(arr):
 
     g = nx.Graph()
     for x in range(arr.shape[0]):
-        g.add_node(x + 1)
+        g.add_node(x)
 
     for idx, conn in np.ndenumerate(arr):
         x, y = idx
+
+        if x == y:
+            continue
         if conn:
             g.add_edge(x, y)
 
