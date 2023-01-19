@@ -65,6 +65,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     alignability_matrix = get_alignability(ligand_neighbourhoods, system_data)
 
     logger.debug(alignability_matrix)
+    logger.debug(alignability_matrix.shape)
 
     # Get connected components
     connected_components = get_connected_components(alignability_matrix)
