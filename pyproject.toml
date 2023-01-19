@@ -17,6 +17,8 @@ dependencies = [
     "gemmi",
     "loguru",
     "pydantic",
+    "networkx",
+    "numpy",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
