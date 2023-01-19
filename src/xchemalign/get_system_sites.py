@@ -13,6 +13,7 @@ from xchemalign.data import (
     SystemSites,
     XtalFormSite,
 )
+from xchemalign.generate_aligned_structures import generate_aligned_structures
 from xchemalign.get_alignability import get_alignability
 from xchemalign.get_alignable_sites import get_alignable_sites
 from xchemalign.get_canonical_sites import get_canonical_sites
@@ -22,7 +23,9 @@ from xchemalign.get_site_observations import get_site_observations
 from xchemalign.get_xtal_form_sites import get_xtal_form_sites
 
 
-def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
+def get_system_sites(
+    system_sites_json_path: Path, data_json_path: Path, output_dir: Path
+):
     logger.info(f"System sites json path is: {system_sites_json_path}")
     logger.info(f"Data json path is: {data_json_path}")
 
@@ -79,6 +82,11 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     sites = get_alignable_sites(connected_components, [])
     logger.info(f"Found {len(sites)} alignable sites!")
     logger.debug(sites)
+
+    # Generate aligned sites
+    generate_aligned_structures(
+        output_dir, ligand_neighbourhoods, system_data, sites
+    )
 
     exit()
 
@@ -150,11 +158,15 @@ if __name__ == "__main__":
         type=Path,
         help="",
     )
+    parser.add_argument(
+        "--output_dir",
+        type=Path,
+        help="",
+    )
 
     args = parser.parse_args()
 
     # Run the program
     get_system_sites(
-        args.system_sites_json_path,
-        args.data_json_path,
+        args.system_sites_json_path, args.data_json_path, args.output_dir
     )
