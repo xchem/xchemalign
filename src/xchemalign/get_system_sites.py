@@ -92,7 +92,7 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     logger.info(
         f"New number of site observations is {new_num_site_observations}"
     )
-    logger.debug(site_observations)
+    # logger.debug(site_observations)
 
     # Construct the new system sites
     system_sites: SystemSites = SystemSites(
