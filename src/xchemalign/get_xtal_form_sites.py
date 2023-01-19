@@ -42,6 +42,7 @@ def get_xtal_form_sites(
             # Check if a match to any xtalform site
             match: bool = False
             for xtal_form_id, xtal_form_site in xtal_form_sites.items():
+                # TODO: Make this superposition of actual atoms
                 match = match_atoms(
                     xtal_form_site.artefact_atoms,
                     ligand_neighbourhood.artefact_atoms,

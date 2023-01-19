@@ -13,6 +13,7 @@ from xchemalign.data import (
     SystemSites,
     XtalFormSite,
 )
+from xchemalign.get_alignability import get_alignability
 from xchemalign.get_canonical_sites import get_canonical_sites
 from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
 from xchemalign.get_site_observations import get_site_observations
@@ -58,6 +59,13 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
 
     num_neighbourhoods = len(ligand_neighbourhoods)
     logger.info(f"Found {num_neighbourhoods} ligand neighbourhoods")
+
+    # Get alignability
+    alignability_matrix = get_alignability(ligand_neighbourhoods, system_data)
+
+    logger.debug(alignability_matrix)
+
+    exit()
 
     # Get the canonical sites
     canonical_sites: dict[int, CanonicalSite] = get_canonical_sites(
