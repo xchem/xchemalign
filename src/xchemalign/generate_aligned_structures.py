@@ -1,6 +1,7 @@
 import os
 
 import gemmi
+from loguru import logger
 
 from xchemalign.data import AlignableSite
 from xchemalign.matching import match_atom
@@ -38,6 +39,7 @@ def get_transforms(reference_neighbourhood, neighbourhood):
         [alignable_ca[0] for alignable_ca in alignable_cas],
         [alignable_ca[1] for alignable_ca in alignable_cas],
     )
+    logger.debug(sup.rmsd)
 
     return sup.transform
 
