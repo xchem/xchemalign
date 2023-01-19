@@ -11,7 +11,7 @@ def get_connected_components(arr):
         if conn:
             g.add_edge(x, y)
 
-    cliques = nx.enumerate_all_cliques(g)
+    cliques = list(nx.enumerate_all_cliques(g))
     logger.debug(cliques)
 
     logger.debug(g)
