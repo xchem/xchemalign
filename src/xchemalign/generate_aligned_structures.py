@@ -39,7 +39,7 @@ def get_transforms(reference_neighbourhood, neighbourhood):
         [alignable_ca[0] for alignable_ca in alignable_cas],
         [alignable_ca[1] for alignable_ca in alignable_cas],
     )
-    logger.debug(sup.rmsd)
+    logger.debug(f"Superposition: rmsd {sup.rmsd} n {len(alignable_cas)}")
 
     return sup.transform
 
