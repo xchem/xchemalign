@@ -48,6 +48,12 @@ class Atom(BaseModel):
     z: float
 
 
+class AlignableSite(BaseModel):
+    id: int
+    name: str
+    ligand_ids: list[LigandID]
+
+
 class CanonicalSite(BaseModel):
     id: int
     name: str

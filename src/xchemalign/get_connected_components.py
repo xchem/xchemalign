@@ -31,3 +31,5 @@ def get_connected_components(arr, ligand_neighbourhoods):
     fig.savefig("./graph.png")
 
     # logger.debug(g)
+
+    return cliques

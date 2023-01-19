@@ -14,6 +14,7 @@ from xchemalign.data import (
     XtalFormSite,
 )
 from xchemalign.get_alignability import get_alignability
+from xchemalign.get_alignable_sites import get_alignable_sites
 from xchemalign.get_canonical_sites import get_canonical_sites
 from xchemalign.get_connected_components import get_connected_components
 from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
@@ -74,6 +75,8 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     logger.debug(connected_components)
 
     # Form sites
+    sites = get_alignable_sites(connected_components)
+    logger.debug(sites)
 
     exit()
 
