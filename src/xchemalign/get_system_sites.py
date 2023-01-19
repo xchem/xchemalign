@@ -15,6 +15,7 @@ from xchemalign.data import (
 )
 from xchemalign.get_alignability import get_alignability
 from xchemalign.get_canonical_sites import get_canonical_sites
+from xchemalign.get_connected_components import get_connected_components
 from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
 from xchemalign.get_site_observations import get_site_observations
 from xchemalign.get_xtal_form_sites import get_xtal_form_sites
@@ -64,6 +65,10 @@ def get_system_sites(system_sites_json_path: Path, data_json_path: Path):
     alignability_matrix = get_alignability(ligand_neighbourhoods, system_data)
 
     logger.debug(alignability_matrix)
+
+    # Get connected components
+    connected_components = get_connected_components(alignability_matrix)
+    logger.debug(connected_components)
 
     exit()
 
