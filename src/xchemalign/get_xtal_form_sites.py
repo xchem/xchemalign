@@ -44,13 +44,15 @@ def get_xtal_form_sites(
                     xtal_form_site.artefact_atoms,
                     ligand_neighbourhood.artefact_atoms,
                 )
+                if match:
+                    logger.debug(f"Site {ligand_id} matches {xtal_form_id}!")
+
             if match:
                 if ligand_id not in xtal_form_site.members:
                     xtal_form_site.members.append(ligand_id)
 
             # Otherwise create a new xtalform site and add the ligand to it
             else:
-                xtal_form_sites_num = xtal_form_sites_num + 1
                 xtal_form_sites[xtal_form_sites_num] = XtalFormSite(
                     id=xtal_form_sites_num,
                     canon_site_id=canonical_site_id,
