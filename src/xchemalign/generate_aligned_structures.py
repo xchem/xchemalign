@@ -66,6 +66,7 @@ def generate_aligned_structures(
 
     #
     for site in sites:
+        logger.debug(f"Site id is: {site.id}")
         site_dir = output_dir / f"{site.id}"
         if not site_dir.exists():
             os.mkdir(site_dir)
