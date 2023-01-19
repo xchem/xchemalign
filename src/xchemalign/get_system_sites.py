@@ -68,7 +68,7 @@ def get_system_sites(
     # Get alignability
     alignability_matrix = get_alignability(ligand_neighbourhoods, system_data)
 
-    logger.debug(alignability_matrix)
+    # logger.debug(alignability_matrix)
     logger.debug(alignability_matrix.shape)
 
     # Get connected components
@@ -76,12 +76,12 @@ def get_system_sites(
         alignability_matrix, ligand_neighbourhoods
     )
     logger.info(f"Found {len(connected_components)} connected components!")
-    logger.debug(connected_components)
+    # logger.debug(connected_components)
 
     # Form sites
     sites = get_alignable_sites(connected_components, [])
     logger.info(f"Found {len(sites)} alignable sites!")
-    logger.debug(sites)
+    # logger.debug(sites)
 
     # Generate aligned sites
     generate_aligned_structures(
