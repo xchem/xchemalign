@@ -371,7 +371,7 @@ def get_ligand_neighbourhood(
 
 
 def get_dataset_neighbourhoods(
-    dataset: Dataset, max_radius: float = 5.0
+    dataset: Dataset, max_radius: float = 7.0
 ) -> dict[LigandID, LigandNeighbourhood]:
     # Load the structure
     logger.debug(dataset.pdb)
