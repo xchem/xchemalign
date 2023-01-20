@@ -45,7 +45,7 @@ def get_system_sites(
     system_data: SystemData = SystemData.parse_file(str(data_json_path))
 
     # TODO: REMOVE
-    system_data.dataset = system_data.dataset[:20]
+    # system_data.dataset = system_data.dataset[:20]
 
     if initial_system_sites:
         num_canonical_sites = len(initial_system_sites.canonical_site)
