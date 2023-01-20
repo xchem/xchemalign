@@ -13,11 +13,16 @@ from xchemalign.data import (
     SystemSites,
     XtalFormSite,
 )
-from xchemalign.generate_aligned_structures import generate_aligned_structures
+from xchemalign.generate_aligned_structures import (
+    generate_aligned_structures,
+    generate_aligned_structures_connected_components,
+)
 from xchemalign.get_alignability import get_alignability
 from xchemalign.get_alignable_sites import get_alignable_sites
 from xchemalign.get_canonical_sites import get_canonical_sites
-from xchemalign.get_connected_components import get_connected_components
+from xchemalign.get_connected_components import (
+    get_connected_components_connected,
+)
 from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
 from xchemalign.get_site_observations import get_site_observations
 from xchemalign.get_xtal_form_sites import get_xtal_form_sites
@@ -40,7 +45,7 @@ def get_system_sites(
     system_data: SystemData = SystemData.parse_file(str(data_json_path))
 
     # TODO: REMOVE
-    # system_data.dataset = system_data.dataset[:20]
+    system_data.dataset = system_data.dataset[:20]
 
     if initial_system_sites:
         num_canonical_sites = len(initial_system_sites.canonical_site)
@@ -72,7 +77,10 @@ def get_system_sites(
     logger.debug(alignability_matrix.shape)
 
     # Get connected components
-    connected_components: list[list[LigandID]] = get_connected_components(
+    # connected_components: list[list[LigandID]] = get_connected_components(
+    #     alignability_matrix, ligand_neighbourhoods
+    # )
+    connected_components, g = get_connected_components_connected(
         alignability_matrix, ligand_neighbourhoods
     )
     logger.info(f"Found {len(connected_components)} connected components!")
@@ -89,6 +97,9 @@ def get_system_sites(
     # Generate aligned sites
     generate_aligned_structures(
         output_dir, ligand_neighbourhoods, system_data, sites
+    )
+    generate_aligned_structures_connected_components(
+        output_dir, ligand_neighbourhoods, system_data, sites, g
     )
 
     exit()

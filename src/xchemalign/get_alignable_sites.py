@@ -14,6 +14,9 @@ def match_site(containing_site, contained_site):
         return False
 
 
+# def get_alignable_sites_()
+
+
 def get_alignable_sites(
     connected_components, alignable_sites: list[AlignableSite] | None
 ):
