@@ -72,11 +72,14 @@ def get_system_sites(
     logger.debug(alignability_matrix.shape)
 
     # Get connected components
-    connected_components = get_connected_components(
+    connected_components: list[list[LigandID]] = get_connected_components(
         alignability_matrix, ligand_neighbourhoods
     )
     logger.info(f"Found {len(connected_components)} connected components!")
     # logger.debug(connected_components)
+
+    # Merge heavily connected components
+    # connected_components = merge_components(connected_components)
 
     # Form sites
     sites = get_alignable_sites(connected_components, [])

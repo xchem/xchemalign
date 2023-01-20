@@ -1,10 +1,11 @@
 import os
 
 import gemmi
-from loguru import logger
 
 from xchemalign.data import AlignableSite
 from xchemalign.matching import match_atom
+
+# from loguru import logger
 
 
 def get_transforms(reference_neighbourhood, neighbourhood):
@@ -42,7 +43,7 @@ def get_transforms(reference_neighbourhood, neighbourhood):
         [alignable_ca[0] for alignable_ca in alignable_cas],
         [alignable_ca[1] for alignable_ca in alignable_cas],
     )
-    logger.debug(f"Superposition: rmsd {sup.rmsd} n {len(alignable_cas)}")
+    # logger.debug(f"Superposition: rmsd {sup.rmsd} n {len(alignable_cas)}")
 
     return sup.transform
 
@@ -69,7 +70,7 @@ def generate_aligned_structures(
 
     #
     for site in sites:
-        logger.debug(f"Site id is: {site.id}")
+        # logger.debug(f"Site id is: {site.id}")
         site_dir = output_dir / f"{site.id}"
         if not site_dir.exists():
             os.mkdir(site_dir)

@@ -371,7 +371,7 @@ def get_ligand_neighbourhood(
 
 
 def get_dataset_neighbourhoods(
-    dataset: Dataset, max_radius: float = 5.0
+    dataset: Dataset, max_radius: float = 10.0
 ) -> dict[LigandID, LigandNeighbourhood]:
     # Load the structure
     logger.debug(dataset.pdb)
@@ -395,7 +395,7 @@ def get_dataset_neighbourhoods(
     fragment_neighbourhoods: dict[LigandID, LigandNeighbourhood] = {}
     for ligand_id, fragment in fragments.items():
         fragment_neighbourhoods[ligand_id] = get_ligand_neighbourhood(
-            structure, ns, fragment
+            structure, ns, fragment, max_dist=max_radius
         )
 
     return fragment_neighbourhoods
