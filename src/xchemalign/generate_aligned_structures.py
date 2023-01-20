@@ -108,7 +108,7 @@ def generate_aligned_structures_connected_components(
         structure: gemmi.Structure = gemmi.read_structure(dataset.pdb)
         structures[dataset.dtag] = structure
 
-    #
+    # Iterate sites
     for site in sites:
         logger.debug(f"Site id is: {site.id}")
         site_dir = output_dir / f"{site.id}"
