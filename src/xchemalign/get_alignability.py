@@ -22,7 +22,7 @@ def match_cas(
             ligand_2_atom,
         ) in ligand_2_neighbourhood.atoms.items():
             if ligand_1_atom_id.atom == "CA":
-                if match_atom(ligand_1_atom, ligand_2_atom):
+                if match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
                     alignable_cas.append(
                         (
                             gemmi.Position(

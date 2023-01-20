@@ -2,15 +2,22 @@ from xchemalign.data import Atom, AtomID, CanonicalSite, LigandNeighbourhood
 
 
 def match_atom(
-    canonical_site_atom: Atom, ligand_neighbourhood_atom: Atom
+    canonical_site_atom: Atom,
+    ligand_neighbourhood_atom: Atom,
+    ignore_chain=False,
 ) -> bool:
     id_1 = canonical_site_atom.atom_id
     id_2 = ligand_neighbourhood_atom.atom_id
 
-    if id_1.atom == id_2.atom:
-        if id_1.residue == id_2.residue:
-            if id_1.chain == id_2.chain:
+    if ignore_chain:
+        if id_1.atom == id_2.atom:
+            if id_1.residue == id_2.residue:
                 return True
+    else:
+        if id_1.atom == id_2.atom:
+            if id_1.residue == id_2.residue:
+                if id_1.chain == id_2.chain:
+                    return True
 
     return False
 
