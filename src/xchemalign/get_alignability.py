@@ -16,15 +16,15 @@ def match_cas(
     min_alignable_atoms: int = 5,
     max_alignable_rmsd: float = 2.0,
 ):
+
     alignable_cas = []
     for (
         ligand_1_atom_id,
         ligand_1_atom,
-    ) in ligand_1_neighbourhood.atoms.items():
-        for (
-            ligand_2_atom_id,
-            ligand_2_atom,
-        ) in ligand_2_neighbourhood.atoms.items():
+    ) in zip(ligand_1_neighbourhood.atom_ids, ligand_1_neighbourhood.atoms):
+        for (ligand_2_atom_id, ligand_2_atom,) in zip(
+            ligand_2_neighbourhood.atom_ids, ligand_2_neighbourhood.atoms
+        ):
             if ligand_1_atom_id.atom == "CA":
                 if match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
                     alignable_cas.append(
@@ -72,12 +72,12 @@ def get_alignability(
     connectivity = []
     for (ligand_1_id, ligand_1_neighbourhood) in zip(
         ligand_neighbourhoods.ligand_ids,
-        ligand_neighbourhoods.ligand_neighbourhoods.values(),
+        ligand_neighbourhoods.ligand_neighbourhoods,
     ):
         connectivities = []
         for (ligand_2_id, ligand_2_neighbourhood,) in zip(
             ligand_neighbourhoods.ligand_ids,
-            ligand_neighbourhoods.ligand_neighbourhoods.values(),
+            ligand_neighbourhoods.ligand_neighbourhoods,
         ):
             # See if atoms match
             ca_match = match_cas(

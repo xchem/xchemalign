@@ -388,8 +388,10 @@ def get_ligand_neighbourhood(
     # logger.debug(model_atoms)
     # logger.debug(artefact_atoms)
     ligand_neighbourhood: LigandNeighbourhood = LigandNeighbourhood(
-        atoms=model_atoms,
-        artefact_atoms=artefact_atoms,
+        atom_ids=[aid for aid in model_atoms.keys()],
+        atoms=[a for a in model_atoms.values()],
+        artefact_atom_ids=[aid for aid in artefact_atoms.keys()],
+        artefact_atoms=[a for a in artefact_atoms.values()],
     )
 
     return ligand_neighbourhood
@@ -440,7 +442,5 @@ def get_ligand_neighbourhoods(
 
     return LigandNeighbourhoods(
         ligand_ids=[lid for lid in ligand_neighbourhoods.keys()],
-        ligand_neighbourhoods={
-            j: lnb for j, lnb in enumerate(ligand_neighbourhoods.values())
-        },
+        ligand_neighbourhoods=[lnb for lnb in ligand_neighbourhoods.values()],
     )

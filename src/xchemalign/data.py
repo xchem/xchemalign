@@ -113,13 +113,15 @@ class SystemData(BaseModel):
 
 
 class LigandNeighbourhood(BaseModel):
-    atoms: dict[AtomID, Atom]
-    artefact_atoms: dict[AtomID, Atom]
+    atom_ids: list[AtomID]
+    atoms: list[Atom]
+    artefact_atom_ids: list[AtomID]
+    artefact_atoms: list[Atom]
 
 
 class LigandNeighbourhoods(BaseModel):
     ligand_ids: list[LigandID]
-    ligand_neighbourhoods: dict[int, LigandNeighbourhood]
+    ligand_neighbourhoods: list[LigandNeighbourhood]
 
 
 class DatasetID:

@@ -14,16 +14,15 @@ def get_transform(
     reference_neighbourhood: LigandNeighbourhood,
     neighbourhood: LigandNeighbourhood,
 ):
-
     alignable_cas = {}
     for (
         ligand_1_atom_id,
         ligand_1_atom,
-    ) in reference_neighbourhood.atoms.items():
+    ) in zip(reference_neighbourhood.atom_ids, reference_neighbourhood.atoms):
         for (
             ligand_2_atom_id,
             ligand_2_atom,
-        ) in neighbourhood.atoms.items():
+        ) in zip(neighbourhood.atom_ids, neighbourhood.atoms):
             if ligand_1_atom_id.atom == "CA":
                 if match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
                     alignable_cas[ligand_1_atom_id] = (
@@ -56,12 +55,12 @@ def get_transforms(ligand_neighbourhoods: LigandNeighbourhoods, g):
     transforms: dict[LigandID, dict[LigandID, Transform]] = {}
     for (ligand_id_1, ligand_neighbourhood_1) in zip(
         ligand_neighbourhoods.ligand_ids,
-        ligand_neighbourhoods.ligand_neighbourhoods.values(),
+        ligand_neighbourhoods.ligand_neighbourhoods,
     ):
         transforms[ligand_id_1] = {}
         for (ligand_id_2, ligand_neighbourhood_2,) in zip(
             ligand_neighbourhoods.ligand_ids,
-            ligand_neighbourhoods.ligand_neighbourhoods.values(),
+            ligand_neighbourhoods.ligand_neighbourhoods,
         ):
             if ligand_id_2 in g[ligand_id_1].neighbours():
                 transform = get_transform(
