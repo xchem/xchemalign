@@ -78,24 +78,33 @@ def get_system_sites(
     save_neighbourhoods(
         ligand_neighbourhoods, output_dir / "neighbourhoods.json"
     )
+    logger.info("Saved neighbourhoods!")
 
     # Get alignability
     alignability_matrix = get_alignability(ligand_neighbourhoods, system_data)
 
     # logger.debug(alignability_matrix)
-    logger.debug(alignability_matrix.shape)
+    logger.debug("Alignability matrix shape: {alignability_matrix.shape}")
 
     # Generate the graph
+    logger.info("Getting alignability graph...")
     g = get_graph(alignability_matrix, ligand_neighbourhoods)
+    logger.info("Got alignability graph!")
 
     # Write the graph
+    logger.info("Saving Graph...")
     save_graph(g, output_dir / "alignability.gml")
+    logger.info("Saved Graph!")
 
     # Generate the transforms
+    logger.info("Getting transforms...")
     transforms = get_transforms(ligand_neighbourhoods, g)
+    logger.info("Got transforms!")
 
     # Save the transforms
+    logger.info("Saving transforms...")
     save_transforms(transforms, output_dir / "transforms.json")
+    logger.info("Saved transforms!")
 
     exit()
 
