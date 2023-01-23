@@ -34,7 +34,10 @@ def match_atoms(
             ligand_neighbourhood_atom_id,
             ligand_neighbourhood_atom,
         ) in site_2_atoms.items():
-            if match_atom(canonical_site_atom, ligand_neighbourhood_atom):
+            if match_atom(
+                canonical_site_atom,
+                ligand_neighbourhood_atom,
+            ):
                 num_alignable_atoms += 1
 
     if num_alignable_atoms > min_alignable_atoms:

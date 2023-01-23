@@ -4,13 +4,16 @@ import gemmi
 import networkx as nx
 from loguru import logger
 
-from xchemalign.data import AlignableSite
+from xchemalign.data import AlignableSite, LigandNeighbourhood
 from xchemalign.matching import match_atom
 
 
-def get_transforms(reference_neighbourhood, neighbourhood):
+def get_transforms(
+    reference_neighbourhood: LigandNeighbourhood,
+    neighbourhood: LigandNeighbourhood,
+):
 
-    alignable_cas = []
+    alignable_cas = {}
     for (
         ligand_1_atom_id,
         ligand_1_atom,
@@ -20,32 +23,30 @@ def get_transforms(reference_neighbourhood, neighbourhood):
             ligand_2_atom,
         ) in neighbourhood.atoms.items():
             if ligand_1_atom_id.atom == "CA":
-                if match_atom(ligand_1_atom, ligand_2_atom):
-                    alignable_cas.append(
-                        (
-                            gemmi.Position(
-                                ligand_1_atom.x,
-                                ligand_1_atom.y,
-                                ligand_1_atom.z,
-                            ),
-                            gemmi.Position(
-                                ligand_2_atom.x,
-                                ligand_2_atom.y,
-                                ligand_2_atom.z,
-                            ),
-                        )
+                if match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
+                    alignable_cas[ligand_1_atom_id] = (
+                        gemmi.Position(
+                            ligand_1_atom.x,
+                            ligand_1_atom.y,
+                            ligand_1_atom.z,
+                        ),
+                        gemmi.Position(
+                            ligand_2_atom.x,
+                            ligand_2_atom.y,
+                            ligand_2_atom.z,
+                        ),
                     )
 
     if len(alignable_cas) < 3:
-        return gemmi.Transform()
+        return gemmi.Transform(), []
 
     sup = gemmi.superpose_positions(
-        [alignable_ca[0] for alignable_ca in alignable_cas],
-        [alignable_ca[1] for alignable_ca in alignable_cas],
+        [alignable_ca[0] for alignable_ca in alignable_cas.values()],
+        [alignable_ca[1] for alignable_ca in alignable_cas.values()],
     )
     # logger.debug(f"Superposition: rmsd {sup.rmsd} n {len(alignable_cas)}")
 
-    return sup.transform
+    return sup.transform, [ligand_id for ligand_id in alignable_cas.keys()]
 
 
 def superpose_structure(transform, structure):
@@ -134,9 +135,12 @@ def generate_aligned_structures_connected_components(
             previous_ligand_id = moving_ligand_id
             for next_ligand_id in shortest_path:
                 # Get the transform from previous frame to new one
-                transform = get_transforms(
+                transform, alignment_ids = get_transforms(
                     ligand_neighbourhoods[next_ligand_id],
                     ligand_neighbourhoods[previous_ligand_id],
+                )
+                logger.debug(
+                    [f"{lid.residue}/{lid.atom}" for lid in alignment_ids]
                 )
 
                 # Apply the translation to the new frame
