@@ -2,7 +2,11 @@ import gemmi
 import numpy as np
 from loguru import logger
 
-from xchemalign.data import LigandID, LigandNeighbourhood, SystemData
+from xchemalign.data import (
+    LigandNeighbourhood,
+    LigandNeighbourhoods,
+    SystemData,
+)
 from xchemalign.matching import match_atom
 
 
@@ -54,7 +58,7 @@ def match_cas(
 
 
 def get_alignability(
-    ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood],
+    ligand_neighbourhoods: LigandNeighbourhoods,
     system_data: SystemData,
 ):
 
@@ -66,12 +70,15 @@ def get_alignability(
 
     # Get connectivity matrix
     connectivity = []
-    for ligand_1_id, ligand_1_neighbourhood in ligand_neighbourhoods.items():
+    for (
+        ligand_1_id,
+        ligand_1_neighbourhood,
+    ) in ligand_neighbourhoods.ligand_neighbourhoods.items():
         connectivities = []
         for (
             ligand_2_id,
             ligand_2_neighbourhood,
-        ) in ligand_neighbourhoods.items():
+        ) in ligand_neighbourhoods.ligand_neighbourhoods.items():
             # See if atoms match
             ca_match = match_cas(
                 ligand_1_neighbourhood, ligand_2_neighbourhood

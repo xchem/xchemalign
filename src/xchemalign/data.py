@@ -40,12 +40,22 @@ class AtomID(BaseModel):
         return hash((self.chain, self.residue, self.atom))
 
 
+class Transform(BaseModel):
+    vec: list[float]
+    mat: list[list[float]]
+
+
+class Transforms(BaseModel):
+    transforms: dict[LigandID, dict[LigandID, Transform]]
+
+
 class Atom(BaseModel):
     element: str
     atom_id: AtomID
     x: float
     y: float
     z: float
+    image: Transform
 
 
 class AlignableSite(BaseModel):
@@ -104,6 +114,10 @@ class SystemData(BaseModel):
 class LigandNeighbourhood(BaseModel):
     atoms: dict[AtomID, Atom]
     artefact_atoms: dict[AtomID, Atom]
+
+
+class LigandNeighbourhoods(BaseModel):
+    ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood]
 
 
 class DatasetID:

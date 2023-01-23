@@ -7,7 +7,7 @@ from loguru import logger
 from xchemalign.data import (
     CanonicalSite,
     LigandID,
-    LigandNeighbourhood,
+    LigandNeighbourhoods,
     SiteObservation,
     SystemData,
     SystemSites,
@@ -22,9 +22,14 @@ from xchemalign.get_canonical_sites import get_canonical_sites
 from xchemalign.get_connected_components import (
     get_connected_components_connected,
 )
+from xchemalign.get_graph import get_graph
 from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
 from xchemalign.get_site_observations import get_site_observations
+from xchemalign.get_transforms import get_transforms
 from xchemalign.get_xtal_form_sites import get_xtal_form_sites
+from xchemalign.save_graph import save_graph
+from xchemalign.save_neighbourhoods import save_neighbourhoods
+from xchemalign.save_transforms import save_transforms
 
 
 def get_system_sites(
@@ -62,18 +67,37 @@ def get_system_sites(
     logger.debug(f"Got {num_input_datasets} datasets")
 
     # Identify sites in the input data
-    ligand_neighbourhoods: dict[
-        LigandID, LigandNeighbourhood
-    ] = get_ligand_neighbourhoods(system_data)
+    ligand_neighbourhoods: LigandNeighbourhoods = get_ligand_neighbourhoods(
+        system_data
+    )
 
-    num_neighbourhoods = len(ligand_neighbourhoods)
+    num_neighbourhoods = len(ligand_neighbourhoods.ligand_neighbourhoods)
     logger.info(f"Found {num_neighbourhoods} ligand neighbourhoods")
+
+    # Save the neighbourhoods
+    save_neighbourhoods(
+        ligand_neighbourhoods, output_dir / "neighbourhoods.json"
+    )
 
     # Get alignability
     alignability_matrix = get_alignability(ligand_neighbourhoods, system_data)
 
     # logger.debug(alignability_matrix)
     logger.debug(alignability_matrix.shape)
+
+    # Generate the graph
+    g = get_graph(alignability_matrix, ligand_neighbourhoods)
+
+    # Write the graph
+    save_graph(g, output_dir / "alignability.gml")
+
+    # Generate the transforms
+    transforms = get_transforms(ligand_neighbourhoods, g)
+
+    # Save the transforms
+    save_transforms(transforms, output_dir / "transforms.json")
+
+    exit()
 
     # Get connected components
     # connected_components: list[list[LigandID]] = get_connected_components(

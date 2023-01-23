@@ -8,8 +8,10 @@ from xchemalign.data import (
     Dataset,
     LigandID,
     LigandNeighbourhood,
+    LigandNeighbourhoods,
     Structure,
     SystemData,
+    Transform,
 )
 
 
@@ -199,6 +201,7 @@ def get_ligand_neighbourhood(
     # _model_atoms = []
     # model_atoms: dict[AtomID, Atom] = {}
     # artefact_atoms: dict[AtomID, Atom] = {}
+    atom_images = {}
 
     for atom in fragment:
         atom_neighbours: list[gemmi.NeighborSearch.Mark] = ns.find_neighbors(
@@ -208,11 +211,19 @@ def get_ligand_neighbourhood(
         )
         for neighbour in atom_neighbours:
             cra = neighbour.to_cra(structure[0])
+            atom_id: AtomID = AtomID(
+                chain=cra.chain.name,
+                residue=cra.residue.seqid.num,
+                atom=cra.atom.name,
+            )
             # logger.debug(f"CRA: {cra}")
 
             nearest_image = structure.cell.find_nearest_pbc_image(
                 atom.pos, cra.atom.pos, neighbour.image_idx
             )
+
+            atom_images[atom_id] = structure.cell.images[neighbour.image_idx]
+
             # logger.debug(f"{nearest_image}")
             # logger.debug(f"{nearest_image.sym_idx}")
             # logger.debug(f"{nearest_image.pbc_shift}")
@@ -334,12 +345,18 @@ def get_ligand_neighbourhood(
             residue=cra.residue.seqid.num,
             atom=cra.atom.name,
         )
+        image_transform = atom_images[model_atom_id]
+        transform = Transform(
+            vec=image_transform.vec.tolist(),
+            mat=image_transform.mat.tolist(),
+        )
         model_atoms[model_atom_id] = Atom(
             element=atom.element.name,
             atom_id=model_atom_id,
             x=pos.x,
             y=pos.y,
             z=pos.z,
+            image=transform,
         )
 
     # Artefact atoms
@@ -351,12 +368,18 @@ def get_ligand_neighbourhood(
             residue=cra.residue.seqid.num,
             atom=cra.atom.name,
         )
+        image_transform = atom_images[artefact_atom_id]
+        transform = Transform(
+            vec=image_transform.vec.tolist(),
+            mat=image_transform.mat.tolist(),
+        )
         artefact_atoms[artefact_atom_id] = Atom(
             element=atom.element.name,
             atom_id=artefact_atom_id,
             x=pos.x,
             y=pos.y,
             z=pos.z,
+            image=transform,
         )
 
     # Cosntruct the neighbourhood
@@ -403,7 +426,7 @@ def get_dataset_neighbourhoods(
 
 def get_ligand_neighbourhoods(
     system_data: SystemData,
-) -> dict[LigandID, LigandNeighbourhood]:
+) -> LigandNeighbourhoods:
     # Iterate over data, loading in structures, getting ligands for each
     # structure and finding their neighbourhoods
     ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood] = {}
@@ -413,4 +436,4 @@ def get_ligand_neighbourhoods(
         ] = get_dataset_neighbourhoods(dataset)
         ligand_neighbourhoods.update(dataset_ligand_neighbourhoods)
 
-    return ligand_neighbourhoods
+    return LigandNeighbourhoods(ligand_neighbourhoods=ligand_neighbourhoods)
