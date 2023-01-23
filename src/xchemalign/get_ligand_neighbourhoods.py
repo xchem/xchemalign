@@ -222,7 +222,9 @@ def get_ligand_neighbourhood(
                 atom.pos, cra.atom.pos, neighbour.image_idx
             )
 
-            atom_images[atom_id] = structure.cell.images[neighbour.image_idx]
+            atom_images[atom_id] = ns.get_image_transformation(
+                neighbour.image_idx
+            )
 
             # logger.debug(f"{nearest_image}")
             # logger.debug(f"{nearest_image.sym_idx}")
