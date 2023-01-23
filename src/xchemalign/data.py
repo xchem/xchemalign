@@ -46,8 +46,8 @@ class Transform(BaseModel):
 
 
 class Transforms(BaseModel):
-    ligand_ids: list[LigandID]
-    transforms: dict[int, dict[LigandID, Transform]]
+    ligand_ids: list[tuple[LigandID, LigandID]]
+    transforms: list[Transform]
 
 
 class Atom(BaseModel):

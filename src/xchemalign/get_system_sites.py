@@ -25,7 +25,8 @@ from xchemalign.get_connected_components import (
 from xchemalign.get_graph import get_graph
 from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
 from xchemalign.get_site_observations import get_site_observations
-from xchemalign.get_transforms import get_transforms
+
+# from xchemalign.get_transforms import get_transforms
 from xchemalign.get_xtal_form_sites import get_xtal_form_sites
 from xchemalign.save_graph import save_graph
 from xchemalign.save_neighbourhoods import save_neighbourhoods
@@ -75,13 +76,19 @@ def get_system_sites(
     logger.info(f"Found {num_neighbourhoods} ligand neighbourhoods")
 
     # Save the neighbourhoods
+    logger.info("Saving neighbourhoods!")
+
     save_neighbourhoods(
         ligand_neighbourhoods, output_dir / "neighbourhoods.json"
     )
     logger.info("Saved neighbourhoods!")
 
     # Get alignability
-    alignability_matrix = get_alignability(ligand_neighbourhoods, system_data)
+    logger.info("Getting alignbaility matrix...!")
+    alignability_matrix, transforms = get_alignability(
+        ligand_neighbourhoods, system_data
+    )
+    logger.info("Got alignability matrix!")
 
     # logger.debug(alignability_matrix)
     logger.debug("Alignability matrix shape: {alignability_matrix.shape}")
@@ -98,7 +105,7 @@ def get_system_sites(
 
     # Generate the transforms
     logger.info("Getting transforms...")
-    transforms = get_transforms(ligand_neighbourhoods, g)
+    # transforms = get_transforms(ligand_neighbourhoods, g)
     logger.info("Got transforms!")
 
     # Save the transforms

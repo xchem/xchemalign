@@ -6,6 +6,8 @@ from xchemalign.data import (
     LigandNeighbourhood,
     LigandNeighbourhoods,
     SystemData,
+    Transform,
+    Transforms,
 )
 from xchemalign.matching import match_atom
 
@@ -50,11 +52,13 @@ def match_cas(
 
         rmsd = sup.rmsd
         if rmsd < max_alignable_rmsd:
-            return True
+            return True, Transform(
+                vec=sup.transform.vec.tolist(), mat=sup.transform.mat.tolist()
+            )
         else:
-            return False
+            return False, None
     else:
-        return False
+        return False, None
 
 
 def get_alignability(
@@ -70,6 +74,8 @@ def get_alignability(
 
     # Get connectivity matrix
     connectivity = []
+    transform_ids = []
+    transforms = []
     for (ligand_1_id, ligand_1_neighbourhood) in zip(
         ligand_neighbourhoods.ligand_ids,
         ligand_neighbourhoods.ligand_neighbourhoods,
@@ -80,12 +86,14 @@ def get_alignability(
             ligand_neighbourhoods.ligand_neighbourhoods,
         ):
             # See if atoms match
-            ca_match = match_cas(
+            ca_match, transform = match_cas(
                 ligand_1_neighbourhood, ligand_2_neighbourhood
             )
 
             if ca_match:
                 connectivities.append(1)
+                transform_ids.append((ligand_1_id, ligand_2_id))
+                transforms.append(transform)
             else:
                 connectivities.append(0)
 
@@ -93,4 +101,6 @@ def get_alignability(
 
     logger.debug(connectivity)
 
-    return np.array(connectivity)
+    return np.array(connectivity), Transforms(
+        transform_ids=transform_ids, transforms=transforms
+    )
