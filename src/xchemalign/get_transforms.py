@@ -54,15 +54,15 @@ def get_transform(
 def get_transforms(ligand_neighbourhoods: LigandNeighbourhoods, g):
 
     transforms: dict[LigandID, dict[LigandID, Transform]] = {}
-    for (
-        ligand_id_1,
-        ligand_neighbourhood_1,
-    ) in ligand_neighbourhoods.ligand_neighbourhoods.items():
+    for (ligand_id_1, ligand_neighbourhood_1) in zip(
+        ligand_neighbourhoods.ligand_ids,
+        ligand_neighbourhoods.ligand_neighbourhoods.values(),
+    ):
         transforms[ligand_id_1] = {}
-        for (
-            ligand_id_2,
-            ligand_neighbourhood_2,
-        ) in ligand_neighbourhoods.ligand_neighbourhoods.items():
+        for (ligand_id_2, ligand_neighbourhood_2,) in zip(
+            ligand_neighbourhoods.ligand_ids,
+            ligand_neighbourhoods.ligand_neighbourhoods.values(),
+        ):
             if ligand_id_2 in g[ligand_id_1].neighbours():
                 transform = get_transform(
                     ligand_neighbourhood_2, ligand_neighbourhood_1

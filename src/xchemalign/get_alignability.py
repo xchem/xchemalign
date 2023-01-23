@@ -70,15 +70,15 @@ def get_alignability(
 
     # Get connectivity matrix
     connectivity = []
-    for (
-        ligand_1_id,
-        ligand_1_neighbourhood,
-    ) in ligand_neighbourhoods.ligand_neighbourhoods.items():
+    for (ligand_1_id, ligand_1_neighbourhood) in zip(
+        ligand_neighbourhoods.ligand_ids,
+        ligand_neighbourhoods.ligand_neighbourhoods.values(),
+    ):
         connectivities = []
-        for (
-            ligand_2_id,
-            ligand_2_neighbourhood,
-        ) in ligand_neighbourhoods.ligand_neighbourhoods.items():
+        for (ligand_2_id, ligand_2_neighbourhood,) in zip(
+            ligand_neighbourhoods.ligand_ids,
+            ligand_neighbourhoods.ligand_neighbourhoods.values(),
+        ):
             # See if atoms match
             ca_match = match_cas(
                 ligand_1_neighbourhood, ligand_2_neighbourhood

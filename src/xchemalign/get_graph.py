@@ -1,17 +1,19 @@
 import networkx as nx
 import numpy as np
 
+from xchemalign.data import LigandNeighbourhoods
+
 # from loguru import logger
 # from matplotlib import pyplot as plt
 
 
-def get_graph(arr, ligand_neighbourhoods):
+def get_graph(arr, ligand_neighbourhoods: LigandNeighbourhoods):
 
-    ligand_ids = [ligand_id for ligand_id in ligand_neighbourhoods]
+    ligand_ids = [ligand_id for ligand_id in ligand_neighbourhoods.ligand_ids]
 
     g = nx.Graph()
-    for x in ligand_ids:
-        g.add_node(x)
+    for j in ligand_ids:
+        g.add_node(j)
 
     for idx, conn in np.ndenumerate(arr):
         x, y = idx

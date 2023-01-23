@@ -46,7 +46,8 @@ class Transform(BaseModel):
 
 
 class Transforms(BaseModel):
-    transforms: dict[LigandID, dict[LigandID, Transform]]
+    ligand_ids: list[LigandID]
+    transforms: dict[int, dict[LigandID, Transform]]
 
 
 class Atom(BaseModel):
@@ -117,7 +118,8 @@ class LigandNeighbourhood(BaseModel):
 
 
 class LigandNeighbourhoods(BaseModel):
-    ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood]
+    ligand_ids: list[LigandID]
+    ligand_neighbourhoods: dict[int, LigandNeighbourhood]
 
 
 class DatasetID:
@@ -127,7 +129,8 @@ class DatasetID:
 class SystemSites(BaseModel):
     canonical_site: dict[int, CanonicalSite]
     xtal_form_site: dict[int, XtalFormSite]
-    site_observation: dict[LigandID, SiteObservation]
+    ligand_ids: list[LigandID]
+    site_observation: dict[int, SiteObservation]
 
     @validator("canonical_site")
     def check_canonical_site_ids(cls, v: dict[LigandID, SiteObservation]):

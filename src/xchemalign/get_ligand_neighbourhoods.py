@@ -438,4 +438,9 @@ def get_ligand_neighbourhoods(
         ] = get_dataset_neighbourhoods(dataset)
         ligand_neighbourhoods.update(dataset_ligand_neighbourhoods)
 
-    return LigandNeighbourhoods(ligand_neighbourhoods=ligand_neighbourhoods)
+    return LigandNeighbourhoods(
+        ligand_ids=[lid for lid in ligand_neighbourhoods.keys()],
+        ligand_neighbourhoods={
+            j: lnb for j, lnb in enumerate(ligand_neighbourhoods.values())
+        },
+    )
