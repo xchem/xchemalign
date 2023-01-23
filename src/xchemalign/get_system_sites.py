@@ -14,7 +14,6 @@ from xchemalign.data import (
     XtalFormSite,
 )
 from xchemalign.generate_aligned_structures import (
-    generate_aligned_structures,
     generate_aligned_structures_connected_components,
 )
 from xchemalign.get_alignability import get_alignability
@@ -95,9 +94,9 @@ def get_system_sites(
     # logger.debug(sites)
 
     # Generate aligned sites
-    generate_aligned_structures(
-        output_dir, ligand_neighbourhoods, system_data, sites
-    )
+    # generate_aligned_structures(
+    #     output_dir, ligand_neighbourhoods, system_data, sites
+    # )
     generate_aligned_structures_connected_components(
         output_dir, ligand_neighbourhoods, system_data, sites, g
     )
