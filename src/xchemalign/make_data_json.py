@@ -58,7 +58,7 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
     initial_datasets: dict = {}
     for idx, row in event_table.iterrows():
         dtag = row["dtag"]
-        event_id = row["event_id"]
+        event_id = row["event_idx"]
         x = row["x"]
         y = row["y"]
         z = row["z"]
