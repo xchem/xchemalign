@@ -41,7 +41,7 @@ def get_closest_lig(structure, coord):
 
 def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
 
-    logger.info(f"Data directory is: {data_dir}")
+    logger.info(f"PanDDA directory is: {pandda_dir}")
     logger.info(f"Output dir is: {output_dir}")
 
     # Get the PanDDA dirs
