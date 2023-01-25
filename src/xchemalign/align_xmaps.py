@@ -6,6 +6,7 @@ import numpy as np
 
 from xchemalign.data import (
     Block,
+    LigandBindingEvent,
     LigandNeighbourhood,
     LigandNeighbourhoods,
     Sites,
@@ -283,7 +284,9 @@ def _align_xmaps(
             )
 
             # Get the ligand binding event
-            lbe = system_data.get_dataset(lid.dtag).ligand_binding_events[lid]
+            lbe: LigandBindingEvent = system_data.get_dataset(
+                lid.dtag
+            ).ligand_binding_events[lid]
 
             # Get the xmap path
             xmap_path: Path = Path(lbe.xmap)
