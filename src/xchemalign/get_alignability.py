@@ -68,7 +68,7 @@ def get_alignability(
 
     # Get structures
     structures = {}
-    for dataset in system_data.dataset:
+    for dataset in system_data.datasets:
         structure: gemmi.Structure = gemmi.read_structure(dataset.pdb)
         structures[dataset.dtag] = structure
 
