@@ -32,7 +32,7 @@ def get_closest_lig(structure, coord):
 
                     arr = np.array(poss)
                     mean = np.mean(arr, axis=0)
-                    mean_pos = gemmi.pos(*mean)
+                    mean_pos = gemmi.Position(*mean)
                     distance = coord_gemmi.dist(mean_pos)
                     distances[residue.seqid.num] = distance
 
