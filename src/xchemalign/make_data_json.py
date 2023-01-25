@@ -128,7 +128,7 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
         ligand_binding_events = [event for event in events.values()]
         dataset = Dataset(
             dtag=dtag,
-            pdb=final_structure_path,
+            pdb=str(final_structure_path),
             ligand_binding_events=LigandBindingEvents(
                 ligand_ids=event_ids,
                 ligand_binding_events=ligand_binding_events,
