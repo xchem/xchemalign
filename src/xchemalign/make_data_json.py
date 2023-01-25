@@ -34,10 +34,10 @@ def get_closest_lig(structure, coord):
                     mean = np.mean(arr, axis=0)
                     mean_pos = gemmi.Position(*mean)
                     distance = coord_gemmi.dist(mean_pos)
-                    distances[residue.seqid.num] = distance
+                    distances[(chain.name, residue.seqid.num)] = distance
 
     if len(distances) == 0:
-        return None
+        return None, None
 
     return min(distances, key=lambda x: distances[x])
 
@@ -89,7 +89,7 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
         structure = gemmi.read_structure(str(final_structure_path))
 
         # Identify the closest ligand to the event
-        residue_num = get_closest_lig(structure, (x, y, z))
+        chain, residue_num = get_closest_lig(structure, (x, y, z))
 
         if not residue_num:
             continue
@@ -107,7 +107,7 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
             initial_datasets[dtag] = {}
 
         initial_datasets[dtag][event_id] = LigandBindingEvent(
-            id=event_id, residue=residue_num, xmap=str(xmap_path)
+            id=event_id, chain=chain, residue=residue_num, xmap=str(xmap_path)
         )
 
     # Get the datasets
@@ -123,7 +123,8 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
             / constants.PANDDA_FINAL_STRUCTURE_PDB_TEMPLATE.format(dtag=dtag)
         )
         event_ids = [
-            LigandID(dtag=dtag, id=event_id) for event_id in events.keys()
+            LigandID(dtag=dtag, chain=event.chain, id=event_id)
+            for event_id, event in events.keys()
         ]
         ligand_binding_events = [event for event in events.values()]
         dataset = Dataset(

@@ -10,6 +10,7 @@ class DatasetID(BaseModel):
 
 class LigandID(BaseModel):
     dtag: str
+    chain: str
     id: int
 
     def __eq__(self, other) -> bool:
@@ -125,6 +126,7 @@ class SiteObservation(BaseModel):
 
 class LigandBindingEvent(BaseModel):
     id: int
+    chain: str
     residue: int
     xmap: str
 
