@@ -16,6 +16,7 @@ from xchemalign.data import (
     XtalForms,
 )
 from xchemalign.generate_aligned_structures import _align_structures
+from xchemalign.make_data_json import make_data_json
 
 
 def _update_sites(g, neighbourhoods, sites):
@@ -111,10 +112,10 @@ class CLI:
         build_alignment_graph(_source_dir)
 
     def build_system_data(self, system_data_dir: str, output_dir: str):
-        # _system_data_dir: Path = Path(system_data_dir)
-        # _output_dir: Path = Path(output_dir)
+        _system_data_dir: Path = Path(system_data_dir)
+        _output_dir: Path = Path(output_dir)
 
-        ...
+        make_data_json(_system_data_dir, _output_dir)
 
     def change_site_reference(self):
         ...

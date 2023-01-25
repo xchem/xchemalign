@@ -4,7 +4,7 @@ from pydantic import BaseModel, validator
 Structure = gemmi.Structure
 
 
-class DatasetID:
+class DatasetID(BaseModel):
     dtag: str
 
 
@@ -152,12 +152,12 @@ class SystemData(BaseModel):
     dataset_ids: list[DatasetID]
     datasets: list[Dataset]
 
-    def get_dataset(self, did: str | DatasetID) -> Dataset | None:
+    def get_dataset(self, did: str | DatasetID) -> Dataset:
         for _did, dataset in zip(self.dataset_ids, self.datasets):
             if _did == did:
                 return dataset
 
-        return None
+        raise Exception()
 
 
 class LigandNeighbourhood(BaseModel):

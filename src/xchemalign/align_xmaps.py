@@ -261,9 +261,10 @@ def _align_xmaps(
         reference_ligand_id = site.reference
 
         # Get the refeence binding site
-        reference_binding_site = system_data.get_dataset(
-            reference_ligand_id.dtag
-        ).ligand_binding_events[reference_ligand_id]
+        rlbes = system_data.get_dataset(reference_ligand_id.dtag)
+        reference_binding_site = rlbes.ligand_binding_events[
+            reference_ligand_id
+        ]
 
         # Reference_xmap_path
         reference_xmap_path: Path = Path(reference_binding_site.xmap)
