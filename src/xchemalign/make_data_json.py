@@ -36,6 +36,9 @@ def get_closest_lig(structure, coord):
                     distance = coord_gemmi.dist(mean_pos)
                     distances[residue.seqid.num] = distance
 
+    if len(distances) == 0:
+        return None
+
     return min(distances, key=lambda x: distances[x])
 
 
@@ -87,6 +90,9 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
 
         # Identify the closest ligand to the event
         residue_num = get_closest_lig(structure, (x, y, z))
+
+        if not residue_num:
+            continue
 
         # Get the event map
         xmap_path = (
