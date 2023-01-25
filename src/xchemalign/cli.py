@@ -112,6 +112,7 @@ class CLI:
         build_alignment_graph(_source_dir)
 
     def build_system_data(self, system_data_dir: str, output_dir: str):
+        print(output_dir)
         _system_data_dir: Path = Path(system_data_dir).resolve()
         _output_dir: Path = Path(output_dir).resolve()
 
