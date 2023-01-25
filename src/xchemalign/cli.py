@@ -112,8 +112,8 @@ class CLI:
         build_alignment_graph(_source_dir)
 
     def build_system_data(self, system_data_dir: str, output_dir: str):
-        _system_data_dir: Path = Path(system_data_dir)
-        _output_dir: Path = Path(output_dir)
+        _system_data_dir: Path = Path(system_data_dir).resolve()
+        _output_dir: Path = Path(output_dir).resolve()
 
         make_data_json_from_pandda_dir(_system_data_dir, _output_dir)
 
