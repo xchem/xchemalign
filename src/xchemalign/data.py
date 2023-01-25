@@ -23,6 +23,17 @@ class LigandID(BaseModel):
     def __hash__(self):
         return hash((self.dtag, self.chain, self.id))
 
+    def to_string(
+        self,
+    ):
+        return f"{self.dtag}_{self.chain}_{self.id}"
+
+    @classmethod
+    def from_string(string):
+        dtag, chain, id = string.split("_")
+
+        return LigandID(dtag=dtag, chain=chain, id=int(id))
+
 
 class SymOp(BaseModel):
     operation: str
