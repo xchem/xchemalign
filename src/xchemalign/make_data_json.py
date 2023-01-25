@@ -41,6 +41,9 @@ def get_closest_lig(structure, coord):
 
 def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
 
+    logger.info(f"Data directory is: {data_dir}")
+    logger.info(f"Output dir is: {output_dir}")
+
     # Get the PanDDA dirs
     analyses_dir: Path = pandda_dir / constants.PANDDA_ANALYSES_DIR
     processed_datasets_dir: Path = (
@@ -63,6 +66,13 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
         y = row["y"]
         z = row["z"]
         bdc = row["1-BDC"]
+        ligand_confidence = row["Ligand Confidence"]
+
+        logger.debug(f"Processing {dtag} {event_id}")
+
+        if ligand_confidence != "High":
+            logger.debug("No high confidence ligand!")
+            continue
 
         # Get the structure
         processed_dataset_dir = processed_datasets_dir / dtag
@@ -73,7 +83,7 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
             final_structure_dir_path
             / constants.PANDDA_FINAL_STRUCTURE_PDB_TEMPLATE.format(dtag=dtag)
         )
-        structure = gemmi.read_structure(final_structure_path)
+        structure = gemmi.read_structure(str(final_structure_path))
 
         # Identify the closest ligand to the event
         residue_num = get_closest_lig(structure, (x, y, z))
@@ -94,7 +104,7 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
             id=event_id, residue=residue_num, xmap=str(xmap_path)
         )
 
-    #
+    # Get the datasets
     datasets = []
     dataset_ids = []
     for dtag, events in initial_datasets.items():
