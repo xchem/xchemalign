@@ -434,7 +434,7 @@ def get_ligand_neighbourhoods(
     # Iterate over data, loading in structures, getting ligands for each
     # structure and finding their neighbourhoods
     ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood] = {}
-    for dataset in system_data.dataset:
+    for dataset in system_data.datasets:
         dataset_ligand_neighbourhoods: dict[
             LigandID, LigandNeighbourhood
         ] = get_dataset_neighbourhoods(dataset)

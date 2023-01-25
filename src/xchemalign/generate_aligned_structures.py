@@ -1,10 +1,18 @@
 import os
+from pathlib import Path
 
 import gemmi
 import networkx as nx
 from loguru import logger
 
-from xchemalign.data import AlignableSite, LigandNeighbourhood
+from xchemalign.data import (  # Transform,
+    AlignableSite,
+    LigandNeighbourhood,
+    LigandNeighbourhoods,
+    Sites,
+    Transforms,
+    XtalForms,
+)
 from xchemalign.matching import match_atom
 
 
@@ -17,11 +25,11 @@ def get_transforms(
     for (
         ligand_1_atom_id,
         ligand_1_atom,
-    ) in reference_neighbourhood.atoms.items():
+    ) in zip(reference_neighbourhood.atom_ids, reference_neighbourhood.atoms):
         for (
             ligand_2_atom_id,
             ligand_2_atom,
-        ) in neighbourhood.atoms.items():
+        ) in zip(neighbourhood.atom_ids, neighbourhood.atoms):
             if ligand_1_atom_id.atom == "CA":
                 if match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
                     alignable_cas[ligand_1_atom_id] = (
@@ -170,3 +178,73 @@ def generate_aligned_structures_connected_components(
         #     structure.write_pdb(
         #         str(site_dir / f"{ligand_id.dtag}_{ligand_id.id}.pdb")
         #     )
+
+
+def expand_structure(_structure, xtalforms: XtalForms, moving_ligand_id):
+    ...
+    # for xtalform in xtalforms.xtalforms:
+    #     if moving_ligand_id in xtalform.members:
+    #         # Add the relvant images
+    #         if xtalform.images:
+    #             ...
+
+
+def _align_structures(
+    structures,
+    sites: Sites,
+    transforms: Transforms,
+    neighbourhoods: LigandNeighbourhoods,
+    xtalforms: XtalForms,
+    g,
+    _output_dir: Path,
+):
+    # Iterate sites
+    for site in sites.sites:
+        logger.debug(f"Site id is: {site.id}")
+        site_dir = _output_dir / f"{site.id}"
+        if not site_dir.exists():
+            os.mkdir(site_dir)
+        ligand_ids = site.ligand_ids
+
+        # Select the alignment reference ligand_id
+        reference_ligand_id = ligand_ids[0]
+
+        # For each other ligand
+        for moving_ligand_id in ligand_ids[:-1]:
+            # Get the shortest alignment path to the reference
+            shortest_path = nx.shortest_path(
+                g, moving_ligand_id, reference_ligand_id
+            )
+            logger.debug(f"Shortest path: {shortest_path}")
+
+            # Initial structure
+            _structure = structures[moving_ligand_id.dtag].clone()
+
+            # Expand structure
+            structure = expand_structure(
+                _structure, xtalforms, moving_ligand_id
+            )
+
+            # Walk the path, iteratively applying transforms
+            previous_ligand_id = moving_ligand_id
+            for next_ligand_id in shortest_path:
+                # Get the transform from previous frame to new one
+                transform = transforms.get_transform(
+                    (
+                        neighbourhoods.get_neighbourhood(next_ligand_id),
+                        neighbourhoods.get_neighbourhood(previous_ligand_id),
+                    )
+                )
+
+                # logger.debug(
+                #     [f"{lid.residue}/{lid.atom}" for lid in alignment_ids]
+                # )
+
+                # Apply the translation to the new frame
+                structure = superpose_structure(transform, structure)
+
+            # Write the fully aligned structure
+            out_path = (
+                site_dir / f"{moving_ligand_id.dtag}_{moving_ligand_id.id}.pdb"
+            )
+            structure.write_pdb(str(out_path))

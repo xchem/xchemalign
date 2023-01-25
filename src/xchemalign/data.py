@@ -4,6 +4,10 @@ from pydantic import BaseModel, validator
 Structure = gemmi.Structure
 
 
+class DatasetID:
+    dtag: str
+
+
 class LigandID(BaseModel):
     dtag: str
     id: int
@@ -49,6 +53,16 @@ class Transforms(BaseModel):
     ligand_ids: list[tuple[LigandID, LigandID]]
     transforms: list[Transform]
 
+    def get_transform(self, transform_id: tuple[LigandID, LigandID]):
+        for ligand_id, _transform in zip(self.ligand_ids, self.transforms):
+            if transform_id == ligand_id:
+
+                transform = gemmi.Transform()
+                transform.vec.fromlist(_transform.vec)
+                transform.mat.fromlist(_transform.mat)
+
+                return transform
+
 
 class Atom(BaseModel):
     element: str
@@ -63,6 +77,7 @@ class AlignableSite(BaseModel):
     id: int
     name: str
     ligand_ids: list[LigandID]
+    reference: LigandID
 
 
 class CanonicalSite(BaseModel):
@@ -78,6 +93,12 @@ class XtalForm(BaseModel):
     id: int
     space_group: int
     unit_cell: tuple[float, float, float, float, float, float]
+    members: list[DatasetID]
+    transforms: list[Transform]
+
+
+class XtalForms(BaseModel):
+    xtalforms: list[XtalForm]
 
 
 class XtalFormSite(BaseModel):
@@ -102,14 +123,41 @@ class SiteObservation(BaseModel):
     # compound: int
 
 
+class LigandBindingEvent(BaseModel):
+    id: int
+    residue: int
+    xmap: str
+
+
+class LigandBindingEvents(BaseModel):
+    ligand_ids: list[LigandID]
+    ligand_binding_events: list[LigandBindingEvent]
+
+    def __getitem__(self, lid: LigandID) -> LigandBindingEvent | None:
+        for _lid, lbe in zip(self.ligand_ids, self.ligand_binding_events):
+            if lid == _lid:
+                return lbe
+
+        return None
+
+
 class Dataset(BaseModel):
     dtag: str
     pdb: str
+    ligand_binding_events: LigandBindingEvents
     # mtz: str
 
 
 class SystemData(BaseModel):
-    dataset: list[Dataset]
+    dataset_ids: list[DatasetID]
+    datasets: list[Dataset]
+
+    def get_dataset(self, did: str | DatasetID) -> Dataset | None:
+        for _did, dataset in zip(self.dataset_ids, self.datasets):
+            if _did == did:
+                return dataset
+
+        return None
 
 
 class LigandNeighbourhood(BaseModel):
@@ -123,9 +171,12 @@ class LigandNeighbourhoods(BaseModel):
     ligand_ids: list[LigandID]
     ligand_neighbourhoods: list[LigandNeighbourhood]
 
-
-class DatasetID:
-    dtag: str
+    def get_neighbourhood(self, ligand_id: LigandID):
+        for _ligand_id, _neighbourhood in zip(
+            self.ligand_ids, self.ligand_neighbourhoods
+        ):
+            if _ligand_id == ligand_id:
+                return _neighbourhood
 
 
 class SystemSites(BaseModel):
@@ -190,3 +241,22 @@ class SystemSites(BaseModel):
         site_nums = [site.id for site in v.values()]
         for site_num in range(num_sites):
             assert site_num in site_nums
+
+
+class Site(BaseModel):
+    members: list[LigandID]
+
+
+class Sites(BaseModel):
+    site_ids: list[int]
+    sites: list[AlignableSite]
+
+
+class Block(BaseModel):
+    xi: int
+    yi: int
+    zi: int
+    dx: int
+    dy: int
+    dz: int
+    transform: Transform
