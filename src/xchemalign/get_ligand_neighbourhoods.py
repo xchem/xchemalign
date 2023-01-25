@@ -25,7 +25,7 @@ def get_structure_fragments(
             for residue in chain:
                 if residue.name == "LIG":
                     ligand_id: LigandID = LigandID(
-                        dtag=dataset.dtag, id=lig_number
+                        dtag=dataset.dtag, chain=chain.name, id=lig_number
                     )
                     fragments[ligand_id] = residue
                     lig_number = lig_number + 1

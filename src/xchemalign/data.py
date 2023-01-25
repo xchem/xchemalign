@@ -16,11 +16,12 @@ class LigandID(BaseModel):
     def __eq__(self, other) -> bool:
         if self.dtag == other.dtag:
             if self.id == other.id:
-                return True
+                if self.chain == other.chain:
+                    return True
         return False
 
     def __hash__(self):
-        return hash((self.dtag, self.id))
+        return hash((self.dtag, self.chain, self.id))
 
 
 class SymOp(BaseModel):
