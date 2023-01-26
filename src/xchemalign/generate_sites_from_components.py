@@ -105,7 +105,7 @@ def get_sites_from_subsites(
             members=list(
                 set(sum([subsites[j].members for j in component], start=[]))
             ),
-            resides=list(
+            residues=list(
                 set(sum([subsites[j].residues for j in component], start=[]))
             ),
         )
