@@ -76,7 +76,7 @@ def get_sites_from_subsites(
         g.add_node(ss.id)
 
     # Form the site overlap matrix
-    arr = np.zeros(len(subsites), len(subsites))
+    arr = np.zeros((len(subsites), len(subsites)))
     for ss1 in subsites:
         for ss2 in subsites:
             if ss1.id == ss2.id:
