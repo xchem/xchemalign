@@ -16,6 +16,9 @@ from xchemalign.data import (
     XtalForms,
 )
 from xchemalign.generate_aligned_structures import _align_structures
+from xchemalign.generate_sites_from_components import (
+    _generate_sites_from_components,
+)
 from xchemalign.make_data_json import make_data_json_from_pandda_dir
 
 
@@ -126,6 +129,11 @@ class CLI:
 
     def align_xmaps(self):
         ...
+
+    def generate_sites_from_components(self, source_dir: str):
+        _source_dir: Path = Path(source_dir)
+
+        _generate_sites_from_components(_source_dir)
 
     def align_all(self, source_dir: str, output_dir: str):
         _source_dir: Path = Path(source_dir)

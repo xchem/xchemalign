@@ -29,7 +29,7 @@ class LigandID(BaseModel):
         return f"{self.dtag}_{self.chain}_{self.id}"
 
     @classmethod
-    def from_string(string):
+    def from_string(cls, string):
         dtag, chain, id = string.split("_")
 
         return LigandID(dtag=dtag, chain=chain, id=int(id))
@@ -257,13 +257,8 @@ class SystemSites(BaseModel):
             assert site_num in site_nums
 
 
-class Site(BaseModel):
-    members: list[LigandID]
-
-
-class Sites(BaseModel):
-    site_ids: list[int]
-    sites: list[AlignableSite]
+# class Site(BaseModel):
+#     members: list[LigandID]
 
 
 class Block(BaseModel):
@@ -274,3 +269,30 @@ class Block(BaseModel):
     dy: int
     dz: int
     transform: Transform
+
+
+class ResidueID(BaseModel):
+    chain: str
+    residue: int
+
+
+class SubSite(BaseModel):
+    id: int
+    name: str
+    residues: list[ResidueID]
+    members: list[LigandID]
+
+
+class SubSites(BaseModel):
+    subsites: list[SubSite]
+
+
+class Site(BaseModel):
+    subsites: list[SubSite]
+    members: list[LigandID]
+    residues: list[ResidueID]
+
+
+class Sites(BaseModel):
+    site_ids: list[int]
+    sites: list[Site]
