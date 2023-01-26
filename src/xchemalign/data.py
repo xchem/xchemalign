@@ -26,11 +26,11 @@ class LigandID(BaseModel):
     def to_string(
         self,
     ):
-        return f"{self.dtag}_{self.chain}_{self.id}"
+        return f"{self.dtag}~{self.chain}~{self.id}"
 
     @classmethod
     def from_string(cls, string):
-        dtag, chain, id = string.split("_")
+        dtag, chain, id = string.split("~")
 
         return LigandID(dtag=dtag, chain=chain, id=int(id))
 
