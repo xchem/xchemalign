@@ -124,8 +124,31 @@ class CLI:
     def change_site_reference(self):
         ...
 
-    def align_structures(self):
-        ...
+    def align_structures(self, source_dir):
+        _source_dir: Path = Path(source_dir)
+        # _output_dir: Path = Path(output_dir)
+
+        g = read_graph(_source_dir)
+        transforms: Transforms = read_transforms(_source_dir)
+        neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
+        # xtalforms: XtalForms = read_xtalforms(_source_dir)
+        xtalforms = XtalForms()
+        sites: Sites = read_sites(_source_dir)
+        system_data: SystemData = read_system_data(_source_dir)
+
+        # get Structures
+        structures = read_structures(system_data)
+
+        # Align structures
+        _align_structures_from_sites(
+            structures,
+            sites,
+            transforms,
+            neighbourhoods,
+            xtalforms,
+            g,
+            _source_dir,
+        )
 
     def align_xmaps(self):
         ...

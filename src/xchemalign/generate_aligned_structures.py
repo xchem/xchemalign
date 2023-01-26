@@ -181,6 +181,8 @@ def generate_aligned_structures_connected_components(
 
 
 def expand_structure(_structure, xtalforms: XtalForms, moving_ligand_id):
+    # TODO: Make this work
+    return _structure
     ...
     # for xtalform in xtalforms.xtalforms:
     #     if moving_ligand_id in xtalform.members:
