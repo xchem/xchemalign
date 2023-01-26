@@ -94,13 +94,17 @@ def get_sites_from_subsites(
         if conn:
             g.add_edge(x, y)
 
+    logger.debug(f"Number of sites sharing residues: {len(g.edges)}")
+
     # Get the connected components
     cc = get_components(g)
 
     # Form the sites
     sites = []
+    j = 0
     for component in cc:
         s = Site(
+            id=j,
             subsites=[subsites[j] for j in component],
             members=list(
                 set(sum([subsites[j].members for j in component], start=[]))
@@ -109,6 +113,7 @@ def get_sites_from_subsites(
                 set(sum([subsites[j].residues for j in component], start=[]))
             ),
         )
+        j += 1
         sites.append(s)
 
     return sites

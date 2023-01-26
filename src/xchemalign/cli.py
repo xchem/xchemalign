@@ -15,7 +15,7 @@ from xchemalign.data import (
     Transforms,
     XtalForms,
 )
-from xchemalign.generate_aligned_structures import _align_structures
+from xchemalign.generate_aligned_structures import _align_structures_from_sites
 from xchemalign.generate_sites_from_components import (
     _generate_sites_from_components,
 )
@@ -150,7 +150,7 @@ class CLI:
         structures = read_structures(system_data)
 
         # Align structures
-        _align_structures(
+        _align_structures_from_sites(
             structures,
             sites,
             transforms,

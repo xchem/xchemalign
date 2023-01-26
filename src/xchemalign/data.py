@@ -296,6 +296,7 @@ class SubSites(BaseModel):
 
 
 class Site(BaseModel):
+    id: int
     subsites: list[SubSite]
     members: list[LigandID]
     residues: list[ResidueID]
