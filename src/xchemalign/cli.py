@@ -106,7 +106,7 @@ class CLI:
     def change_site_reference(self):
         ...
 
-    def align_structures(self, source_dir):
+    def align_structures(self, source_dir: Path):
         _source_dir: Path = Path(source_dir)
         # _output_dir: Path = Path(output_dir)
 

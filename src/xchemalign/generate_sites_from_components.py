@@ -10,10 +10,12 @@ from xchemalign.data import (
     LigandNeighbourhoods,
     ResidueID,
     Site,
+    Sites,
     SubSite,
     read_graph,
     read_neighbourhoods,
 )
+from xchemalign.save_sites import save_sites
 
 
 def get_components(g):
@@ -124,7 +126,11 @@ def _generate_sites_from_components(_source_dir: Path):
 
     # Merge the connected components with shared residues into sites
     logger.info("Getting sites...")
-    sites = get_sites_from_subsites(subsites, neighbourhoods)
-    logger.info(f"Number of sites: {len(sites)}")
+    _sites: list[Site] = get_sites_from_subsites(subsites, neighbourhoods)
+    logger.info(f"Number of sites: {len(_sites)}")
+
+    sites: Sites = Sites(sites_ids=[s.id for s in _sites], sites=_sites)
+
+    save_sites(sites, _source_dir)
 
     return sites

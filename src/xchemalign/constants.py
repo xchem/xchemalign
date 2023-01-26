@@ -4,7 +4,7 @@ NEIGHBOURHOODS_FILE_NAME: str = "neighbourhoods.json"
 DATA_JSON_PATH: str = "data.json"
 
 OBSERVED_SITES_FILE_NAME: str = ""
-SITES_FILE_NAME: str = ""
+SITES_FILE_NAME: str = "sites.json"
 
 PANDDA_ANALYSES_DIR: str = "analyses"
 PANDDA_EVENTS_INSPECT_TABLE_PATH: str = "pandda_inspect_events.csv"
