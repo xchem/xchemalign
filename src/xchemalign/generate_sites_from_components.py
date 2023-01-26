@@ -102,8 +102,12 @@ def get_sites_from_subsites(
     for component in cc:
         s = Site(
             subsites=[subsites[j] for j in component],
-            members=list(set(sum([subsites[j].members for j in component]))),
-            resides=list(set(sum([subsites[j].residues for j in component]))),
+            members=list(
+                set(sum([subsites[j].members for j in component], start=[]))
+            ),
+            resides=list(
+                set(sum([subsites[j].residues for j in component], start=[]))
+            ),
         )
         sites.append(s)
 
