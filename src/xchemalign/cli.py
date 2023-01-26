@@ -132,7 +132,7 @@ class CLI:
         transforms: Transforms = read_transforms(_source_dir)
         neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
         # xtalforms: XtalForms = read_xtalforms(_source_dir)
-        xtalforms = XtalForms()
+        xtalforms = XtalForms(xtalforms=[])
         sites: Sites = read_sites(_source_dir)
         system_data: SystemData = read_system_data(_source_dir)
 
