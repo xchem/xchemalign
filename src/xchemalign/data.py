@@ -14,11 +14,16 @@ class LigandID(BaseModel):
     id: int
 
     def __eq__(self, other) -> bool:
-        if self.dtag == other.dtag:
-            if self.id == other.id:
-                if self.chain == other.chain:
-                    return True
-        return False
+
+        try:
+
+            if self.dtag == other.dtag:
+                if self.id == other.id:
+                    if self.chain == other.chain:
+                        return True
+            return False
+        except Exception:
+            return False
 
     def __hash__(self):
         return hash((self.dtag, self.chain, self.id))
