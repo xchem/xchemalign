@@ -307,6 +307,7 @@ def _align_structures_from_sites(
 
                     # Apply the translation to the new frame
                     structure = superpose_structure(transform, structure)
+                    previous_ligand_id = next_ligand_id
 
                 # Write the fully aligned structure
                 out_path = (
