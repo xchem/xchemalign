@@ -129,7 +129,7 @@ def _generate_sites_from_components(_source_dir: Path):
     _sites: list[Site] = get_sites_from_subsites(subsites, neighbourhoods)
     logger.info(f"Number of sites: {len(_sites)}")
 
-    sites: Sites = Sites(sites_ids=[s.id for s in _sites], sites=_sites)
+    sites: Sites = Sites(site_ids=[s.id for s in _sites], sites=_sites)
 
     save_sites(sites, _source_dir)
 
