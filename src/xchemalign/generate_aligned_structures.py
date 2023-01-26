@@ -311,7 +311,7 @@ def _align_structures_from_sites(
 
                 # Write the fully aligned structure
                 out_path = (
-                    site_dir
+                    subsite_dir
                     / f"{moving_ligand_id.dtag}_{moving_ligand_id.id}.pdb"
                 )
                 structure.write_pdb(str(out_path))
