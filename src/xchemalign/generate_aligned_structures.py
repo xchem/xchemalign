@@ -232,10 +232,7 @@ def _align_structures(
             for next_ligand_id in shortest_path:
                 # Get the transform from previous frame to new one
                 transform = transforms.get_transform(
-                    (
-                        neighbourhoods.get_neighbourhood(next_ligand_id),
-                        neighbourhoods.get_neighbourhood(previous_ligand_id),
-                    )
+                    (previous_ligand_id, next_ligand_id)
                 )
 
                 # logger.debug(
