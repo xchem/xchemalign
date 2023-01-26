@@ -124,18 +124,18 @@ def _generate_sites_from_components(_source_dir: Path):
     # Get the connected components
     logger.info("Getiting connected components...")
     connected_components = get_components(g)
-    logger.info(f"Number of connected components: {connected_components}")
+    logger.info(f"Number of connected components: {len(connected_components)}")
 
     # Get the subsites from the connected components with overlap
     logger.info("Geting sites...")
     subsites: list[SubSite] = get_subsites_from_components(
         connected_components, neighbourhoods
     )
-    logger.info(f"Number of subsites: {subsites}")
+    logger.info(f"Number of subsites: {len(subsites)}")
 
     # Merge the connected components with shared residues into sites
     logger.info("Getting sites...")
     sites = get_sites_from_subsites(subsites, neighbourhoods)
-    logger.info(f"Number of sites: {sites}")
+    logger.info(f"Number of sites: {len(sites)}")
 
     return sites
