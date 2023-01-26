@@ -280,6 +280,9 @@ class ResidueID(BaseModel):
     chain: str
     residue: int
 
+    def __hash__(self):
+        return hash((self.chain, self.residue))
+
 
 class SubSite(BaseModel):
     id: int
