@@ -86,6 +86,8 @@ class Transforms(BaseModel):
 
                 return transform
 
+        raise Exception(f"Transform {transform_id} not in transforms!")
+
 
 class Atom(BaseModel):
     element: str
