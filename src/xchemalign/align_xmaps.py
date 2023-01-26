@@ -13,55 +13,10 @@ from xchemalign.data import (
     SystemData,
     Transform,
     Transforms,
+    read_xmap,
+    transform_to_gemmi,
+    write_xmap,
 )
-
-
-def transform_to_gemmi(transform: Transform):
-    transform_gemmi = gemmi.Transform()
-    transform_gemmi.vec.fromlist(transform.vec)
-    transform_gemmi.mat.fromlist(transform.mat)
-
-    return transform_gemmi
-
-
-def read_xmap(path: Path):
-    m = gemmi.read_ccp4_map(str(path), setup=True)
-    return m.grid
-
-
-def get_box(neighbourhood: LigandNeighbourhood, xmap, transform: Transform):
-
-    transform_gemmi = transform_to_gemmi(transform)
-
-    box = gemmi.FractionalBox()
-    for atom in neighbourhood.atoms:
-        box.extend(
-            xmap.cell.fractionalize(
-                transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
-            )
-        )
-
-    for atom in neighbourhood.atoms:
-        box.extend(
-            xmap.cell.fractionalize(
-                transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
-            )
-        )
-
-    return box
-
-
-def write_xmap(
-    xmap, path: Path, neighbourhood: LigandNeighbourhood, transform: Transform
-):
-
-    ccp4 = gemmi.Ccp4Map()
-    ccp4.grid = xmap
-    box = get_box(neighbourhood, xmap, transform)
-    ccp4.set_extent(box)
-    ccp4.update_ccp4_header()
-
-    ccp4.write_ccp4_map(str(path))
 
 
 def get_coord_array(neighbourhood: LigandNeighbourhood):
@@ -259,7 +214,8 @@ def _align_xmaps(
 
     for site in sites.sites:
         # Get the site reference
-        reference_ligand_id = site.reference
+        # TODO: Make work
+        reference_ligand_id = site.members[0]
 
         # Get the refeence binding site
         rlbes = system_data.get_dataset(reference_ligand_id.dtag)
@@ -274,7 +230,7 @@ def _align_xmaps(
         reference_xmap = read_xmap(reference_xmap_path)
 
         # For each ligand neighbourhood, find the xmap and transform
-        for lid in site.ligand_ids:
+        for lid in site.members:
             # for lid, neighbourhood in zip(neighbourhoods.ligand_ids,
             # neighbourhoods.ligand_neighbourhoods):
 

@@ -1,5 +1,10 @@
+from pathlib import Path
+
 import gemmi
+import networkx as nx
 from pydantic import BaseModel, validator
+
+from xchemalign import constants
 
 Structure = gemmi.Structure
 
@@ -305,3 +310,93 @@ class Site(BaseModel):
 class Sites(BaseModel):
     site_ids: list[int]
     sites: list[Site]
+
+
+def read_xmap(path: Path):
+    m = gemmi.read_ccp4_map(str(path), setup=True)
+    return m.grid
+
+
+def transform_to_gemmi(transform: Transform):
+    transform_gemmi = gemmi.Transform()
+    transform_gemmi.vec.fromlist(transform.vec)
+    transform_gemmi.mat.fromlist(transform.mat)
+
+    return transform_gemmi
+
+
+def get_box(neighbourhood: LigandNeighbourhood, xmap, transform: Transform):
+
+    transform_gemmi = transform_to_gemmi(transform)
+
+    box = gemmi.FractionalBox()
+    for atom in neighbourhood.atoms:
+        box.extend(
+            xmap.cell.fractionalize(
+                transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
+            )
+        )
+
+    for atom in neighbourhood.atoms:
+        box.extend(
+            xmap.cell.fractionalize(
+                transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
+            )
+        )
+
+    return box
+
+
+def write_xmap(
+    xmap, path: Path, neighbourhood: LigandNeighbourhood, transform: Transform
+):
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = xmap
+    box = get_box(neighbourhood, xmap, transform)
+    ccp4.set_extent(box)
+    ccp4.update_ccp4_header()
+
+    ccp4.write_ccp4_map(str(path))
+
+
+def read_graph(path: Path):
+    g = nx.read_gml(
+        str(path / constants.ALIGNABILITY_GRAPH_FILE_NAME),
+        destringizer=lambda x: LigandID.from_string(x),
+    )
+
+    return g
+
+
+def read_neighbourhoods(path: Path):
+    neighbourhoods = LigandNeighbourhoods.parse_file(
+        str(path / constants.NEIGHBOURHOODS_FILE_NAME)
+    )
+    return neighbourhoods
+
+
+def read_sites(path: Path):
+    sites = Sites.parse_file(str(path / constants.SITES_FILE_NAME))
+
+    return sites
+
+
+def read_transforms(path: Path):
+    transforms = Transforms.parse_file(
+        str(path / constants.TRANSFORMS_FILE_NAME)
+    )
+    return transforms
+
+
+def read_structures(system_data: SystemData):
+    structures = {}
+    for dataset in system_data.datasets:
+        structure: gemmi.Structure = gemmi.read_structure(dataset.pdb)
+        structures[dataset.dtag] = structure
+
+    return structures
+
+
+def read_system_data(path: Path):
+    return SystemData.parse_file(str(path / constants.DATA_JSON_PATH))

@@ -4,32 +4,16 @@ import networkx as nx
 import numpy as np
 from loguru import logger
 
-from xchemalign import constants
 from xchemalign.data import (
     AtomID,
-    LigandID,
     LigandNeighbourhood,
     LigandNeighbourhoods,
     ResidueID,
     Site,
     SubSite,
+    read_graph,
+    read_neighbourhoods,
 )
-
-
-def read_graph(path: Path):
-    g = nx.read_gml(
-        str(path / constants.ALIGNABILITY_GRAPH_FILE_NAME),
-        destringizer=lambda x: LigandID.from_string(x),
-    )
-
-    return g
-
-
-def read_neighbourhoods(path: Path):
-    neighbourhoods = LigandNeighbourhoods.parse_file(
-        str(path / constants.NEIGHBOURHOODS_FILE_NAME)
-    )
-    return neighbourhoods
 
 
 def get_components(g):
