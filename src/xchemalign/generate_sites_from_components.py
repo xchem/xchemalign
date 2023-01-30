@@ -188,10 +188,12 @@ def _generate_sites_from_components(_source_dir: Path):
     save_sites(sites, _source_dir)
 
     # Get the subsite transforms
+    logger.info("Getting transfroms between subsites...")
     structures = get_structures(system_data)
     subsite_transforms = get_subsite_transforms(sites, structures)
 
     # Get the site transforms
+    logger.info("Getting transforms between sites...")
     site_transforms = get_site_transforms(sites, structures)
     site_transforms = SiteTransforms(
         site_transform_ids=[key for key in site_transforms.keys()],
