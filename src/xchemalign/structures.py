@@ -32,6 +32,23 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
 
     logger.debug(f"{len(acs)}")
     if len(acs) < 3:
+        print("####### SRS")
+
+        for model in srs:
+            for chain in model:
+                for r in chain:
+                    print(f"{chain.name}: {r.resid.num}")
+
+        print("####### SSRS")
+        for model in ssrs:
+            for chain in model:
+                for r in chain:
+                    print(f"{chain.name}: {r.resid.num}")
+
+        print("####### RESIDS")
+        for rid in rs:
+            print(f"{rid.chain} {rid.residue}")
+
         raise Exception()
 
     sup = gemmi.superpose_positions(
