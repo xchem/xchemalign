@@ -11,11 +11,15 @@ from xchemalign.data import (
     ResidueID,
     Site,
     Sites,
+    SiteTransforms,
     SubSite,
+    Transform,
     read_graph,
     read_neighbourhoods,
+    read_system_data,
 )
 from xchemalign.save_sites import save_sites
+from xchemalign.structures import get_structures, get_transform_from_residues
 
 
 def get_components(g):
@@ -92,6 +96,7 @@ def get_sites_from_subsites(
     for component in cc:
         s = Site(
             id=j,
+            subsite_ids=[subsites[j].id for j in component],
             subsites=[subsites[j] for j in component],
             members=list(
                 set(sum([subsites[j].members for j in component], start=[]))
@@ -106,12 +111,60 @@ def get_sites_from_subsites(
     return sites
 
 
+def get_subsite_transforms(sites: Sites, structures):
+
+    transforms = {}
+    for site_id, site in zip(sites.site_ids, sites.sites):
+        rss = site.subsites[0].members[0].dtag
+        rs = site.residues
+        srs = structures[rss]
+
+        for ssid, ss in zip(site.subsite_ids, site.subsites):
+            ssr = ss.members[0].dtag
+            ssrs = structures[ssr]
+            transform = get_transform_from_residues(rs, srs, ssrs)
+            transforms[(site_id, rss, ssid)] = Transform(
+                vec=transform.vec, mat=transform.mat
+            )
+
+    return transforms
+
+
+def get_site_transforms(sites: Sites, structures):
+    transforms = {}
+    rs = sites.sites[0]
+    rsid = sites.site_ids[0]
+
+    rss = structures[rs.subsites[0].members[0].dtag]
+    ref_site_all_ress = [
+        ResidueID(chain=chain.name, residue=res.resid.num)
+        for model in rss
+        for chain in model
+        for res in chain
+    ]
+
+    for site_id, site in zip(sites.site_ids, sites.sites):
+        srs = site.members[0].dtag
+        site_structure = structures[srs]
+
+        transform = get_transform_from_residues(
+            ref_site_all_ress, rss, site_structure
+        )
+        transforms[rsid, site_id] = Transform(
+            vec=transform.vec, mat=transform.mat
+        )
+
+    return transforms
+
+
 def _generate_sites_from_components(_source_dir: Path):
 
     logger.info(f"Source dir: {_source_dir}")
     g = read_graph(_source_dir)
     neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
     logger.info(f"Number of neighbourhoods: {len(neighbourhoods.ligand_ids)}")
+
+    system_data = read_system_data(_source_dir)
 
     # Get the connected components
     logger.info("Getiting connected components...")
@@ -133,5 +186,18 @@ def _generate_sites_from_components(_source_dir: Path):
     sites: Sites = Sites(site_ids=[s.id for s in _sites], sites=_sites)
 
     save_sites(sites, _source_dir)
+
+    # Get the subsite transforms
+    structures = get_structures(system_data)
+    subsite_transforms = get_subsite_transforms(sites, structures)
+
+    # Get the site transforms
+    site_transforms = get_site_transforms(sites, structures)
+    site_transforms = SiteTransforms(
+        site_transform_ids=[key for key in site_transforms.keys()],
+        site_transforms=[tr for tr in site_transforms.values()],
+        subsite_transform_ids=[key for key in subsite_transforms.keys()],
+        subsite_transforms=[tr for tr in subsite_transforms.values],
+    )
 
     return sites

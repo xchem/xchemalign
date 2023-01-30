@@ -304,6 +304,7 @@ class SubSites(BaseModel):
 
 class Site(BaseModel):
     id: int
+    subsite_ids: list[int]
     subsites: list[SubSite]
     members: list[LigandID]
     residues: list[ResidueID]
@@ -402,3 +403,21 @@ def read_structures(system_data: SystemData):
 
 def read_system_data(path: Path):
     return SystemData.parse_file(str(path / constants.DATA_JSON_PATH))
+
+
+class SiteTransforms(BaseModel):
+    site_transform_ids: list[tuple[int, int]]
+    site_transforms: list[Transform]
+    subsite_transform_ids: list[tuple[int, int, int]]
+    subsite_transforms: list[Transform]
+
+
+def save_site_transforms(site_transforms: SiteTransforms, path: Path):
+    with open(path / constants.SITES_TRANSFORMS_FILE_NAME, "w") as f:
+        f.write(site_transforms.json())
+
+
+def read_site_transforms(path: Path):
+    return SiteTransforms.parse_file(
+        str(path / constants.SITES_TRANSFORMS_FILE_NAME)
+    )
