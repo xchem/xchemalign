@@ -277,6 +277,7 @@ def _align_structures_from_sites(
                 os.mkdir(subsite_dir)
 
             ligand_ids = subsite.members
+            logger.debug(f"Subsite members: {len(subsite.members)}")
 
             # Select the alignment reference ligand_id
             # TODO: Track reference properly
