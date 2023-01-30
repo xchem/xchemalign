@@ -36,13 +36,13 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
 
         for model in srs:
             for c in model:
-                for r in chain:
+                for r in c:
                     print(f"{c.name}: {r.seqid.num}")
 
         print("####### SSRS")
         for model in ssrs:
             for c in model:
-                for r in chain:
+                for r in c:
                     print(f"{c.name}: {r.seqid.num}")
 
         print("####### RESIDS")
