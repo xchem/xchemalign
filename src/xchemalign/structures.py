@@ -1,4 +1,5 @@
 import gemmi
+from loguru import logger
 
 from xchemalign.data import LigandNeighbourhood, ResidueID, SystemData
 from xchemalign.matching import match_atom
@@ -22,11 +23,16 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
     acs = []
     for resid in rs:
         chain, num = resid.chain, resid.residue
-        srsca = srs[0][chain][num]["CA"]
-        ssrsca = ssrs[0][chain][num]["CA"]
-        acs.append((srsca, ssrsca))
+        try:
+            srsca = srs[0][chain][num]["CA"]
+            ssrsca = ssrs[0][chain][num]["CA"]
+            acs.append((srsca, ssrsca))
+        except Exception:
+            continue
 
-    # logger.debug(f"{len()}")
+    logger.debug(f"{len(acs)}")
+    if len(acs) < 3:
+        raise Exception()
 
     sup = gemmi.superpose_positions(
         [x[0].pos for x in acs], [x[1].pos for x in acs]
