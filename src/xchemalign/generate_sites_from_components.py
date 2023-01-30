@@ -137,7 +137,7 @@ def get_site_transforms(sites: Sites, structures):
 
     rss = structures[rs.subsites[0].members[0].dtag]
     ref_site_all_ress = [
-        ResidueID(chain=chain.name, residue=res.resid.num)
+        ResidueID(chain=chain.name, residue=res.seqid.num)
         for model in rss
         for chain in model
         for res in chain
