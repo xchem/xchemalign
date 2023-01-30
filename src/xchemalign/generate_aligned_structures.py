@@ -268,6 +268,7 @@ def _align_structures_from_sites(
         for subsite in site.subsites:
             subsite_id: int = subsite.id
             subsite_dir = site_dir / f"{subsite_id}"
+            logger.debug(f"SubSite id is: {subsite_id}")
 
             if not subsite_dir.exists():
                 os.mkdir(subsite_dir)

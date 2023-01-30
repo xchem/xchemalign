@@ -68,7 +68,7 @@ def get_sites_from_subsites(
             if ss1.id == ss2.id:
                 continue
             v = set(ss1.residues).intersection(set(ss2.residues))
-            if len(v) > 0:
+            if len(v) > 5:
                 arr[ss1.id, ss2.id] = 1
 
     # Complete the graph
