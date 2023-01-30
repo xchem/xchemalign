@@ -22,11 +22,13 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
     acs = []
     for resid in rs:
         chain, num = resid.chain, resid.residue
-        srsca = srs[0][chain][num][0]["CA"][0]
-        ssrsca = ssrs[0][chain][num][0]["CA"][0]
+        srsca = srs[0][chain][num][0]["CA"]
+        ssrsca = ssrs[0][chain][num][0]["CA"]
         acs.append((srsca, ssrsca))
 
-    sup = gemmi.superpose_positions([x[0] for x in acs], [x[1] for x in acs])
+    sup = gemmi.superpose_positions(
+        [x[0].pos for x in acs], [x[1].pos for x in acs]
+    )
 
     return sup.transform
 
