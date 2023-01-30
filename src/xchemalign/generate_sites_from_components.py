@@ -17,6 +17,7 @@ from xchemalign.data import (
     read_graph,
     read_neighbourhoods,
     read_system_data,
+    save_site_transforms,
 )
 from xchemalign.save_sites import save_sites
 from xchemalign.structures import get_structures, get_transform_from_residues
@@ -201,5 +202,6 @@ def _generate_sites_from_components(_source_dir: Path):
         subsite_transform_ids=[key for key in subsite_transforms.keys()],
         subsite_transforms=[tr for tr in subsite_transforms.values()],
     )
+    save_site_transforms(site_transforms, _source_dir)
 
     return sites
