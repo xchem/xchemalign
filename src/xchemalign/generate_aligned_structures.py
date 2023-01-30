@@ -284,7 +284,7 @@ def _align_structures_from_sites(
             reference_ligand_id = ligand_ids[0]
 
             # For each other ligand
-            for moving_ligand_id in ligand_ids[:-1]:
+            for moving_ligand_id in ligand_ids:
                 # Get the shortest alignment path to the reference
                 shortest_path = nx.shortest_path(
                     g, moving_ligand_id, reference_ligand_id
