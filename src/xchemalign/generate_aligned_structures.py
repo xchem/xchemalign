@@ -304,12 +304,16 @@ def _align_structures_from_sites(
                 for next_ligand_id in shortest_path:
                     # Get the transform from previous frame to new one
                     # Transform is 2 onto 1
-                    transform = transforms.get_transform(
-                        (
-                            next_ligand_id,
-                            previous_ligand_id,
-                        ),
-                    )
+                    if next_ligand_id != previous_ligand_id:
+
+                        transform = transforms.get_transform(
+                            (
+                                next_ligand_id,
+                                previous_ligand_id,
+                            ),
+                        )
+                    else:
+                        transform = gemmi.Transform()
 
                     # Apply the translation to the new frame
                     structure = superpose_structure(transform, structure)
