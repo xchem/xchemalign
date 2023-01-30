@@ -124,7 +124,7 @@ def get_subsite_transforms(sites: Sites, structures):
             ssrs = structures[ssr]
             transform = get_transform_from_residues(rs, srs, ssrs)
             transforms[(site_id, rss, ssid)] = Transform(
-                vec=transform.vec, mat=transform.mat
+                vec=transform.vec.tolist(), mat=transform.mat.tolist()
             )
 
     return transforms
@@ -151,7 +151,7 @@ def get_site_transforms(sites: Sites, structures):
             ref_site_all_ress, rss, site_structure
         )
         transforms[rsid, site_id] = Transform(
-            vec=transform.vec, mat=transform.mat
+            vec=transform.vec.tolist(), mat=transform.mat.tolist()
         )
 
     return transforms
