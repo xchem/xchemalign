@@ -27,7 +27,8 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
             srsca = srs[0][chain][num]["CA"][0]
             ssrsca = ssrs[0][chain][num]["CA"][0]
             acs.append((srsca, ssrsca))
-        except Exception:
+        except Exception as e:
+            print(e)
             continue
 
     logger.debug(f"{len(acs)}")
