@@ -25,8 +25,9 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
         chain, num = resid.chain, resid.residue
         try:
             srsr = srs[0][chain][f"{num}"][0]
-            srsca = srsr["CA"][0]
             ssrsr = ssrs[0][chain][f"{num}"][0]
+
+            srsca = srsr["CA"][0]
             ssrsca = ssrsr["CA"][0]
             acs.append((srsca, ssrsca))
         except Exception as e:
