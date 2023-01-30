@@ -258,10 +258,11 @@ def _align_structures_from_sites(
     g,
     _output_dir: Path,
 ):
+    asd = _output_dir / "aligned_structures"
     # Iterate sites
     for site_id, site in zip(sites.site_ids, sites.sites):
         logger.debug(f"Site id is: {site.id}")
-        site_dir = _output_dir / f"{site.id}"
+        site_dir = asd / f"{site.id}"
         if not site_dir.exists():
             os.mkdir(site_dir)
 
