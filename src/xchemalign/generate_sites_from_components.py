@@ -199,7 +199,7 @@ def _generate_sites_from_components(_source_dir: Path):
         site_transform_ids=[key for key in site_transforms.keys()],
         site_transforms=[tr for tr in site_transforms.values()],
         subsite_transform_ids=[key for key in subsite_transforms.keys()],
-        subsite_transforms=[tr for tr in subsite_transforms.values],
+        subsite_transforms=[tr for tr in subsite_transforms.values()],
     )
 
     return sites
