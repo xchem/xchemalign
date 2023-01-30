@@ -68,6 +68,7 @@ def get_sites_from_subsites(
             if ss1.id == ss2.id:
                 continue
             v = set(ss1.residues).intersection(set(ss2.residues))
+            logger.debug(f"{ss1.id} {ss2.id} {len(v)}")
             if len(v) > 5:
                 arr[ss1.id, ss2.id] = 1
 
