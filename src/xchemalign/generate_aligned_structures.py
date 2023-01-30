@@ -298,10 +298,11 @@ def _align_structures_from_sites(
                 previous_ligand_id = moving_ligand_id
                 for next_ligand_id in shortest_path:
                     # Get the transform from previous frame to new one
+                    # Transform is 2 onto 1
                     transform = transforms.get_transform(
                         (
-                            previous_ligand_id,
                             next_ligand_id,
+                            previous_ligand_id,
                         ),
                     )
 

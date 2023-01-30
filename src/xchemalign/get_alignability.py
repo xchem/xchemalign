@@ -85,7 +85,7 @@ def get_alignability(
             ligand_neighbourhoods.ligand_ids,
             ligand_neighbourhoods.ligand_neighbourhoods,
         ):
-            # See if atoms match
+            # See if atoms match - transform is frame 2 to frame 1
             ca_match, transform = match_cas(
                 ligand_1_neighbourhood, ligand_2_neighbourhood
             )
