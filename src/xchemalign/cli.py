@@ -71,7 +71,11 @@ class CLI:
     def suggest_merges(self):
         ...
 
-    def align(self, source_dir: str, system_data_dir: str):
+    def align(
+        self,
+        system_data_dir: str,
+        source_dir: str,
+    ):
         self.build_system_data(system_data_dir, source_dir)
         self.build_graph(source_dir)
         self.generate_sites_from_components(source_dir)
