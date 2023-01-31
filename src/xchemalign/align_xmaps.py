@@ -240,6 +240,7 @@ def _align_xmaps(
         DatasetID(dtag=reference_lid.dtag)
     )
     reference_binding_site = referance_ds.ligand_binding_events[reference_lid]
+    logger.debug(f"PDB: {referance_ds.pdb}")
 
     # Reference_xmap_path
     reference_xmap_path: Path = Path(reference_binding_site.xmap)
