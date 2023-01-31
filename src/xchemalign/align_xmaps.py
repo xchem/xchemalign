@@ -234,7 +234,9 @@ def _align_xmaps(
     reference_lid: LigandID = sites.sites[0].members[0]
 
     # Get that dataset
-    referance_ds: Dataset = system_data.get_dataset(reference_lid.dtag)
+    referance_ds: Dataset = system_data.get_dataset(
+        DatasetID(dtag=reference_lid.dtag)
+    )
     reference_binding_site = referance_ds.ligand_binding_events[reference_lid]
 
     # Reference_xmap_path
