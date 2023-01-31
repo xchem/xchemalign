@@ -92,7 +92,7 @@ def get_subblocks(xrm, xr):
 
 def get_blocks(rglb, rgub, xmap):
 
-    cell = xmap.cell
+    cell = xmap.unit_cell
 
     xr = np.arrange(rglb[0], rgub[0])
     yr = np.arrange(rglb[1], rgub[1])
