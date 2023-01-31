@@ -209,12 +209,14 @@ def get_ligand_neighbourhood(
     atom_images = {}
 
     for atom in fragment:
+        # Get the atom neighbours (as arbitrary image marks)
         atom_neighbours: list[gemmi.NeighborSearch.Mark] = ns.find_neighbors(
             atom,
             min_dist=min_dist,
             max_dist=max_dist,
         )
         for neighbour in atom_neighbours:
+            # Get positions of the marks nearest image to canon atom
             cra = neighbour.to_cra(structure[0])
             atom_id: AtomID = AtomID(
                 chain=cra.chain.name,
@@ -223,84 +225,34 @@ def get_ligand_neighbourhood(
             )
             # logger.debug(f"CRA: {cra}")
 
+            # Nearest image of canon atom
             nearest_image = structure.cell.find_nearest_pbc_image(
                 atom.pos, cra.atom.pos, neighbour.image_idx
-            )
-
-            atom_images[atom_id] = ns.get_image_transformation(
-                neighbour.image_idx
             )
 
             # logger.debug(f"{nearest_image}")
             # logger.debug(f"{nearest_image.sym_idx}")
             # logger.debug(f"{nearest_image.pbc_shift}")
 
+            # Get canon atom pos as tractional
             fpos = structure.cell.fractionalize(cra.atom.pos)
             # logger.debug(f"--FPos: {fpos}")
 
+            # Get transform that generates image from canon
             ftransform = ns.get_image_transformation(neighbour.image_idx)
+            atom_images[atom_id] = ftransform
             # logger.debug(f"--Transform: {ftransform}")
 
-            fpos_transformed = ftransform.apply(fpos)
-            fpos.x = fpos_transformed.x + nearest_image.pbc_shift[0]
-            fpos.y = fpos_transformed.y + nearest_image.pbc_shift[1]
-            fpos.z = fpos_transformed.z + nearest_image.pbc_shift[2]
-
+            # Apply the canon -> image and image -> pbc image transforms
+            fpos_trans = ftransform.apply(fpos)
+            fpos_trans.x = fpos_trans.x + nearest_image.pbc_shift[0]
+            fpos_trans.y = fpos_trans.y + nearest_image.pbc_shift[1]
+            fpos_trans.z = fpos_trans.z + nearest_image.pbc_shift[2]
             # logger.debug(f"--Transformed FPos: {fpos_transformed}")
 
-            pos = structure.cell.orthogonalize(fpos_transformed)
-            # logger.debug(
-            #     f"--Transformed pos: {pos} vs Original pos: {atom.pos}"
-            # )
-            # logger.debug(
-            #     f"--Transformed pos: {pos} vs Canon pos: {cra.atom.pos}"
-            # )
-
-            # nearest_image_dist = nearest_image.dist()
-            # dist = atom.pos.dist(pos)
-            # logger.debug(f"--Distance: {dist} vs nid {nearest_image_dist}")
-
-            # rounded_pos = ((
-            #     round(pos.x, 1),
-            #     round(pos.y, 1),
-            #     round(pos.z, 1),
-            # ), ()
-
-            # residue_neighbours[rounded_pos] = cra
+            pos = structure.cell.orthogonalize(fpos_trans)
 
             residue_neighbours.append((pos, cra))
-
-            # if nearest_image.sym_idx != 0:
-            #     artefact_atom_id: AtomID = AtomID(
-            #         chain=cra.chain.name,
-            #         residue=cra.residue.seqid.num,
-            #         atom=cra.atom.name,
-            #     )
-            #     artefact_atoms[artefact_atom_id] = Atom(
-            #         element=cra.atom.element.name,
-            #         atom_id=artefact_atom_id,
-            #         x=pos.x,
-            #         y=pos.y,
-            #         z=pos.z,
-            #     )
-            #     # artefact_atoms[rounded_pos] = pos
-            # else:
-            #     # _model_atoms.append(neighbour)
-            #     model_atom_id: AtomID = AtomID(
-            #         chain=cra.chain.name,
-            #         residue=cra.residue.seqid.num,
-            #         atom=cra.atom.name,
-            #     )
-            #     model_atoms[model_atom_id] = Atom(
-            #         element=atom.element.name,
-            #         atom_id=model_atom_id,
-            #         x=atom.x,
-            #         y=atom.y,
-            #         z=atom.z,
-            #     )
-
-    # exit()
-    # logger.debug(f"Found {len(residue_neighbours)} atoms near residue")
 
     # # Seperate out model and artefact atoms
     _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
@@ -308,40 +260,6 @@ def get_ligand_neighbourhood(
     )
     logger.debug(f"Got {len(_model_atoms)} model atoms")
     logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
-
-    # # Model atoms
-    # model_atoms: dict[AtomID, Atom] = {}
-    # for atom in _model_atoms:
-    #     cra = atom.to_cra(structure[0])
-    #     model_atom_id: AtomID = AtomID(
-    #         chain=cra.chain.name,
-    #         residue=cra.residue.seqid.num,
-    #         atom=cra.atom.name,
-    #     )
-    #     model_atoms[model_atom_id] = Atom(
-    #         element=atom.element.name,
-    #         atom_id=model_atom_id,
-    #         x=atom.x,
-    #         y=atom.y,
-    #         z=atom.z,
-    #     )
-
-    # # Artefact atoms
-    # artefact_atoms: dict[AtomID, Atom] = {}
-    # for atom in _artefact_atoms:
-    #     artefact_cra = atom.to_cra(structure[0])
-    #     artefact_atom_id: AtomID = AtomID(
-    #         chain=artefact_cra.chain.name,
-    #         residue=artefact_cra.residue.seqid.num,
-    #         atom=artefact_cra.atom.name,
-    #     )
-    #     artefact_atoms[artefact_atom_id] = Atom(
-    #         element=atom.element.name,
-    #         atom_id=artefact_atom_id,
-    #         x=atom.x,
-    #         y=atom.y,
-    #         z=atom.z,
-    #     )
 
     # Model atoms
     model_atoms: dict[AtomID, Atom] = {}
@@ -390,8 +308,6 @@ def get_ligand_neighbourhood(
         )
 
     # Cosntruct the neighbourhood
-    # logger.debug(model_atoms)
-    # logger.debug(artefact_atoms)
     ligand_neighbourhood: LigandNeighbourhood = LigandNeighbourhood(
         atom_ids=[aid for aid in model_atoms.keys()],
         atoms=[a for a in model_atoms.values()],
