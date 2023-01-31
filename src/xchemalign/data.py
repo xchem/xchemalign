@@ -165,7 +165,7 @@ class LigandBindingEvents(BaseModel):
             if lid == _lid:
                 return lbe
 
-        raise Exception()
+        raise Exception(f"{lid} : {self.ligand_ids}")
 
 
 class Dataset(BaseModel):
