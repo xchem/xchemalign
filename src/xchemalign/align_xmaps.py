@@ -58,14 +58,14 @@ def get_grid_bounds(tlb, tub, xmap):
     tubf = cell.fractionalize(gemmi.Position(*tub))
 
     tlbg = (
-        floor(xmap.dx * tlbf.x),
-        floor(xmap.dy * tlbf.y),
-        floor(xmap.dz * tlbf.z),
+        floor(xmap.nx * tlbf.x),
+        floor(xmap.ny * tlbf.y),
+        floor(xmap.nz * tlbf.z),
     )
     tubg = (
-        ceil(xmap.dx * tubf.x),
-        ceil(xmap.dy * tubf.y),
-        ceil(xmap.dz * tubf.z),
+        ceil(xmap.nx * tubf.x),
+        ceil(xmap.ny * tubf.y),
+        ceil(xmap.nz * tubf.z),
     )
 
     return tlbg, tubg
