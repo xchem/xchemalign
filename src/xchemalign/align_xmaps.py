@@ -2,14 +2,19 @@ from math import ceil, floor
 from pathlib import Path
 
 import gemmi
+import networkx as nx
 import numpy as np
+from loguru import logger
 
 from xchemalign.data import (
     Block,
+    Dataset,
     LigandBindingEvent,
+    LigandID,
     LigandNeighbourhood,
     LigandNeighbourhoods,
     Sites,
+    SiteTransforms,
     SystemData,
     Transform,
     Transforms,
@@ -129,7 +134,7 @@ def get_blocks(rglb, rgub, xmap):
 
 
 def get_interpolation_range(
-    neighbourhood: LigandNeighbourhood, transform: Transform, reference_xmap
+    neighbourhood: LigandNeighbourhood, transform, reference_xmap
 ):
 
     # Get the gemmi transform
@@ -140,20 +145,29 @@ def get_interpolation_range(
 
     # Find the bounds
     lb, ub = get_bounds(coord_arr)
+    logger.debug(f"Neighbourhood bounds are: {lb} : {ub}")
 
     # Transform the bounds
     rlb, rub = transform_gemmi.apply(
         gemmi.Position(*lb)
     ), transform_gemmi.apply(gemmi.Position(*ub))
+    logger.debug(f"Reference bounds are: {lb} : {ub}")
 
     # Get the new bounds
     tlb, tub = get_transformed_bounds(rlb, rub)
+    logger.debug(f"Transformed bounds are: {tlb} : {tub}")
 
     # Get grid bounds
     rglb, rgub = get_grid_bounds(tlb, tub, reference_xmap)
+    logger.debug(f"Grid bounds are: {rglb} : {rgub}")
 
     # Get the blocks
     blocks: list[Block] = get_blocks(rglb, rgub, reference_xmap)
+    logger.debug(f"Num blocks: {blocks}")
+    for b in blocks:
+        s = f"Block: {b.xi} {b.yi} {b.zi} {b.dx} {b.dy} {b.dz}"
+        logger.debug(s)
+        logger.debug(b.transform)
 
     return blocks
 
@@ -206,64 +220,106 @@ def interpolate_range(
 
 def _align_xmaps(
     system_data: SystemData,
+    structures,
     sites: Sites,
     neighbourhoods: LigandNeighbourhoods,
+    g,
     transforms: Transforms,
+    site_transforms: SiteTransforms,
     _output_dir: Path,
 ):
 
-    for site in sites.sites:
-        # Get the site reference
-        # TODO: Make work
-        reference_ligand_id = site.members[0]
+    # Get the global reference
+    reference_lid: LigandID = sites.sites[0].members[0]
 
-        # Get the refeence binding site
-        rlbes = system_data.get_dataset(reference_ligand_id.dtag)
-        reference_binding_site = rlbes.ligand_binding_events[
-            reference_ligand_id
-        ]
+    # Get that dataset
+    referance_ds: Dataset = system_data.get_dataset(reference_lid.dtag)
+    reference_binding_site = referance_ds.ligand_binding_events[reference_lid]
 
-        # Reference_xmap_path
-        reference_xmap_path: Path = Path(reference_binding_site.xmap)
+    # Reference_xmap_path
+    reference_xmap_path: Path = Path(reference_binding_site.xmap)
 
-        # Load the site reference xmap
-        reference_xmap = read_xmap(reference_xmap_path)
+    # Load the site reference xmap
+    reference_xmap = read_xmap(reference_xmap_path)
 
-        # For each ligand neighbourhood, find the xmap and transform
-        for lid in site.members:
-            # for lid, neighbourhood in zip(neighbourhoods.ligand_ids,
-            # neighbourhoods.ligand_neighbourhoods):
+    for site_id, site in sites.iter():
+        logger.debug(f"Aligning site: {site_id}")
+        # site_reference_id = site.members[0]
+        for subsite_id, subsite in site.iter():
+            logger.debug(f"Aligning subsite: {subsite_id}")
+            # Get the site reference
+            # TODO: Make work
+            subsite_reference_id = subsite.members[0]
 
-            # Get the ligand neighbourhood
-            neighbourhood: LigandNeighbourhood = (
-                neighbourhoods.get_neighbourhood(lid)
-            )
+            # For each ligand neighbourhood, find the xmap and transform
+            for lid in subsite.members:
+                # for lid, neighbourhood in zip(neighbourhoods.ligand_ids,
+                # neighbourhoods.ligand_neighbourhoods):
+                logger.debug(f"Aligning xmap: {lid}")
 
-            # Get the ligand binding event
-            lbe: LigandBindingEvent = system_data.get_dataset(
-                lid.dtag
-            ).ligand_binding_events[lid]
+                # Get the ligand neighbourhood
+                neighbourhood: LigandNeighbourhood = (
+                    neighbourhoods.get_neighbourhood(lid)
+                )
 
-            # Get the xmap path
-            xmap_path: Path = Path(lbe.xmap)
+                # Get the ligand binding event
+                lbe: LigandBindingEvent = system_data.get_dataset(
+                    lid.dtag
+                ).ligand_binding_events[lid]
 
-            # Get the xmap
-            xmap = read_xmap(xmap_path)
+                # Get the xmap path
+                xmap_path: Path = Path(lbe.xmap)
+                logger.debug(f"Xmap path: {xmap_path}")
 
-            # Get the Transform to reference
-            transform = transforms.get_transform((reference_ligand_id, lid))
+                # Get the xmap
+                xmap = read_xmap(xmap_path)
 
-            # Define the interpolation range
-            interpolation_range = get_interpolation_range(
-                neighbourhood, transform, reference_xmap
-            )
+                # Get the Transform to reference
+                running_transform = gemmi.Transform()
+                shortest_path = nx.shortest_path(g, lid, subsite_reference_id)
 
-            # Interpolate
-            new_xmap = interpolate_range(
-                reference_xmap, xmap, interpolation_range, transform
-            )
+                previous_ligand_id = lid
+                for next_ligand_id in shortest_path:
+                    # Get the transform from previous frame to new one
+                    # Transform is 2 onto 1
+                    if next_ligand_id != previous_ligand_id:
 
-            # Output the xmap
-            write_xmap(new_xmap, _output_dir / "", neighbourhood, transform)
+                        transform = transforms.get_transform(
+                            (
+                                next_ligand_id,
+                                previous_ligand_id,
+                            ),
+                        )
+                        running_transform = transform.combine(
+                            running_transform
+                        )
 
-    # for dtag, dataset in zip(system_data.dataset_ids, system_data.datasets):
+                # Get the subsite transform
+                subsite_transform = site_transforms.get_subsite_transform(
+                    site_id, subsite_id
+                )
+
+                # Get the site transform
+                site_transform = site_transforms.get_site_transform(site_id)
+
+                # Running transform
+                running_transform = site_transform.combine(
+                    subsite_transform.combine(running_transform)
+                )
+
+                logger.debug(f"Transform is: {running_transform}")
+
+                # Define the interpolation range
+                interpolation_range = get_interpolation_range(
+                    neighbourhood, running_transform, reference_xmap
+                )
+
+                # Interpolate
+                new_xmap = interpolate_range(
+                    reference_xmap, xmap, interpolation_range, transform
+                )
+
+                # Output the xmap
+                write_xmap(
+                    new_xmap, _output_dir / "", neighbourhood, transform
+                )

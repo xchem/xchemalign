@@ -9,6 +9,7 @@ from xchemalign.data import (  # Transform,
     AlignableSite,
     LigandNeighbourhoods,
     Sites,
+    SiteTransforms,
     Transforms,
     XtalForms,
 )
@@ -211,6 +212,7 @@ def _align_structures_from_sites(
     neighbourhoods: LigandNeighbourhoods,
     xtalforms: XtalForms,
     g,
+    site_transforms: SiteTransforms,
     _output_dir: Path,
 ):
     asd = _output_dir / "aligned_structures"
@@ -256,6 +258,7 @@ def _align_structures_from_sites(
 
                 # Walk the path, iteratively applying transforms
                 previous_ligand_id = moving_ligand_id
+                running_transform = gemmi.Transform()
                 for next_ligand_id in shortest_path:
                     # Get the transform from previous frame to new one
                     # Transform is 2 onto 1
@@ -267,12 +270,26 @@ def _align_structures_from_sites(
                                 previous_ligand_id,
                             ),
                         )
+                        running_transform = transform.combine(
+                            running_transform
+                        )
                     else:
                         transform = gemmi.Transform()
 
                     # Apply the translation to the new frame
-                    structure = superpose_structure(transform, structure)
                     previous_ligand_id = next_ligand_id
+
+                # Subsite alignment transform
+                subsite_transform = site_transforms.get_subsite_transform(
+                    site_id, subsite_id
+                )
+                subsite_transform.combine(running_transform)
+
+                # Site alignment transform
+                site_transform = site_transforms.get_site_transform(site_id)
+                site_transform.combine(running_transform)
+
+                structure = superpose_structure(running_transform, structure)
 
                 # Write the fully aligned structure
                 out_path = (

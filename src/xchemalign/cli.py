@@ -16,6 +16,7 @@ from xchemalign.data import (
     XtalForms,
     read_graph,
     read_neighbourhoods,
+    read_site_transforms,
     read_sites,
     read_structures,
     read_system_data,
@@ -117,6 +118,7 @@ class CLI:
         xtalforms = XtalForms(xtalforms=[])
         sites: Sites = read_sites(_source_dir)
         system_data: SystemData = read_system_data(_source_dir)
+        site_transforms = read_site_transforms(_source_dir)
 
         # get Structures
         structures = read_structures(system_data)
@@ -129,46 +131,71 @@ class CLI:
             neighbourhoods,
             xtalforms,
             g,
+            site_transforms,
             _source_dir,
         )
 
-    def align_xmaps(self):
-        ...
+    def align_xmaps(self, source_dir: Path):
+        _source_dir: Path = Path(source_dir)
+        # _output_dir: Path = Path(output_dir)
+
+        g = read_graph(_source_dir)
+        transforms: Transforms = read_transforms(_source_dir)
+        neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
+        # xtalforms: XtalForms = read_xtalforms(_source_dir)
+        # xtalforms = XtalForms(xtalforms=[])
+        sites: Sites = read_sites(_source_dir)
+        system_data: SystemData = read_system_data(_source_dir)
+        site_transforms = read_site_transforms(_source_dir)
+
+        # get Structures
+        structures = read_structures(system_data)
+
+        _align_xmaps(
+            system_data,
+            structures,
+            sites,
+            neighbourhoods,
+            g,
+            transforms,
+            site_transforms,
+            _source_dir,
+        )
 
     def generate_sites_from_components(self, source_dir: str):
         _source_dir: Path = Path(source_dir)
 
         _generate_sites_from_components(_source_dir)
 
-    def align_all(self, source_dir: str, output_dir: str):
-        _source_dir: Path = Path(source_dir)
-        _output_dir: Path = Path(output_dir)
+        # def align_all(self, source_dir: str, output_dir: str):
+        #     _source_dir: Path = Path(source_dir)
+        #     _output_dir: Path = Path(output_dir)
 
-        g = read_graph(_source_dir)
-        transforms: Transforms = read_transforms(_source_dir)
-        neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
-        xtalforms: XtalForms = read_xtalforms(_source_dir)
-        sites: Sites = read_sites(_source_dir)
-        system_data: SystemData = read_system_data(_source_dir)
+        #     g = read_graph(_source_dir)
+        #     transforms: Transforms = read_transforms(_source_dir)
+        #     neighbourhoods = read_neighbourhoods(_source_dir)
+        #     xtalforms: XtalForms = read_xtalforms(_source_dir)
+        #     sites: Sites = read_sites(_source_dir)
+        #     system_data: SystemData = read_system_data(_source_dir)
 
-        # get Structures
-        structures = read_structures(system_data)
+        #     # get Structures
+        #     structures = read_structures(system_data)
 
         # Align structures
-        _align_structures_from_sites(
-            structures,
-            sites,
-            transforms,
-            neighbourhoods,
-            xtalforms,
-            g,
-            _output_dir,
-        )
+        # _align_structures_from_sites(
+        #     structures,
+        #     sites,
+        #     transforms,
+        #     neighbourhoods,
+        #     xtalforms,
+        #     g,
+        #     _output_dir,
+        # )
 
-        # Align xmaps
-        _align_xmaps(
-            system_data, sites, neighbourhoods, transforms, _output_dir
-        )
+        # # Align xmaps
+        # _align_xmaps(
+        #     system_data, sites, neighbourhoods, transforms, _output_dir
+        # )
 
         # Report
         report_alignments()

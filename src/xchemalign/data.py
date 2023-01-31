@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Generator
 
 import gemmi
 import networkx as nx
@@ -159,12 +160,12 @@ class LigandBindingEvents(BaseModel):
     ligand_ids: list[LigandID]
     ligand_binding_events: list[LigandBindingEvent]
 
-    def __getitem__(self, lid: LigandID) -> LigandBindingEvent | None:
+    def __getitem__(self, lid: LigandID) -> LigandBindingEvent:
         for _lid, lbe in zip(self.ligand_ids, self.ligand_binding_events):
             if lid == _lid:
                 return lbe
 
-        return None
+        raise Exception()
 
 
 class Dataset(BaseModel):
@@ -301,6 +302,10 @@ class SubSite(BaseModel):
 class SubSites(BaseModel):
     subsites: list[SubSite]
 
+    def iter(self) -> Generator[tuple[int, SubSite], None, None]:
+        for subsite in self.subsites:
+            yield subsite.id, subsite
+
 
 class Site(BaseModel):
     id: int
@@ -309,10 +314,18 @@ class Site(BaseModel):
     members: list[LigandID]
     residues: list[ResidueID]
 
+    def iter(self) -> Generator[tuple[int, SubSite], None, None]:
+        for subsite_id, subsite in zip(self.subsite_ids, self.subsites):
+            yield subsite_id, subsite
+
 
 class Sites(BaseModel):
     site_ids: list[int]
     sites: list[Site]
+
+    def iter(self) -> Generator[tuple[int, Site], None, None]:
+        for site_id, site in zip(self.site_ids, self.sites):
+            yield site_id, site
 
 
 def read_xmap(path: Path):
@@ -410,6 +423,28 @@ class SiteTransforms(BaseModel):
     site_transforms: list[Transform]
     subsite_transform_ids: list[tuple[int, int, int]]
     subsite_transforms: list[Transform]
+
+    def get_subsite_transform(self, site_id, subsite_id):
+        for subsite_transform_id, subsite_transform in zip(
+            self.subsite_transform_ids, self.subsite_transforms
+        ):
+            if subsite_transform_id[0] == site_id:
+                if subsite_transform_id[2] == subsite_id:
+                    return subsite_transform
+
+        raise Exception()
+
+    def get_site_transform(
+        self,
+        site_id,
+    ):
+        for site_transform_id, subsite_transform in zip(
+            self.site_transform_ids, self.site_transforms
+        ):
+            if site_transform_id[1] == site_id:
+                return subsite_transform
+
+        raise Exception()
 
 
 def save_site_transforms(site_transforms: SiteTransforms, path: Path):
