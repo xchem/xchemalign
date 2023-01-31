@@ -43,7 +43,7 @@ def get_bounds(coord_array):
 
 
 def get_transformed_bounds(rlb, rub):
-    arr = np.array([rlb.x, rlb.y, rlb.z], [rub.x, rub.y, rub.z])
+    arr = np.array([[rlb.x, rlb.y, rlb.z], [rub.x, rub.y, rub.z]])
 
     lb, ub = get_bounds(arr)
     return lb, ub
