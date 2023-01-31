@@ -9,6 +9,7 @@ from loguru import logger
 from xchemalign.data import (
     Block,
     Dataset,
+    DatasetID,
     LigandBindingEvent,
     LigandID,
     LigandNeighbourhood,
@@ -264,7 +265,7 @@ def _align_xmaps(
 
                 # Get the ligand binding event
                 lbe: LigandBindingEvent = system_data.get_dataset(
-                    lid.dtag
+                    DatasetID(dtag=lid.dtag)
                 ).ligand_binding_events[lid]
 
                 # Get the xmap path
