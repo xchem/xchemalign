@@ -98,9 +98,9 @@ def get_blocks(rglb, rgub, xmap):
     yr = np.arange(rglb[1], rgub[1])
     zr = np.arange(rglb[2], rgub[2])
 
-    xrm = np.mod(xr, xmap.dx)
-    yrm = np.mod(yr, xmap.dy)
-    zrm = np.mod(zr, xmap.dz)
+    xrm = np.mod(xr, xmap.nu)
+    yrm = np.mod(yr, xmap.nv)
+    zrm = np.mod(zr, xmap.nw)
 
     xb, xbi = get_subblocks(xrm)
     yb, ybi = get_subblocks(yrm)
