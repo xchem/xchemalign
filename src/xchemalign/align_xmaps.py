@@ -116,13 +116,18 @@ def get_blocks(rglb, rgub, xmap):
         for ysb, ysbi in zip(yb, ybi):
             for zsb, zsbi in zip(zb, zbi):
                 # Transform jkl -> fractional -> orthogonal -> initial point
+                # Fractional pos of block 0,0,0
                 transform_vec = (
-                    xsbi * xmap.nu,
-                    ysbi * xmap.nv,
-                    zsbi * xmap.nw,
+                    xsbi / xmap.nu,
+                    ysbi / xmap.nv,
+                    zsbi / xmap.nw,
                 )
+                # Transform mat: fractional to orth
                 orth_arr = np.array(cell.orth.mat.tolist())
-                frac_arr = np.diag([1 / cell.a, 1 / cell.b, 1 / cell.c])
+                # Transform mat: grid to frac
+                # frac_arr = np.diag([1 / cell.a, 1 / cell.b, 1 / cell.c])
+                frac_arr = np.diag([1 / xmap.nu, 1 / xmap.nv, 1 / xmap.nw])
+
                 block = Block(
                     xi=xsb[0],
                     yi=ysb[0],
