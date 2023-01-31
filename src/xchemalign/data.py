@@ -184,7 +184,7 @@ class SystemData(BaseModel):
             if _did == did:
                 return dataset
 
-        raise Exception()
+        raise Exception(f"{did} : {self.dataset_ids}")
 
 
 class LigandNeighbourhood(BaseModel):
