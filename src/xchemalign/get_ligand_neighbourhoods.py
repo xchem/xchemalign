@@ -19,16 +19,21 @@ def get_structure_fragments(
     dataset: Dataset, structure: Structure
 ) -> dict[LigandID, gemmi.Residue]:
     fragments: dict[LigandID, gemmi.Residue] = {}
-    lig_number: int = 0
+    # lig_number: int = 0
     for model in structure:
         for chain in model:
             for residue in chain:
-                if residue.name == "LIG":
-                    ligand_id: LigandID = LigandID(
-                        dtag=dataset.dtag, chain=chain.name, id=lig_number
-                    )
-                    fragments[ligand_id] = residue
-                    lig_number = lig_number + 1
+                for lbe in dataset.ligand_binding_events.ligand_binding_events:
+                    if (
+                        (residue.name == "LIG")
+                        & (lbe.chain == chain.name)
+                        & (lbe.residue == residue.seqid.num)
+                    ):
+                        ligand_id: LigandID = LigandID(
+                            dtag=dataset.dtag, chain=chain.name, id=lbe.id
+                        )
+                        fragments[ligand_id] = residue
+                    # lig_number = lig_number + 1
 
     return fragments
 

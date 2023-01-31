@@ -71,6 +71,13 @@ class CLI:
     def suggest_merges(self):
         ...
 
+    def align(self, source_dir: str, system_data_dir: str):
+        self.build_system_data(system_data_dir, source_dir)
+        self.build_graph(source_dir)
+        self.generate_sites_from_components(source_dir)
+        self.align_structures(source_dir)
+        self.align_xmaps(source_dir)
+
     def update_sites(self, path: str = "."):
         _path: Path = Path(path)
 
@@ -107,7 +114,7 @@ class CLI:
     def change_site_reference(self):
         ...
 
-    def align_structures(self, source_dir: Path):
+    def align_structures(self, source_dir: str):
         _source_dir: Path = Path(source_dir)
         # _output_dir: Path = Path(output_dir)
 
@@ -135,7 +142,7 @@ class CLI:
             _source_dir,
         )
 
-    def align_xmaps(self, source_dir: Path):
+    def align_xmaps(self, source_dir: str):
         _source_dir: Path = Path(source_dir)
         # _output_dir: Path = Path(output_dir)
 
