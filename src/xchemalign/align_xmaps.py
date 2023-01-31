@@ -52,7 +52,7 @@ def get_transformed_bounds(rlb, rub):
 
 def get_grid_bounds(tlb, tub, xmap):
 
-    cell = xmap.cell
+    cell = xmap.unit_cell
 
     tlbf = cell.fractionalize(tlb)
     tubf = cell.fractionalize(tub)
