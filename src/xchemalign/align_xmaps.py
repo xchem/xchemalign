@@ -98,14 +98,18 @@ def get_blocks(rglb, rgub, xmap):
     xr = np.arange(rglb[0], rgub[0])
     yr = np.arange(rglb[1], rgub[1])
     zr = np.arange(rglb[2], rgub[2])
+    logger.debug(f"X range: {xr[0]} : {xr[-1]}")
 
     xrm = np.mod(xr, xmap.nu)
     yrm = np.mod(yr, xmap.nv)
     zrm = np.mod(zr, xmap.nw)
+    logger.debug(f"X mod range: {xrm[0]} : {xrm[-1]}")
 
     xb, xbi = get_subblocks(xrm, xr)
     yb, ybi = get_subblocks(yrm, yr)
     zb, zbi = get_subblocks(zrm, zr)
+    logger.debug(f"X subblock 0 range: {xb[0][0]} : {xb[0][-1]}")
+    logger.debug(f"X subblock initial: {xbi[0]}")
 
     blocks = []
     for xsb, xsbi in zip(xb, xbi):
