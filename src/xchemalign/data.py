@@ -341,6 +341,10 @@ def transform_to_gemmi(transform: Transform):
     return transform_gemmi
 
 
+def gemmi_to_transform(transform):
+    return Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
+
+
 def get_box(neighbourhood: LigandNeighbourhood, xmap, transform: Transform):
 
     transform_gemmi = transform_to_gemmi(transform)

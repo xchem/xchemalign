@@ -19,6 +19,7 @@ from xchemalign.data import (
     SystemData,
     Transform,
     Transforms,
+    gemmi_to_transform,
     read_xmap,
     transform_to_gemmi,
     write_xmap,
@@ -312,7 +313,9 @@ def _align_xmaps(
                     subsite_transform.combine(running_transform)
                 )
 
-                logger.debug(f"Transform is: {running_transform}")
+                logger.debug(
+                    f"Transform is: {gemmi_to_transform(running_transform)}"
+                )
 
                 # Define the interpolation range
                 interpolation_range = get_interpolation_range(
