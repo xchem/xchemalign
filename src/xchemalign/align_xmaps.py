@@ -94,9 +94,9 @@ def get_blocks(rglb, rgub, xmap):
 
     cell = xmap.unit_cell
 
-    xr = np.arrange(rglb[0], rgub[0])
-    yr = np.arrange(rglb[1], rgub[1])
-    zr = np.arrange(rglb[2], rgub[2])
+    xr = np.arange(rglb[0], rgub[0])
+    yr = np.arange(rglb[1], rgub[1])
+    zr = np.arange(rglb[2], rgub[2])
 
     xrm = np.mod(xr, xmap.dx)
     yrm = np.mod(yr, xmap.dy)
