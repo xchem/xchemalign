@@ -84,7 +84,7 @@ def get_subblocks(xrm, xr):
             xbt = []
 
         else:
-            xbt.append(xm)
+            xbt.append(x)
     if len(xbt) > 0:
         xb.append(xbt)
         xbi.append(x)
