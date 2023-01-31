@@ -54,8 +54,8 @@ def get_grid_bounds(tlb, tub, xmap):
 
     cell = xmap.unit_cell
 
-    tlbf = cell.fractionalize(tlb)
-    tubf = cell.fractionalize(tub)
+    tlbf = cell.fractionalize(gemmi.Position(*tlb))
+    tubf = cell.fractionalize(gemmi.Position(*tub))
 
     tlbg = (
         floor(xmap.dx * tlbf.x),
