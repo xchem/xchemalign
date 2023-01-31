@@ -102,9 +102,9 @@ def get_blocks(rglb, rgub, xmap):
     yrm = np.mod(yr, xmap.nv)
     zrm = np.mod(zr, xmap.nw)
 
-    xb, xbi = get_subblocks(xrm)
-    yb, ybi = get_subblocks(yrm)
-    zb, zbi = get_subblocks(zrm)
+    xb, xbi = get_subblocks(xrm, xr)
+    yb, ybi = get_subblocks(yrm, yr)
+    zb, zbi = get_subblocks(zrm, zr)
 
     blocks = []
     for xsb, xsbi in zip(xb, xbi):
