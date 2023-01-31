@@ -139,7 +139,7 @@ def get_interpolation_range(
 ):
 
     # Get the gemmi transform
-    transform_gemmi = transform_to_gemmi(transform)
+    transform_gemmi = transform
 
     # Coord array
     coord_arr = get_coord_array(neighbourhood)
