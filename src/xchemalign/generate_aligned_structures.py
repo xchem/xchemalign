@@ -244,11 +244,6 @@ def _align_structures_from_sites(
             # For each other ligand
             for moving_ligand_id in ligand_ids:
                 # Get the shortest alignment path to the reference
-                shortest_path = nx.shortest_path(
-                    g, moving_ligand_id, reference_ligand_id
-                )
-                logger.debug(f"Shortest path: {shortest_path}")
-
                 # Initial structure
                 _structure = structures[moving_ligand_id.dtag].clone()
 
@@ -258,6 +253,11 @@ def _align_structures_from_sites(
                 )
 
                 # Walk the path, iteratively applying transforms
+                shortest_path = nx.shortest_path(
+                    g, moving_ligand_id, reference_ligand_id
+                )
+                logger.debug(f"Shortest path: {shortest_path}")
+
                 previous_ligand_id = moving_ligand_id
                 running_transform = gemmi.Transform()
                 for next_ligand_id in shortest_path:

@@ -330,6 +330,7 @@ def _align_xmaps(
                 # Get the Transform to reference
                 running_transform = gemmi.Transform()
                 shortest_path = nx.shortest_path(g, lid, subsite_reference_id)
+                logger.debug(f"Shortest path: {shortest_path}")
 
                 previous_ligand_id = lid
                 for next_ligand_id in shortest_path:
