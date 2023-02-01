@@ -199,7 +199,7 @@ def interpolate_range(
 ):
     # Make a xmap on reference template
     new_xmap = gemmi.FloatGrid(
-        reference_xmap.dx, reference_xmap.dy, reference_xmap.dz
+        reference_xmap.nu, reference_xmap.nv, reference_xmap.nw
     )
     new_xmap.set_unit_cell(reference_xmap.unit_cell)
     new_xmap.spacegroup = reference_xmap.spacegroup
@@ -208,7 +208,7 @@ def interpolate_range(
     # Interpolate values
     for interpolation_range in interpolation_ranges:
         arr = np.zeros(
-            interpolation_range.dx,
+            interpolation_range.dz,
             interpolation_range.dy,
             interpolation_range.dz,
         )
