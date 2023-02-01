@@ -344,7 +344,7 @@ def _align_xmaps(
                             ),
                         )
                         running_transform = transform.combine(
-                            transform_to_gemmi(running_transform)
+                            running_transform
                         )
 
                 # Get the subsite transform
