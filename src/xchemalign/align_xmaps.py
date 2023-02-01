@@ -208,9 +208,11 @@ def interpolate_range(
     # Interpolate values
     for interpolation_range in interpolation_ranges:
         arr = np.zeros(
-            interpolation_range.dz,
-            interpolation_range.dy,
-            interpolation_range.dz,
+            (
+                interpolation_range.dz,
+                interpolation_range.dy,
+                interpolation_range.dz,
+            )
         )
 
         range_transform = gemmi.Transform()
