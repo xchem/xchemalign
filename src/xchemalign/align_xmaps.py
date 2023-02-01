@@ -212,7 +212,8 @@ def interpolate_range(
                 interpolation_range.dz,
                 interpolation_range.dy,
                 interpolation_range.dz,
-            )
+            ),
+            dtype=np.float32,
         )
 
         range_transform = gemmi.Transform()
