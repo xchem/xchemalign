@@ -215,6 +215,7 @@ def interpolate_range(
             ),
             dtype=np.float32,
         )
+        logger.debug(f"Sample grid shape: {arr.shape}")
 
         range_transform = gemmi.Transform()
         range_transform.vec.fromlist(interpolation_range.transform.vec)
