@@ -117,10 +117,12 @@ def get_blocks(rglb, rgub, xmap):
             for zsb, zsbi in zip(zb, zbi):
                 # Transform jkl -> fractional -> orthogonal -> initial point
                 # Fractional pos of block 0,0,0
-                transform_vec = (
-                    xsbi / xmap.nu,
-                    ysbi / xmap.nv,
-                    zsbi / xmap.nw,
+                transform_vec = xmap.unit_cell.orthogonalize(
+                    gemmi.Fractional(
+                        xsbi / xmap.nu,
+                        ysbi / xmap.nv,
+                        zsbi / xmap.nw,
+                    )
                 )
                 # Transform mat: fractional to orth
                 orth_arr = np.array(cell.orth.mat.tolist())
@@ -136,7 +138,12 @@ def get_blocks(rglb, rgub, xmap):
                     dy=len(ysb),
                     dz=len(zsb),
                     transform=Transform(
-                        vec=transform_vec, mat=(orth_arr @ frac_arr).tolist()
+                        vec=[
+                            transform_vec.x,
+                            transform_vec.y,
+                            transform_vec.z,
+                        ],
+                        mat=(orth_arr @ frac_arr).tolist(),
                     ),
                 )
 
