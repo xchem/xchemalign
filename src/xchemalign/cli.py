@@ -79,6 +79,9 @@ class CLI:
                 for pdb in subsite_dir.glob("*"):
                     script += f'read_pdb_file("{pdb}"); '
 
+        with open(script_path, "w") as f:
+            f.write(script)
+
         p = subprocess.Popen(f"coot --script {script_path}", shell=True)
         p.communicate()
         os.remove(script_path)
