@@ -271,9 +271,9 @@ def _align_structures_from_sites(
                                 previous_ligand_id,
                             ),
                         )
-                        running_transform = transform_to_gemmi(
-                            transform
-                        ).combine(running_transform)
+                        running_transform = transform.combine(
+                            running_transform
+                        )
                     # else:
                     #     transform = gemmi.Transform()
 
