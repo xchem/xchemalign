@@ -67,8 +67,8 @@ class CLI:
         _source_dir = Path(source_dir)
         script_path = _source_dir / "coot_script.py"
         script = ""
-        script += 'if __name__ == "__main__": '
-        script += 'set_nomenclature_errors_on_read("ignore")'
+        script += 'if __name__ == "__main__": \n'
+        script += '\tset_nomenclature_errors_on_read("ignore")\n'
 
         str_dir = _source_dir / constants.ALIGNED_STRUCTURES_DIR
 
@@ -78,7 +78,7 @@ class CLI:
 
             for subsite_dir in site_dir.glob("*"):
                 for pdb in subsite_dir.glob("*"):
-                    script += f'read_pdb_file("{pdb}"); '
+                    script += f'\tread_pdb_file("{pdb}")\n '
 
         with open(script_path, "w") as f:
             f.write(script)
