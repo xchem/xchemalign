@@ -12,6 +12,7 @@ from xchemalign.data import (  # Transform,
     SiteTransforms,
     Transforms,
     XtalForms,
+    transform_to_gemmi,
 )
 from xchemalign.structures import get_structures, get_transforms
 
@@ -270,11 +271,11 @@ def _align_structures_from_sites(
                                 previous_ligand_id,
                             ),
                         )
-                        running_transform = transform.combine(
-                            running_transform
-                        )
-                    else:
-                        transform = gemmi.Transform()
+                        running_transform = transform_to_gemmi(
+                            transform
+                        ).combine(running_transform)
+                    # else:
+                    #     transform = gemmi.Transform()
 
                     # Apply the translation to the new frame
                     previous_ligand_id = next_ligand_id
