@@ -1,3 +1,4 @@
+import os
 from math import ceil, floor
 from pathlib import Path
 
@@ -281,6 +282,8 @@ def _align_xmaps(
 
     #
     xmaps_dir = _output_dir / "aligned_xmaps"
+    if not xmaps_dir.exists():
+        os.mkdir(xmaps_dir)
 
     for site_id, site in sites.iter():
         logger.debug(f"Aligning site: {site_id}")
@@ -288,6 +291,9 @@ def _align_xmaps(
 
         #
         site_xmaps_dir = xmaps_dir / f"{site_id}"
+        if not site_xmaps_dir.exists():
+            os.mkdir(site_xmaps_dir)
+
         for subsite_id, subsite in site.iter():
             logger.debug(f"Aligning subsite: {subsite_id}")
             # Get the site reference
@@ -295,6 +301,8 @@ def _align_xmaps(
             subsite_reference_id = subsite.members[0]
 
             subsite_xmaps_dir = site_xmaps_dir / f"{subsite_id}"
+            if not subsite_xmaps_dir.exists():
+                os.mkdir(subsite_xmaps_dir)
 
             # For each ligand neighbourhood, find the xmap and transform
             for lid in subsite.members:
