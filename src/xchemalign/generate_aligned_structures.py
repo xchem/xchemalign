@@ -281,13 +281,15 @@ def _align_structures_from_sites(
                     previous_ligand_id = next_ligand_id
 
                 # Subsite alignment transform
-                subsite_transform = site_transforms.get_subsite_transform(
-                    site_id, subsite_id
+                subsite_transform = transform_to_gemmi(
+                    site_transforms.get_subsite_transform(site_id, subsite_id)
                 )
                 subsite_transform.combine(running_transform)
 
                 # Site alignment transform
-                site_transform = site_transforms.get_site_transform(site_id)
+                site_transform = transform_to_gemmi(
+                    site_transforms.get_site_transform(site_id)
+                )
                 site_transform.combine(running_transform)
 
                 structure = superpose_structure(running_transform, structure)
