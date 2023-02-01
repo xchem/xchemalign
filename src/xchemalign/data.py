@@ -345,7 +345,7 @@ def gemmi_to_transform(transform):
     return Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
 
 
-def get_box(neighbourhood: LigandNeighbourhood, xmap, transform: Transform):
+def get_box(neighbourhood: LigandNeighbourhood, xmap, transform):
 
     # transform_gemmi = transform_to_gemmi(transform)
     transform_gemmi = transform
@@ -369,7 +369,7 @@ def get_box(neighbourhood: LigandNeighbourhood, xmap, transform: Transform):
 
 
 def write_xmap(
-    xmap, path: Path, neighbourhood: LigandNeighbourhood, transform: Transform
+    xmap, path: Path, neighbourhood: LigandNeighbourhood, transform
 ):
 
     ccp4 = gemmi.Ccp4Map()
