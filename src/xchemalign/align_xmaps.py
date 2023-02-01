@@ -230,11 +230,11 @@ def interpolate_range(
 
         # Assign to blocks
         rxi = interpolation_range.xi
-        rxf = interpolation_range.xi + interpolation_range.dx
+        rxf = interpolation_range.xi + interpolation_range.dx - 1
         ryi = interpolation_range.yi
-        ryf = interpolation_range.yi + interpolation_range.dy
+        ryf = interpolation_range.yi + interpolation_range.dy - 1
         rzi = interpolation_range.zi
-        rzf = interpolation_range.zi + interpolation_range.dz
+        rzf = interpolation_range.zi + interpolation_range.dz - 1
         logger.debug(f"Block X Range: {rxi} : {rxf}")
         logger.debug(f"Block Y Range: {ryi} : {ryf}")
         logger.debug(f"Block Z Range: {rzi} : {rzf}")
