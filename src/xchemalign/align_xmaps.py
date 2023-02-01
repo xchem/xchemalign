@@ -347,6 +347,8 @@ def _align_xmaps(
                         running_transform = transform.combine(
                             running_transform
                         )
+                    # Apply the translation to the new frame
+                    previous_ligand_id = next_ligand_id
 
                 # Get the subsite transform
                 subsite_transform = transform_to_gemmi(
