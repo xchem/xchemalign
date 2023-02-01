@@ -73,8 +73,9 @@ class CLI:
         str_dir = _source_dir / constants.ALIGNED_STRUCTURES_DIR
 
         for site_dir in str_dir.glob("*"):
-            if site_dir.name != site_id:
+            if site_dir.name != f"{site_id}":
                 continue
+
             for subsite_dir in site_dir.glob("*"):
                 for pdb in subsite_dir.glob("*"):
                     script += f'read_pdb_file("{pdb}"); '
