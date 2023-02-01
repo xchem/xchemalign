@@ -207,6 +207,7 @@ def interpolate_range(
     new_xmap.set_unit_cell(reference_xmap.unit_cell)
     new_xmap.spacegroup = reference_xmap.spacegroup
     grid_np = np.array(new_xmap, copy=False)
+    logger.debug(f"Xmap shape is: {grid_np.shape}")
 
     # Interpolate values
     for interpolation_range in interpolation_ranges:
