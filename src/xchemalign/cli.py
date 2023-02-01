@@ -1,4 +1,4 @@
-import os
+# import os
 import subprocess
 from pathlib import Path
 
@@ -84,7 +84,7 @@ class CLI:
 
         p = subprocess.Popen(f"coot --script {script_path}", shell=True)
         p.communicate()
-        os.remove(script_path)
+        # os.remove(script_path)
 
     def merge_clusters(
         self, cluster_1: int, cluster_2: int, sites_path: str = "."
