@@ -67,7 +67,7 @@ class CLI:
         _source_dir = Path(source_dir)
         script_path = _source_dir / "coot_script.py"
         script = ""
-        script += 'if __name__ == "__main__": ; '
+        script += 'if __name__ == "__main__": '
         script += 'set_nomenclature_errors_on_read("ignore")'
 
         str_dir = _source_dir / constants.ALIGNED_STRUCTURES_DIR
