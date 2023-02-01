@@ -220,7 +220,10 @@ def interpolate_range(
         range_transform.mat.fromlist(interpolation_range.transform.mat)
 
         xmap.interpolate_values(
-            arr, transform.combine(interpolation_range.transform)
+            arr,
+            transform.combine(
+                transform_to_gemmi(interpolation_range.transform)
+            ),
         )
 
         # Assign to blocks
