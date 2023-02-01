@@ -78,7 +78,7 @@ class CLI:
 
             for subsite_dir in site_dir.glob("*"):
                 for pdb in subsite_dir.glob("*"):
-                    script += f'\tread_pdb_file("{pdb}")\n '
+                    script += f'\tread_pdb("{pdb}")\n '
 
         with open(script_path, "w") as f:
             f.write(script)
