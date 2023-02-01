@@ -347,7 +347,8 @@ def gemmi_to_transform(transform):
 
 def get_box(neighbourhood: LigandNeighbourhood, xmap, transform: Transform):
 
-    transform_gemmi = transform_to_gemmi(transform)
+    # transform_gemmi = transform_to_gemmi(transform)
+    transform_gemmi = transform
 
     box = gemmi.FractionalBox()
     for atom in neighbourhood.atoms:
@@ -357,7 +358,7 @@ def get_box(neighbourhood: LigandNeighbourhood, xmap, transform: Transform):
             )
         )
 
-    for atom in neighbourhood.atoms:
+    for atom in neighbourhood.artefact_atoms:
         box.extend(
             xmap.cell.fractionalize(
                 transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
