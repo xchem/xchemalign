@@ -78,7 +78,7 @@ def get_subblocks(xrm, xr):
     xit = xr[0]
     xbi = []
     for x, xm in zip(xr, xrm):
-        if xm == 0:
+        if (xm == 0) & (len(xbt) > 0):
             xb.append(xbt)
             xbi.append(xit)
             xit = x
