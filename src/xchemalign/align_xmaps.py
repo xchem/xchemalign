@@ -209,7 +209,7 @@ def interpolate_range(
     for interpolation_range in interpolation_ranges:
         arr = np.zeros(
             (
-                interpolation_range.dz,
+                interpolation_range.dx,
                 interpolation_range.dy,
                 interpolation_range.dz,
             ),
@@ -234,6 +234,10 @@ def interpolate_range(
         ryf = interpolation_range.yi + interpolation_range.dy
         rzi = interpolation_range.zi
         rzf = interpolation_range.zi + interpolation_range.dz
+        logger.debug(f"Block X Range: {rxi} : {rxf}")
+        logger.debug(f"Block Y Range: {ryi} : {ryf}")
+        logger.debug(f"Block Z Range: {rzi} : {rzf}")
+
         grid_np[
             rxi:rxf,
             ryi:ryf,
