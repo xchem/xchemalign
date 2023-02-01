@@ -62,6 +62,10 @@ def report_alignments():
     ...
 
 
+def cas_ligands():
+    return "\tgraphics_to_ca_plus_ligands_sec_struct_representation(p) \n"
+
+
 class CLI:
     def open_site(self, source_dir: str, site_id: int):
         _source_dir = Path(source_dir)
@@ -79,7 +83,8 @@ class CLI:
 
             for subsite_dir in site_dir.glob("*"):
                 for pdb in subsite_dir.glob("*"):
-                    script += f'\tread_pdb("{pdb}")\n '
+                    script += f'\tp = read_pdb("{pdb}")\n '
+                    script += cas_ligands()
 
         with open(script_path, "w") as f:
             f.write(script)
