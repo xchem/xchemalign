@@ -69,7 +69,7 @@ class CLI:
         script = ""
         script += 'if __name__ == "__main__": \n'
         script += '\tset_nomenclature_errors_on_read("ignore")\n'
-        script += "\tset_recentre_on_read_pdb(0)"
+        script += "\tset_recentre_on_read_pdb(0) \n"
 
         str_dir = _source_dir / constants.ALIGNED_STRUCTURES_DIR
 
