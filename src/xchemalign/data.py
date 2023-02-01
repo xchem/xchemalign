@@ -391,6 +391,7 @@ def write_xmap(
 
     box = get_box(neighbourhood, xmap, transform)
     ccp4.set_extent(box)
+    ccp4.setup(float("nan"))
     ccp4.update_ccp4_header()
 
     ccp4.write_ccp4_map(str(path))
