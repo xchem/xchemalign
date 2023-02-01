@@ -87,7 +87,9 @@ class Transforms(BaseModel):
 
                 return transform
 
-        raise Exception(f"Transform {transform_id} not in transforms!")
+        raise Exception(
+            f"Transform {transform_id} not in transforms {self.ligand_ids}!"
+        )
 
 
 class Atom(BaseModel):
