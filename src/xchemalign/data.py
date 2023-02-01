@@ -386,6 +386,8 @@ def write_xmap(
 
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = xmap
+    ccp4.update_ccp4_header()
+
     box = get_box(neighbourhood, xmap, transform)
     ccp4.set_extent(box)
     ccp4.update_ccp4_header()
