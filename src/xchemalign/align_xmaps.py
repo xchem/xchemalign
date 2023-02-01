@@ -264,14 +264,22 @@ def _align_xmaps(
     # Load the site reference xmap
     reference_xmap = read_xmap(reference_xmap_path)
 
+    #
+    xmaps_dir = _output_dir / "aligned_xmaps"
+
     for site_id, site in sites.iter():
         logger.debug(f"Aligning site: {site_id}")
         # site_reference_id = site.members[0]
+
+        #
+        site_xmaps_dir = xmaps_dir / f"{site_id}"
         for subsite_id, subsite in site.iter():
             logger.debug(f"Aligning subsite: {subsite_id}")
             # Get the site reference
             # TODO: Make work
             subsite_reference_id = subsite.members[0]
+
+            subsite_xmaps_dir = site_xmaps_dir / f"{subsite_id}"
 
             # For each ligand neighbourhood, find the xmap and transform
             for lid in subsite.members:
@@ -342,10 +350,17 @@ def _align_xmaps(
 
                 # Interpolate
                 new_xmap = interpolate_range(
-                    reference_xmap, xmap, interpolation_range, transform
+                    reference_xmap,
+                    xmap,
+                    interpolation_range,
+                    running_transform.inverse(),
                 )
 
                 # Output the xmap
                 write_xmap(
-                    new_xmap, _output_dir / "", neighbourhood, transform
+                    new_xmap,
+                    subsite_xmaps_dir
+                    / f"{lid.dtag}_{lid.chain}_{lid.id}.ccp4",
+                    neighbourhood,
+                    running_transform,
                 )
