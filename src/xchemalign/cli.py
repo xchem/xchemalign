@@ -1,13 +1,14 @@
+import os
+import subprocess
 from pathlib import Path
 
 import fire
 
+from xchemalign import constants
 from xchemalign.align_xmaps import _align_xmaps
 
 # from xchemalign.get_system_sites import get_system_sites
 from xchemalign.build_alignment_graph import build_alignment_graph
-
-# from xchemalign import constants
 from xchemalign.data import (
     LigandNeighbourhoods,
     Sites,
@@ -62,6 +63,26 @@ def report_alignments():
 
 
 class CLI:
+    def open_site(self, source_dir: str, site_id: int):
+        _source_dir = Path(source_dir)
+        script_path = _source_dir / "coot_script.py"
+        script = ""
+        script += 'if __name__ == "__main__": ; '
+        script += 'set_nomenclature_errors_on_read("ignore")'
+
+        str_dir = _source_dir / constants.ALIGNED_STRUCTURES_DIR
+
+        for site_dir in str_dir.glob("*"):
+            if site_dir.name != site_id:
+                continue
+            for subsite_dir in site_dir.glob("*"):
+                for pdb in subsite_dir.glob("*"):
+                    script += f'read_pdb_file("{pdb}"); '
+
+        p = subprocess.Popen(f"coot --script {script_path}", shell=True)
+        p.communicate()
+        os.remove(script_path)
+
     def merge_clusters(
         self, cluster_1: int, cluster_2: int, sites_path: str = "."
     ):

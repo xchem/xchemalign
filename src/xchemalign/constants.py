@@ -17,3 +17,6 @@ PANDDA_EVENT_MAP_TEMPLATE: str = (
     "{dtag}-event_{event_id}_1-BDC_{bdc}_map.native.ccp4"
 )
 PANDDA_PROCESSED_DATASETS_DIR: str = "processed_datasets"
+
+ALIGNED_STRUCTURES_DIR: str = "aligned_structures"
+ALIGNED_XMAPS_DIR: str = "aligned_xmaps"
