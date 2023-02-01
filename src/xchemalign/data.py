@@ -278,6 +278,9 @@ class Block(BaseModel):
     xi: int
     yi: int
     zi: int
+    xmi: int
+    ymi: int
+    zmi: int
     dx: int
     dy: int
     dz: int

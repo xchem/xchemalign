@@ -134,6 +134,9 @@ def get_blocks(rglb, rgub, xmap):
                     xi=xsb[0],
                     yi=ysb[0],
                     zi=zsb[0],
+                    xmi=xsbi / xmap.nu,
+                    ymi=ysbi / xmap.nv,
+                    zmi=zsbi / xmap.nw,
                     dx=len(xsb),
                     dy=len(ysb),
                     dz=len(zsb),
@@ -229,12 +232,12 @@ def interpolate_range(
         )
 
         # Assign to blocks
-        rxi = interpolation_range.xi
-        rxf = interpolation_range.xi + interpolation_range.dx - 1
-        ryi = interpolation_range.yi
-        ryf = interpolation_range.yi + interpolation_range.dy - 1
-        rzi = interpolation_range.zi
-        rzf = interpolation_range.zi + interpolation_range.dz - 1
+        rxi = interpolation_range.xmi
+        rxf = interpolation_range.xmi + interpolation_range.dx
+        ryi = interpolation_range.ymi
+        ryf = interpolation_range.ymi + interpolation_range.dy
+        rzi = interpolation_range.zmi
+        rzf = interpolation_range.zmi + interpolation_range.dz
         logger.debug(f"Block X Range: {rxi} : {rxf}")
         logger.debug(f"Block Y Range: {ryi} : {ryf}")
         logger.debug(f"Block Z Range: {rzi} : {rzf}")
