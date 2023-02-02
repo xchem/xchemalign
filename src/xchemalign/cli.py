@@ -258,7 +258,7 @@ def _parse_data_sources(_source_dir: Path):
     datasets = []
     for datasource in system_data.datasources:
         logger.info(f"Parsing datasource: {datasource.path}")
-        if datasource.type == "model_building":
+        if datasource.datasource_type == "model_building":
             for model_dir in Path(datasource.path).glob("*"):
                 dtag = model_dir.name
                 dataset_id = DatasetID(dtag=dtag)
@@ -282,7 +282,7 @@ def _parse_data_sources(_source_dir: Path):
                 datasets.append(dataset)
                 logger.debug(f"Added dataset: {dataset_id}")
 
-        elif datasource.type == "manual":
+        elif datasource.datasource_type == "manual":
             for model_dir in Path(datasource.path).glob("*"):
                 dtag = model_dir.name
                 dataset_id = DatasetID(dtag=dtag)
