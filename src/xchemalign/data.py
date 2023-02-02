@@ -176,7 +176,6 @@ class Dataset(BaseModel):
     pdb: str
     xmap: str
     ligand_binding_events: LigandBindingEvents
-    # mtz: str
 
 
 class Datasource(BaseModel):
