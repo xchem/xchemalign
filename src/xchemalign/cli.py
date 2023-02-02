@@ -152,7 +152,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     #     initial_dataset = InitialDataset(dtag=dtag, mtz, pdb, xmap)
 
     datasouce = Datasource(
-        path=str(_data_source_dir), data_source_type="model_building_dir"
+        path=str(_data_source_dir), datasource_type="model_building_dir"
     )
 
     if not system_data.datasources:
@@ -181,7 +181,7 @@ def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
     system_data = read_system_data(_source_dir)
 
     datasouce = Datasource(
-        path=str(_data_source_dir), data_source_type="manual"
+        path=str(_data_source_dir), datasource_type="manual"
     )
 
     if not system_data.datasources:

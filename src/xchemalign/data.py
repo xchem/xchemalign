@@ -182,6 +182,7 @@ class Dataset(BaseModel):
 class Datasource(BaseModel):
     path: str
     data_source_type: str
+    datasource_type: str
     # dataset_ids: list[DatasetID]
     # datasets: list[Dataset]
 
