@@ -188,6 +188,7 @@ class Datasource(BaseModel):
 
 class PanDDA(BaseModel):
     path: str
+    event_table_path: str
 
 
 class SystemData(BaseModel):

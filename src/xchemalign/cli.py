@@ -160,7 +160,14 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
             datasouce,
         ]
     else:
-        system_data.datasources.append(datasouce)
+        new_datasources = [
+            _datasource
+            for _datasource in system_data.datasources
+            if datasouce.path != str(_data_source_dir)
+        ] + [
+            datasouce,
+        ]
+        system_data.datasources = new_datasources
 
     save_data(system_data, _source_dir)
     logger.info(f"Added dir {_data_source_dir} to datasources")
@@ -182,7 +189,14 @@ def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
             datasouce,
         ]
     else:
-        system_data.datasources.append(datasouce)
+        new_datasources = [
+            _datasource
+            for _datasource in system_data.datasources
+            if datasouce.path != str(_data_source_dir)
+        ] + [
+            datasouce,
+        ]
+        system_data.datasources = new_datasources
 
     save_data(system_data, _source_dir)
     logger.info(f"Added dir {_data_source_dir} to datasources")
@@ -211,7 +225,14 @@ def _add_pandda(_source_dir: Path, _pandda_dir: Path):
                 pandda,
             ]
         else:
-            system_data.panddas.append(pandda)
+            new_panddas = [
+                _pandda
+                for _pandda in system_data.panddas
+                if _pandda.path != str(_pandda_dir)
+            ] + [
+                pandda,
+            ]
+            system_data.panddas = new_panddas
 
         save_data(system_data, _source_dir)
     else:
