@@ -17,14 +17,14 @@ class DatasetID(BaseModel):
 class LigandID(BaseModel):
     dtag: str
     chain: str
-    id: int
+    residue: int
 
     def __eq__(self, other) -> bool:
 
         try:
 
             if self.dtag == other.dtag:
-                if self.id == other.id:
+                if self.residue == other.residue:
                     if self.chain == other.chain:
                         return True
             return False
@@ -32,18 +32,18 @@ class LigandID(BaseModel):
             return False
 
     def __hash__(self):
-        return hash((self.dtag, self.chain, self.id))
+        return hash((self.dtag, self.chain, self.residue))
 
     def to_string(
         self,
     ):
-        return f"{self.dtag}~{self.chain}~{self.id}"
+        return f"{self.dtag}~{self.chain}~{self.residue}"
 
     @classmethod
     def from_string(cls, string):
-        dtag, chain, id = string.split("~")
+        dtag, chain, residue = string.split("~")
 
-        return LigandID(dtag=dtag, chain=chain, id=int(id))
+        return LigandID(dtag=dtag, chain=chain, residue=int(residue))
 
 
 class SymOp(BaseModel):
@@ -153,6 +153,7 @@ class SiteObservation(BaseModel):
 
 class LigandBindingEvent(BaseModel):
     id: int
+    dtag: str
     chain: str
     residue: int
     xmap: str
@@ -173,11 +174,26 @@ class LigandBindingEvents(BaseModel):
 class Dataset(BaseModel):
     dtag: str
     pdb: str
+    xmap: str
     ligand_binding_events: LigandBindingEvents
     # mtz: str
 
 
+class Datasource(BaseModel):
+    path: str
+    data_source_type: str
+    # dataset_ids: list[DatasetID]
+    # datasets: list[Dataset]
+
+
+class PanDDA(BaseModel):
+    path: str
+
+
 class SystemData(BaseModel):
+    datasources: list[Datasource]
+    panddas: list[PanDDA]
+
     dataset_ids: list[DatasetID]
     datasets: list[Dataset]
 
@@ -302,10 +318,12 @@ class SubSite(BaseModel):
     name: str
     residues: list[ResidueID]
     members: list[LigandID]
+    reference_ligand_id: LigandID
 
 
 class SubSites(BaseModel):
     subsites: list[SubSite]
+    reference_subsite: int
 
     def iter(self) -> Generator[tuple[int, SubSite], None, None]:
         for subsite in self.subsites:
@@ -318,19 +336,38 @@ class Site(BaseModel):
     subsites: list[SubSite]
     members: list[LigandID]
     residues: list[ResidueID]
+    reference_ligand_id: LigandID
+    reference_subsite_id: int
+    reference_subsite: SubSite
 
     def iter(self) -> Generator[tuple[int, SubSite], None, None]:
         for subsite_id, subsite in zip(self.subsite_ids, self.subsites):
             yield subsite_id, subsite
 
+    def get_subsite(self, subsite_id: int):
+        for _subsite_id, subsite in self.iter():
+            if subsite_id == _subsite_id:
+                return subsite
+
+        raise Exception(f"Site {subsite_id} not in sites: {self.subsite_ids}")
+
 
 class Sites(BaseModel):
     site_ids: list[int]
     sites: list[Site]
+    reference_site: Site
+    reference_site_id: int
 
     def iter(self) -> Generator[tuple[int, Site], None, None]:
         for site_id, site in zip(self.site_ids, self.sites):
             yield site_id, site
+
+    def get_site(self, site_id: int):
+        for _site_id, site in self.iter():
+            if site_id == _site_id:
+                return site
+
+        raise Exception(f"Site {site_id} not in sites: {self.site_ids}")
 
 
 def read_xmap(path: Path):
@@ -479,3 +516,13 @@ def read_site_transforms(path: Path):
     return SiteTransforms.parse_file(
         str(path / constants.SITES_TRANSFORMS_FILE_NAME)
     )
+
+
+def save_sites(sites: Sites, path: Path):
+    with open(path / constants.SITES_FILE_NAME, "w") as f:
+        f.write(sites.json())
+
+
+def save_data(system_data: SystemData, output_dir: Path):
+    with open(output_dir / constants.DATA_JSON_PATH, "w") as f:
+        f.write(system_data.json())

@@ -30,7 +30,9 @@ def get_structure_fragments(
                         & (lbe.residue == residue.seqid.num)
                     ):
                         ligand_id: LigandID = LigandID(
-                            dtag=dataset.dtag, chain=chain.name, id=lbe.id
+                            dtag=dataset.dtag,
+                            chain=chain.name,
+                            residue=lbe.residue,
                         )
                         fragments[ligand_id] = residue
                     # lig_number = lig_number + 1

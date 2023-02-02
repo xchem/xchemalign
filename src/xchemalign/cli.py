@@ -1,16 +1,25 @@
+import os
+
 # import os
 import subprocess
 from pathlib import Path
 
 import fire
+import pandas as pd
+from loguru import logger
 
 from xchemalign import constants
 from xchemalign.align_xmaps import _align_xmaps
 
 # from xchemalign.get_system_sites import get_system_sites
 from xchemalign.build_alignment_graph import build_alignment_graph
-from xchemalign.data import (
+from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
+    Dataset,
+    DatasetID,
+    Datasource,
+    LigandID,
     LigandNeighbourhoods,
+    PanDDA,
     Sites,
     SystemData,
     Transforms,
@@ -22,16 +31,22 @@ from xchemalign.data import (
     read_structures,
     read_system_data,
     read_transforms,
+    save_data,
+    save_sites,
 )
 from xchemalign.generate_aligned_structures import _align_structures_from_sites
 from xchemalign.generate_sites_from_components import (
     _generate_sites_from_components,
 )
-from xchemalign.make_data_json import make_data_json_from_pandda_dir
+from xchemalign.make_data_json import (
+    get_ligand_binding_events_from_panddas,
+    get_ligand_binding_events_from_structure,
+    make_data_json_from_pandda_dir,
+)
 
+# def _update_sites(source_dir: Path):
 
-def _update_sites(g, neighbourhoods, sites):
-    ...
+#     ...
 
 
 def _suggest_merges(sites: Sites):
@@ -66,7 +81,258 @@ def cas_ligands():
     return "\tgraphics_to_ca_plus_ligands_sec_struct_representation(p) \n"
 
 
+def _change_sites_reference(_source_dir: Path, site_id: int):
+    sites: Sites = read_sites(_source_dir)
+    sites.reference_site_id = site_id
+    save_sites(sites, _source_dir)
+
+    logger.info(
+        'Run "update" to generate xmaps and structures with new reference'
+    )
+
+
+def _change_site_reference(_source_dir: Path, site_id: int, subsite_id: int):
+    sites: Sites = read_sites(_source_dir)
+    site = sites.get_site(site_id)
+    site.reference_subsite_id = subsite_id
+    new_reference_subsite = site.get_subsite(subsite_id)
+    site.reference_subsite = new_reference_subsite
+    site.reference_ligand_id = new_reference_subsite.reference_ligand_id
+    save_sites(sites, _source_dir)
+
+    logger.info(
+        'Run "update" to generate xmaps and structures with new reference'
+    )
+
+
+def _change_subsite_reference(
+    _source_dir: Path,
+    site_id: int,
+    subsite_id: int,
+    dtag: int,
+    chain: str,
+    residue: int,
+):
+    sites: Sites = read_sites(_source_dir)
+    site = sites.get_site(site_id)
+    site.reference_subsite_id = subsite_id
+    subsite = site.get_subsite(subsite_id)
+    new_lid = LigandID(dtag=dtag, chain=chain, residue=residue)
+    if new_lid not in subsite.members:
+        raise Exception(f"LigandID {new_lid} not in {subsite.members}")
+    subsite.reference_ligand_id = new_lid
+
+    save_sites(sites, _source_dir)
+
+    logger.info(
+        'Run "update" to generate xmaps and structures with new reference'
+    )
+
+
+# def _ligand_binding_events_from_pdb(pdb: Path, xmap: Path):
+#     st = gemmi.read_structure(str(pdb))
+#     for model in st:
+#         for chain in model:
+#             for residue in chain:
+#                 if residue.name == "LIG":
+#                     lbe = LigandBindingEvent(id=)
+
+
+def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
+    system_data = read_system_data(_source_dir)
+
+    # for model_dir in _source_dir.glob("*"):
+    #     dtag = model_dir.name
+    #     mtz = model_dir / constants.MODEL_DIR_MTZ
+    #     pdb = model_dir / constants.MODEL_DIR_PDB
+    #     xmap = model_dir / constants.MODEL_DIR_XMAP
+    #     # ligand_binding_events = _ligand_binding_events_from_pdb(pdb, xmap)
+    #     # dataset = Dataset(dtag=dtag, pdb=pdb,
+    # ligand_binding_events=ligand_binding_events)
+    #     initial_dataset = InitialDataset(dtag=dtag, mtz, pdb, xmap)
+
+    datasouce = Datasource(
+        path=str(_data_source_dir), data_source_type="model_building_dir"
+    )
+
+    if not system_data.datasources:
+        system_data.datasources = [
+            datasouce,
+        ]
+    else:
+        system_data.datasources.append(datasouce)
+
+    save_data(system_data, _source_dir)
+    logger.info(f"Added dir {_data_source_dir} to datasources")
+    datasource_paths = [
+        _datasource.path for _datasource in system_data.datasources
+    ]
+    logger.info(f"Datasources are: {datasource_paths}")
+
+
+def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
+    system_data = read_system_data(_source_dir)
+
+    datasouce = Datasource(
+        path=str(_data_source_dir), data_source_type="manual"
+    )
+
+    if not system_data.datasources:
+        system_data.datasources = [
+            datasouce,
+        ]
+    else:
+        system_data.datasources.append(datasouce)
+
+    save_data(system_data, _source_dir)
+    logger.info(f"Added dir {_data_source_dir} to datasources")
+    datasource_paths = [
+        _datasource.path for _datasource in system_data.datasources
+    ]
+    logger.info(f"Datasources are: {datasource_paths}")
+
+
+def _add_pandda(_source_dir: Path, _pandda_dir: Path):
+    system_data = read_system_data(_source_dir)
+
+    analyses_dir: Path = _pandda_dir / constants.PANDDA_ANALYSES_DIR
+    event_table_path: Path = (
+        analyses_dir / constants.PANDDA_EVENTS_INSPECT_TABLE_PATH
+    )
+
+    if event_table_path.exists():
+
+        pandda = PanDDA(
+            path=str(_pandda_dir), event_table_path=str(event_table_path)
+        )
+
+        if not system_data.panddas:
+            system_data.panddas = [
+                pandda,
+            ]
+        else:
+            system_data.panddas.append(pandda)
+
+        save_data(system_data, _source_dir)
+    else:
+        raise Exception()
+
+    logger.info(f"Added PanDDA {_pandda_dir} to panddas")
+    pandda_paths = [_pandda.path for _pandda in system_data.panddas]
+    logger.info(f"PanDDAs are: {pandda_paths}")
+
+
+def _parse_data_sources(_source_dir: Path):
+    system_data = read_system_data(_source_dir)
+
+    # Get the PanDDA event tables
+    pandda_event_tables = {
+        pandda.path: pd.read_csv(pandda.event_table_path)
+        for pandda in system_data.panddas
+    }
+    logger.info(f"Read {len(pandda_event_tables)} PanDDA event tables")
+
+    # Get the
+    dataset_ids = []
+    datasets = []
+    for datasource in system_data.datasources:
+        logger.info(f"Parsing datasource: {datasource.path}")
+        if datasource.type == "model_building":
+            for model_dir in Path(datasource.path).glob("*"):
+                dtag = model_dir.name
+                dataset_id = DatasetID(dtag=dtag)
+                if dataset_id in system_data.dataset_ids:
+                    logger.warning(f"Dataset ID {dataset_id} already found!")
+                    continue
+
+                # mtz = model_dir / constants.MODEL_DIR_MTZ
+                pdb = model_dir / constants.MODEL_DIR_PDB
+                xmap = model_dir / constants.MODEL_DIR_XMAP
+                ligand_binding_events = get_ligand_binding_events_from_panddas(
+                    pandda_event_tables, pdb, dtag
+                )
+                dataset = Dataset(
+                    dtag=dtag,
+                    pdb=str(pdb),
+                    xmap=str(xmap),
+                    ligand_binding_events=ligand_binding_events,
+                )
+                dataset_ids.append(dataset_id)
+                datasets.append(dataset)
+                logger.debug(f"Added dataset: {dataset_id}")
+
+        elif datasource.type == "manual":
+            for model_dir in Path(datasource.path).glob("*"):
+                dtag = model_dir.name
+                dataset_id = DatasetID(dtag=dtag)
+
+                if dataset_id in system_data.dataset_ids:
+                    logger.warning(f"Dataset ID {dataset_id} already found!")
+                    continue
+
+                pdb = next(model_dir.glob("*.pdb"))
+                xmap = next(model_dir.glob("*.ccp4"))
+                ligand_binding_events = (
+                    get_ligand_binding_events_from_structure(pdb, xmap, dtag)
+                )
+                dataset = Dataset(
+                    dtag=dtag,
+                    pdb=str(pdb),
+                    xmap=str(xmap),
+                    ligand_binding_events=ligand_binding_events,
+                )
+                dataset_ids.append(dataset_id)
+                datasets.append(dataset)
+                logger.debug(f"Added dataset: {dataset_id}")
+
+    system_data.dataset_ids = dataset_ids
+    system_data.datasets = datasets
+
+    save_data(system_data, _source_dir)
+
+    logger.info(f"Found {len(dataset_ids)} datasets!")
+
+
 class CLI:
+    def init(self, source_dir: str):
+        _source_dir = Path(source_dir)
+
+        if not _source_dir.exists():
+            os.mkdir(_source_dir)
+
+        system_data = SystemData()
+
+        save_data(system_data, _source_dir)
+
+    def add_data_source(
+        self,
+        source_dir: str,
+        data_source_dir: str,
+        source_type: str = "model_building",
+    ):
+        _source_dir = Path(source_dir)
+        _data_source_dir = Path(data_source_dir)
+
+        if source_type == "model_building":
+            _add_model_building_dir(_source_dir, _data_source_dir)
+
+        elif source_type == "manual":
+            _add_manual_dir(_source_dir, _data_source_dir)
+
+        else:
+            raise Exception()
+
+    def add_pandda(self, source_dir: str, pandda_dir: str):
+        _source_dir = Path(source_dir)
+        _pandda_dir = Path(pandda_dir)
+
+        _add_pandda(_source_dir, _pandda_dir)
+
+    def parse_data_sources(self, source_dir: str):
+        _source_dir = Path(source_dir)
+
+        _parse_data_sources(_source_dir)
+
     def open_site(self, source_dir: str, site_id: int):
         _source_dir = Path(source_dir)
         script_path = _source_dir / "coot_script.py"
@@ -113,23 +379,34 @@ class CLI:
         self.align_structures(source_dir)
         self.align_xmaps(source_dir)
 
-    def update_sites(self, path: str = "."):
-        _path: Path = Path(path)
+    def update(self, system_data_dir: str, source_dir: str):
 
-        # Read input data
-        g = read_graph(_path)
-        neighbourhoods = read_neighbourhoods(_path)
-        sites = read_sites(_path)
+        # _source_dir: Path = Path(source_dir)
 
-        # Update sites
-        updated_sites = _update_sites(g, neighbourhoods, sites)
+        self.build_system_data(system_data_dir, source_dir)
+        self.build_graph(source_dir)
+        # self.update_sites(source_dir)
+        self.align_structures(source_dir)
+        self.align_xmaps(source_dir)
 
-        # Check for possible merges and report
-        suggested_merges = _suggest_merges(sites)
+    # def update_sites(self, path: str = "."):
+    #     _path: Path = Path(path)
 
-        # Report
-        report_site_update(sites, updated_sites)
-        report_merges(suggested_merges)
+    #     # Read input data
+    #     g = read_graph(_path)
+    #     neighbourhoods = read_neighbourhoods(_path)
+    #     sites = read_sites(_path)
+
+    #     # Update sites
+    #     updated_sites = _update_sites(g, neighbourhoods, sites)
+
+    #     _update_sites(_path)
+    #     # # Check for possible merges and report
+    #     # suggested_merges = _suggest_merges(sites)
+
+    #     # # Report
+    #     # report_site_update(sites, updated_sites)
+    #     # report_merges(suggested_merges)
 
     def build_graph(
         self,
@@ -146,8 +423,32 @@ class CLI:
 
         make_data_json_from_pandda_dir(_system_data_dir, _output_dir)
 
-    def change_site_reference(self):
-        ...
+    def change_sites_reference(self, source_dir: str, site_id: int):
+        _source_dir: Path = Path(source_dir)
+
+        _change_sites_reference(_source_dir, site_id)
+
+    def change_site_reference(
+        self, source_dir: str, site_id: int, subsite_id: int
+    ):
+        _source_dir: Path = Path(source_dir)
+
+        _change_site_reference(_source_dir, site_id, subsite_id)
+
+    def change_subsite_reference(
+        self,
+        source_dir: str,
+        site_id: int,
+        subsite_id: int,
+        dtag: int,
+        chain: str,
+        residue: int,
+    ):
+        _source_dir: Path = Path(source_dir)
+
+        _change_subsite_reference(
+            _source_dir, site_id, subsite_id, dtag, chain, residue
+        )
 
     def align_structures(self, source_dir: str):
         _source_dir: Path = Path(source_dir)
@@ -208,39 +509,6 @@ class CLI:
         _source_dir: Path = Path(source_dir)
 
         _generate_sites_from_components(_source_dir)
-
-        # def align_all(self, source_dir: str, output_dir: str):
-        #     _source_dir: Path = Path(source_dir)
-        #     _output_dir: Path = Path(output_dir)
-
-        #     g = read_graph(_source_dir)
-        #     transforms: Transforms = read_transforms(_source_dir)
-        #     neighbourhoods = read_neighbourhoods(_source_dir)
-        #     xtalforms: XtalForms = read_xtalforms(_source_dir)
-        #     sites: Sites = read_sites(_source_dir)
-        #     system_data: SystemData = read_system_data(_source_dir)
-
-        #     # get Structures
-        #     structures = read_structures(system_data)
-
-        # Align structures
-        # _align_structures_from_sites(
-        #     structures,
-        #     sites,
-        #     transforms,
-        #     neighbourhoods,
-        #     xtalforms,
-        #     g,
-        #     _output_dir,
-        # )
-
-        # # Align xmaps
-        # _align_xmaps(
-        #     system_data, sites, neighbourhoods, transforms, _output_dir
-        # )
-
-        # Report
-        report_alignments()
 
 
 if __name__ == "__main__":

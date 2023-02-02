@@ -16,6 +16,7 @@ from xchemalign.data import (
     Transform,
     read_graph,
     read_neighbourhoods,
+    read_sites,
     read_system_data,
     save_site_transforms,
 )
@@ -169,13 +170,27 @@ def get_site_transforms(sites: Sites, structures):
     return transforms
 
 
-def _generate_sites_from_components(_source_dir: Path):
+def update_subsites_from_components(
+    sites, connected_components, neighbourhoods
+):
+    ...
+
+
+def update_sites_from_subsites(sites, updated_subsites, neighbourhoods):
+    ...
+
+
+def _update_sites(_source_dir: Path):
 
     logger.info(f"Source dir: {_source_dir}")
     g = read_graph(_source_dir)
     neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
     logger.info(f"Number of neighbourhoods: {len(neighbourhoods.ligand_ids)}")
 
+    # Get the current sites
+    sites: Sites = read_sites(_source_dir)
+
+    # Get the (potentially new) data
     system_data = read_system_data(_source_dir)
 
     # Get the connected components
@@ -183,33 +198,29 @@ def _generate_sites_from_components(_source_dir: Path):
     connected_components = get_components(g)
     logger.info(f"Number of connected components: {len(connected_components)}")
 
-    # Get the subsites from the connected components with overlap
+    # Update the subsites with new component members
+    # Create new subsites if necessary
     logger.info("Geting sites...")
-    subsites: list[SubSite] = get_subsites_from_components(
-        connected_components, neighbourhoods
+    updated_subsites: list[SubSite] = update_subsites_from_components(
+        sites, connected_components, neighbourhoods
     )
-    logger.info(f"Number of subsites: {len(subsites)}")
+    logger.info(f"Number of subsites: {len(updated_subsites)}")
 
-    # Merge the connected components with shared residues into sites
+    # Update sites with new subsites
     logger.info("Getting sites...")
-    _sites: list[Site] = get_sites_from_subsites(subsites, neighbourhoods)
-    logger.info(f"Number of sites: {len(_sites)}")
-
-    sites: Sites = Sites(
-        site_ids=[s.id for s in _sites],
-        sites=_sites,
-        reference_site=_sites[0],
-        reference_site_id=_sites[0].id,
+    updated_sites: Sites = update_sites_from_subsites(
+        sites, updated_subsites, neighbourhoods
     )
+    logger.info(f"Number of sites: {len(updated_sites)}")
 
-    save_sites(sites, _source_dir)
+    save_sites(updated_sites, _source_dir)
 
-    # Get the subsite transforms
+    # Regenerate subsite transforms
     logger.info("Getting transfroms between subsites...")
     structures = get_structures(system_data)
     subsite_transforms = get_subsite_transforms(sites, structures)
 
-    # Get the site transforms
+    # Regenerate the site transforms
     logger.info("Getting transforms between sites...")
     site_transforms = get_site_transforms(sites, structures)
     site_transforms = SiteTransforms(

@@ -42,6 +42,88 @@ def get_closest_lig(structure, coord):
     return min(distances, key=lambda x: distances[x])
 
 
+def get_ligand_binding_events_from_structure(
+    pdb_path: Path,
+    xmap_path: Path,
+    dtag: str,
+):
+    structure = gemmi.read_structure(str(pdb_path))
+    event_id = 0
+
+    lbes = []
+    for model in structure:
+        for chain in model:
+            for residue in chain:
+                lbe = LigandBindingEvent(
+                    id=event_id,
+                    dtag=dtag,
+                    chain=chain.name,
+                    residue=residue.seqid.num,
+                    xmap=str(xmap_path),
+                )
+            event_id += 1
+            lbes.append(lbe)
+
+    return lbes
+
+
+def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
+    structure = gemmi.read_structure(str(pdb_path))
+
+    lbes = []
+    # Iterate the events, and if a match add a ligand binding event
+    for pandda_path, event_table in pandda_event_csvs.items():
+        processed_datasets_dir = (
+            Path(pandda_path) / constants.PANDDA_PROCESSED_DATASETS_DIR
+        )
+
+        for idx, row in event_table.iterrows():
+            _dtag = row["dtag"]
+            event_id = row["event_idx"]
+            x = row["x"]
+            y = row["y"]
+            z = row["z"]
+            bdc = row["1-BDC"]
+            ligand_confidence = row["Ligand Confidence"]
+
+            # logger.debug(f"Processing {dtag} {event_id}")
+
+            if ligand_confidence != "High":
+                # logger.debug("No high confidence ligand!")
+                continue
+
+            if dtag != _dtag:
+                continue
+
+            # Get the structure
+            processed_dataset_dir = processed_datasets_dir / dtag
+
+            # Identify the closest ligand to the event
+            chain, residue_num = get_closest_lig(structure, (x, y, z))
+
+            if not residue_num:
+                continue
+
+            # Get the event map
+            xmap_path = (
+                processed_dataset_dir
+                / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                    dtag=dtag, event_id=event_id, bdc=bdc
+                )
+            )
+
+            lbe = LigandBindingEvent(
+                id=event_id,
+                dtag=dtag,
+                chain=chain,
+                residue=residue_num,
+                xmap=str(xmap_path),
+            )
+            lbes.append(lbe)
+
+    return lbes
+
+
 def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
 
     logger.info(f"PanDDA directory is: {pandda_dir}")
@@ -107,7 +189,11 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
             initial_datasets[dtag] = {}
 
         initial_datasets[dtag][event_id] = LigandBindingEvent(
-            id=event_id, chain=chain, residue=residue_num, xmap=str(xmap_path)
+            id=event_id,
+            dtag=dtag,
+            chain=chain,
+            residue=residue_num,
+            xmap=str(xmap_path),
         )
 
     # Get the datasets
@@ -123,7 +209,11 @@ def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
             / constants.PANDDA_FINAL_STRUCTURE_PDB_TEMPLATE.format(dtag=dtag)
         )
         event_ids = [
-            LigandID(dtag=dtag, chain=event.chain, id=event_id)
+            LigandID(
+                dtag=dtag,
+                chain=event.chain,
+                residue=event.residue,
+            )
             for event_id, event in events.items()
         ]
         ligand_binding_events = [event for event in events.values()]

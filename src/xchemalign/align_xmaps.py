@@ -265,7 +265,7 @@ def _align_xmaps(
 ):
 
     # Get the global reference
-    reference_lid: LigandID = sites.sites[0].members[0]
+    reference_lid: LigandID = sites.reference_site.reference_ligand_id
 
     # Get that dataset
     referance_ds: Dataset = system_data.get_dataset(
@@ -298,7 +298,7 @@ def _align_xmaps(
             logger.debug(f"Aligning subsite: {subsite_id}")
             # Get the site reference
             # TODO: Make work
-            subsite_reference_id = subsite.members[0]
+            subsite_reference_id = subsite.reference_ligand_id
 
             subsite_xmaps_dir = site_xmaps_dir / f"{subsite_id}"
             if not subsite_xmaps_dir.exists():
@@ -386,7 +386,7 @@ def _align_xmaps(
                 write_xmap(
                     new_xmap,
                     subsite_xmaps_dir
-                    / f"{lid.dtag}_{lid.chain}_{lid.id}.ccp4",
+                    / f"{lid.dtag}_{lid.chain}_{lid.residue}.ccp4",
                     neighbourhood,
                     running_transform,
                 )

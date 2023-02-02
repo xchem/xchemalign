@@ -5,8 +5,7 @@ import gemmi
 import networkx as nx
 from loguru import logger
 
-from xchemalign.data import (  # Transform,
-    AlignableSite,
+from xchemalign.data import (  # Transform,; AlignableSite,
     LigandNeighbourhoods,
     Sites,
     SiteTransforms,
@@ -14,7 +13,8 @@ from xchemalign.data import (  # Transform,
     XtalForms,
     transform_to_gemmi,
 )
-from xchemalign.structures import get_structures, get_transforms
+
+# from xchemalign.structures import get_structures, get_transforms
 
 
 def superpose_structure(transform, structure):
@@ -28,113 +28,115 @@ def superpose_structure(transform, structure):
     return new_structure
 
 
-def generate_aligned_structures(
-    output_dir, ligand_neighbourhoods, system_data, sites: list[AlignableSite]
-):
-    # Get structures
-    structures = {}
-    for dataset in system_data.dataset:
-        structure: gemmi.Structure = gemmi.read_structure(dataset.pdb)
-        structures[dataset.dtag] = structure
+# def generate_aligned_structures(
+#     output_dir, ligand_neighbourhoods, system_data,
+# sites: list[AlignableSite]
+# ):
+#     # Get structures
+#     structures = {}
+#     for dataset in system_data.dataset:
+#         structure: gemmi.Structure = gemmi.read_structure(dataset.pdb)
+#         structures[dataset.dtag] = structure
 
-    #
-    for site in sites:
-        # logger.debug(f"Site id is: {site.id}")
-        site_dir = output_dir / f"{site.id}"
-        if not site_dir.exists():
-            os.mkdir(site_dir)
-        ligand_ids = site.ligand_ids
-        neighbourhoods = [ligand_neighbourhoods[n] for n in ligand_ids]
-        neigbhourhood_structures = [
-            structures[ligand_id.dtag] for ligand_id in ligand_ids
-        ]
-        transforms = [
-            get_transforms(neighbourhoods[0], neighbourhood)
-            for neighbourhood in neighbourhoods
-        ]
-        superposed_structures = [
-            superpose_structure(transform, structure)
-            for transform, structure in zip(
-                transforms, neigbhourhood_structures
-            )
-        ]
-        for ligand_id, structure in zip(ligand_ids, superposed_structures):
-            structure.write_pdb(
-                str(site_dir / f"{ligand_id.dtag}_{ligand_id.id}.pdb")
-            )
+#     #
+#     for site in sites:
+#         # logger.debug(f"Site id is: {site.id}")
+#         site_dir = output_dir / f"{site.id}"
+#         if not site_dir.exists():
+#             os.mkdir(site_dir)
+#         ligand_ids = site.ligand_ids
+#         neighbourhoods = [ligand_neighbourhoods[n] for n in ligand_ids]
+#         neigbhourhood_structures = [
+#             structures[ligand_id.dtag] for ligand_id in ligand_ids
+#         ]
+#         transforms = [
+#             get_transforms(neighbourhoods[0], neighbourhood)
+#             for neighbourhood in neighbourhoods
+#         ]
+#         superposed_structures = [
+#             superpose_structure(transform, structure)
+#             for transform, structure in zip(
+#                 transforms, neigbhourhood_structures
+#             )
+#         ]
+#         for ligand_id, structure in zip(ligand_ids, superposed_structures):
+#             structure.write_pdb(
+#                 str(site_dir / f"{ligand_id.dtag}_{ligand_id.id}.pdb")
+#             )
 
 
-def generate_aligned_structures_connected_components(
-    output_dir,
-    ligand_neighbourhoods,
-    system_data,
-    sites: list[AlignableSite],
-    g,
-):
-    # Get structures
-    structures = get_structures(system_data)
+# def generate_aligned_structures_connected_components(
+#     output_dir,
+#     ligand_neighbourhoods,
+#     system_data,
+#     sites: Sites,
+#     g,
+# ):
+#     # Get structures
+#     structures = get_structures(system_data)
 
-    # Iterate sites
-    for site in sites:
-        logger.debug(f"Site id is: {site.id}")
-        site_dir = output_dir / f"{site.id}"
-        if not site_dir.exists():
-            os.mkdir(site_dir)
-        ligand_ids = site.ligand_ids
+#     # Iterate sites
+#     for site in sites:
+#         logger.debug(f"Site id is: {site.id}")
+#         site_dir = output_dir / f"{site.id}"
+#         if not site_dir.exists():
+#             os.mkdir(site_dir)
+#         ligand_ids = site.ligand_ids
 
-        # Select the alignment reference ligand_id
-        reference_ligand_id = ligand_ids[0]
+#         # Select the alignment reference ligand_id
+#         reference_ligand_id = site.reference
 
-        # For each other ligand
-        for moving_ligand_id in ligand_ids[:-1]:
-            # Get the shortest alignment path to the reference
-            shortest_path = nx.shortest_path(
-                g, moving_ligand_id, reference_ligand_id
-            )
-            logger.debug(f"Shortest path: {shortest_path}")
+#         # For each other ligand
+#         for moving_ligand_id in ligand_ids[:-1]:
+#             # Get the shortest alignment path to the reference
+#             shortest_path = nx.shortest_path(
+#                 g, moving_ligand_id, reference_ligand_id
+#             )
+#             logger.debug(f"Shortest path: {shortest_path}")
 
-            # Initial structure
-            structure = structures[moving_ligand_id.dtag].clone()
+#             # Initial structure
+#             structure = structures[moving_ligand_id.dtag].clone()
 
-            # Walk the path, iteratively applying transforms
-            previous_ligand_id = moving_ligand_id
-            for next_ligand_id in shortest_path:
-                # Get the transform from previous frame to new one
-                transform, alignment_ids = get_transforms(
-                    ligand_neighbourhoods[next_ligand_id],
-                    ligand_neighbourhoods[previous_ligand_id],
-                )
-                logger.debug(
-                    [f"{lid.residue}/{lid.atom}" for lid in alignment_ids]
-                )
+#             # Walk the path, iteratively applying transforms
+#             previous_ligand_id = moving_ligand_id
+#             for next_ligand_id in shortest_path:
+#                 # Get the transform from previous frame to new one
+#                 transform, alignment_ids = get_transforms(
+#                     ligand_neighbourhoods[next_ligand_id],
+#                     ligand_neighbourhoods[previous_ligand_id],
+#                 )
+#                 logger.debug(
+#                     [f"{lid.residue}/{lid.atom}" for lid in alignment_ids]
+#                 )
 
-                # Apply the translation to the new frame
-                structure = superpose_structure(transform, structure)
+#                 # Apply the translation to the new frame
+#                 structure = superpose_structure(transform, structure)
 
-            # Write the fully aligned structure
-            out_path = (
-                site_dir / f"{moving_ligand_id.dtag}_{moving_ligand_id.id}.pdb"
-            )
-            structure.write_pdb(str(out_path))
+#             # Write the fully aligned structure
+#             out_path = (
+#                 site_dir / f"{moving_ligand_id.dtag}_{
+# moving_ligand_id.id}.pdb"
+#             )
+#             structure.write_pdb(str(out_path))
 
-        # neighbourhoods = [ligand_neighbourhoods[n] for n in ligand_ids]
-        # neigbhourhood_structures = [
-        #     structures[ligand_id.dtag] for ligand_id in ligand_ids
-        # ]
-        # transforms = [
-        #     get_transforms(neighbourhoods[0], neighbourhood)
-        #     for neighbourhood in neighbourhoods
-        # ]
-        # superposed_structures = [
-        #     superpose_structure(transform, structure)
-        #     for transform, structure in zip(
-        #         transforms, neigbhourhood_structures
-        #     )
-        # ]
-        # for ligand_id, structure in zip(ligand_ids, superposed_structures):
-        #     structure.write_pdb(
-        #         str(site_dir / f"{ligand_id.dtag}_{ligand_id.id}.pdb")
-        #     )
+#         # neighbourhoods = [ligand_neighbourhoods[n] for n in ligand_ids]
+#         # neigbhourhood_structures = [
+#         #     structures[ligand_id.dtag] for ligand_id in ligand_ids
+#         # ]
+#         # transforms = [
+#         #     get_transforms(neighbourhoods[0], neighbourhood)
+#         #     for neighbourhood in neighbourhoods
+#         # ]
+#         # superposed_structures = [
+#         #     superpose_structure(transform, structure)
+#         #     for transform, structure in zip(
+#         #         transforms, neigbhourhood_structures
+#         #     )
+#         # ]
+#         # for ligand_id, structure in zip(ligand_ids, superposed_structures):
+#         #     structure.write_pdb(
+#         #         str(site_dir / f"{ligand_id.dtag}_{ligand_id.id}.pdb")
+#         #     )
 
 
 def expand_structure(_structure, xtalforms: XtalForms, moving_ligand_id):
@@ -148,62 +150,63 @@ def expand_structure(_structure, xtalforms: XtalForms, moving_ligand_id):
     #             ...
 
 
-def _align_structures(
-    structures,
-    sites: Sites,
-    transforms: Transforms,
-    neighbourhoods: LigandNeighbourhoods,
-    xtalforms: XtalForms,
-    g,
-    _output_dir: Path,
-):
-    # Iterate sites
-    for site in sites.sites:
-        logger.debug(f"Site id is: {site.id}")
-        site_dir = _output_dir / f"{site.id}"
-        if not site_dir.exists():
-            os.mkdir(site_dir)
-        ligand_ids = site.members
+# def _align_structures(
+#     structures,
+#     sites: Sites,
+#     transforms: Transforms,
+#     neighbourhoods: LigandNeighbourhoods,
+#     xtalforms: XtalForms,
+#     g,
+#     _output_dir: Path,
+# ):
+#     # Iterate sites
+#     for site in sites.sites:
+#         logger.debug(f"Site id is: {site.id}")
+#         site_dir = _output_dir / f"{site.id}"
+#         if not site_dir.exists():
+#             os.mkdir(site_dir)
+#         ligand_ids = site.members
 
-        # Select the alignment reference ligand_id
-        reference_ligand_id = ligand_ids[0]
+#         # Select the alignment reference ligand_id
+#         reference_ligand_id = ligand_ids[0]
 
-        # For each other ligand
-        for moving_ligand_id in ligand_ids[:-1]:
-            # Get the shortest alignment path to the reference
-            shortest_path = nx.shortest_path(
-                g, moving_ligand_id, reference_ligand_id
-            )
-            logger.debug(f"Shortest path: {shortest_path}")
+#         # For each other ligand
+#         for moving_ligand_id in ligand_ids[:-1]:
+#             # Get the shortest alignment path to the reference
+#             shortest_path = nx.shortest_path(
+#                 g, moving_ligand_id, reference_ligand_id
+#             )
+#             logger.debug(f"Shortest path: {shortest_path}")
 
-            # Initial structure
-            _structure = structures[moving_ligand_id.dtag].clone()
+#             # Initial structure
+#             _structure = structures[moving_ligand_id.dtag].clone()
 
-            # Expand structure
-            structure = expand_structure(
-                _structure, xtalforms, moving_ligand_id
-            )
+#             # Expand structure
+#             structure = expand_structure(
+#                 _structure, xtalforms, moving_ligand_id
+#             )
 
-            # Walk the path, iteratively applying transforms
-            previous_ligand_id = moving_ligand_id
-            for next_ligand_id in shortest_path:
-                # Get the transform from previous frame to new one
-                transform = transforms.get_transform(
-                    (previous_ligand_id, next_ligand_id)
-                )
+#             # Walk the path, iteratively applying transforms
+#             previous_ligand_id = moving_ligand_id
+#             for next_ligand_id in shortest_path:
+#                 # Get the transform from previous frame to new one
+#                 transform = transforms.get_transform(
+#                     (previous_ligand_id, next_ligand_id)
+#                 )
 
-                # logger.debug(
-                #     [f"{lid.residue}/{lid.atom}" for lid in alignment_ids]
-                # )
+#                 # logger.debug(
+#                 #     [f"{lid.residue}/{lid.atom}" for lid in alignment_ids]
+#                 # )
 
-                # Apply the translation to the new frame
-                structure = superpose_structure(transform, structure)
+#                 # Apply the translation to the new frame
+#                 structure = superpose_structure(transform, structure)
 
-            # Write the fully aligned structure
-            out_path = (
-                site_dir / f"{moving_ligand_id.dtag}_{moving_ligand_id.id}.pdb"
-            )
-            structure.write_pdb(str(out_path))
+#             # Write the fully aligned structure
+#             out_path = (
+#
+# site_dir / f"{moving_ligand_id.dtag}_{moving_ligand_id.id}.pdb"
+#             )
+#             structure.write_pdb(str(out_path))
 
 
 def _align_structures_from_sites(
@@ -239,7 +242,7 @@ def _align_structures_from_sites(
 
             # Select the alignment reference ligand_id
             # TODO: Track reference properly
-            reference_ligand_id = ligand_ids[0]
+            reference_ligand_id = subsite.reference_ligand_id
 
             # For each other ligand
             for moving_ligand_id in ligand_ids:
@@ -274,8 +277,6 @@ def _align_structures_from_sites(
                         running_transform = transform.combine(
                             running_transform
                         )
-                    # else:
-                    #     transform = gemmi.Transform()
 
                     # Apply the translation to the new frame
                     previous_ligand_id = next_ligand_id
@@ -297,6 +298,6 @@ def _align_structures_from_sites(
                 # Write the fully aligned structure
                 out_path = (
                     subsite_dir
-                    / f"{moving_ligand_id.dtag}_{moving_ligand_id.id}.pdb"
+                    / f"{moving_ligand_id.dtag}_{moving_ligand_id.residue}.pdb"
                 )
                 structure.write_pdb(str(out_path))
