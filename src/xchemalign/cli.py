@@ -300,7 +300,9 @@ class CLI:
         if not _source_dir.exists():
             os.mkdir(_source_dir)
 
-        system_data = SystemData()
+        system_data = SystemData(
+            datasources=[], panddas=[], dataset_ids=[], datasets=[]
+        )
 
         save_data(system_data, _source_dir)
 
