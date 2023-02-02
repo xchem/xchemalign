@@ -269,6 +269,10 @@ def _parse_data_sources(_source_dir: Path):
                 # mtz = model_dir / constants.MODEL_DIR_MTZ
                 pdb = model_dir / constants.MODEL_DIR_PDB
                 xmap = model_dir / constants.MODEL_DIR_XMAP
+                if not pdb.exists():
+                    continue
+                if not xmap.exists():
+                    continue
                 ligand_binding_events = get_ligand_binding_events_from_panddas(
                     pandda_event_tables, pdb, dtag
                 )
