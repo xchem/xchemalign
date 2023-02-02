@@ -70,6 +70,7 @@ def get_ligand_binding_events_from_structure(
 def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
     structure = gemmi.read_structure(str(pdb_path))
 
+    lids = []
     lbes = []
     # Iterate the events, and if a match add a ligand binding event
     for pandda_path, event_table in pandda_event_csvs.items():
@@ -111,7 +112,7 @@ def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
                     dtag=dtag, event_id=event_id, bdc=bdc
                 )
             )
-
+            lid = LigandID(dtag=dtag, chain=chain, residue=residue_num)
             lbe = LigandBindingEvent(
                 id=event_id,
                 dtag=dtag,
@@ -119,9 +120,10 @@ def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
                 residue=residue_num,
                 xmap=str(xmap_path),
             )
+            lids.append(lid)
             lbes.append(lbe)
 
-    return lbes
+    return LigandBindingEvents(ligand_ids=lids, ligand_binding_events=lbes)
 
 
 def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
