@@ -152,7 +152,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     #     initial_dataset = InitialDataset(dtag=dtag, mtz, pdb, xmap)
 
     datasouce = Datasource(
-        path=str(_data_source_dir), datasource_type="model_building_dir"
+        path=str(_data_source_dir), datasource_type="model_building"
     )
 
     if not system_data.datasources:
