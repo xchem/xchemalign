@@ -17,7 +17,7 @@ Documentation  https://xchem.github.io/xchemalign
 Releases       https://github.com/xchem/xchemalign/releases
 ============== ==============================================================
 
-The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json:
+The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json
 
 .. code:: json
     {
