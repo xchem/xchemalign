@@ -263,14 +263,13 @@ def align_xmap(
     site_id: int,
     subsite_id: int,
     lid: LigandID,
-    xmap_path: Path,
+    xmap,
     output_path: Path,
 ):
     # Get the ligand neighbourhood
     neighbourhood: LigandNeighbourhood = neighbourhoods.get_neighbourhood(lid)
 
     # Get the xmap
-    xmap = read_xmap(xmap_path)
 
     # Get the Transform to reference
     running_transform = gemmi.Transform()
@@ -330,6 +329,12 @@ def align_xmap(
         neighbourhood,
         running_transform,
     )
+
+
+def read_xmap_from_mtz(mtz_path: Path):
+    mtz = gemmi.read_mtz_file(str(mtz_path))
+    grid = mtz.transform_f_phi_to_map("2FOFCWT" "PH2FOFCWT", sample_rate=4)
+    return grid
 
 
 def _align_xmaps(
@@ -402,6 +407,8 @@ def _align_xmaps(
                     / f"{lid.dtag}_{lid.chain}_{lid.residue}.ccp4"
                 )
                 # Align the event map
+                xmap = read_xmap(xmap_path)
+
                 align_xmap(
                     neighbourhoods,
                     g,
@@ -412,7 +419,7 @@ def _align_xmaps(
                     site_id,
                     subsite_id,
                     lid,
-                    xmap_path,
+                    xmap,
                     output_path,
                 )
                 output_path = (
@@ -420,16 +427,19 @@ def _align_xmaps(
                     / f"{lid.dtag}_{lid.chain}_{lid.residue}_refine.ccp4"
                 )
                 # Align the refined map
-                align_xmap(
-                    neighbourhoods,
-                    g,
-                    transforms,
-                    site_transforms,
-                    reference_xmap,
-                    subsite_reference_id,
-                    site_id,
-                    subsite_id,
-                    lid,
-                    Path(dataset.xmap),
-                    output_path,
-                )
+                if dataset.mtz:
+                    xmap = read_xmap_from_mtz(Path(dataset.mtz))
+
+                    align_xmap(
+                        neighbourhoods,
+                        g,
+                        transforms,
+                        site_transforms,
+                        reference_xmap,
+                        subsite_reference_id,
+                        site_id,
+                        subsite_id,
+                        lid,
+                        xmap,
+                        output_path,
+                    )

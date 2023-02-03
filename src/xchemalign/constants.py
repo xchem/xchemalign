@@ -24,3 +24,4 @@ ALIGNED_XMAPS_DIR: str = "aligned_xmaps"
 
 MODEL_DIR_PDB: str = "refine.pdb"
 MODEL_DIR_XMAP: str = "refine.ccp4"
+MODEL_DIR_MTZ: str = "refine.mtz"

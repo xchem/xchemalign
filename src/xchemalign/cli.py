@@ -271,10 +271,11 @@ def _parse_data_sources(_source_dir: Path):
                 # mtz = model_dir / constants.MODEL_DIR_MTZ
                 pdb = model_dir / constants.MODEL_DIR_PDB
                 xmap = model_dir / constants.MODEL_DIR_XMAP
+                mtz = model_dir / constants.MODEL_DIR_MTZ
                 if not pdb.exists():
                     continue
-                if not xmap.exists():
-                    continue
+                # if not xmap.exists():
+                #     continue
                 ligand_binding_events = get_ligand_binding_events_from_panddas(
                     pandda_event_tables, pdb, dtag
                 )
@@ -287,6 +288,7 @@ def _parse_data_sources(_source_dir: Path):
                     dtag=dtag,
                     pdb=str(pdb),
                     xmap=str(xmap),
+                    mtz=str(mtz),
                     ligand_binding_events=ligand_binding_events,
                 )
                 dataset_ids.append(dataset_id)
@@ -304,6 +306,7 @@ def _parse_data_sources(_source_dir: Path):
 
                 pdb = next(model_dir.glob("*.pdb"))
                 xmap = next(model_dir.glob("*.ccp4"))
+                mtz = next(model_dir.glob("*.mtz"))
                 ligand_binding_events = (
                     get_ligand_binding_events_from_structure(pdb, xmap, dtag)
                 )
@@ -316,6 +319,7 @@ def _parse_data_sources(_source_dir: Path):
                     dtag=dtag,
                     pdb=str(pdb),
                     xmap=str(xmap),
+                    mtz=str(mtz),
                     ligand_binding_events=ligand_binding_events,
                 )
                 dataset_ids.append(dataset_id)

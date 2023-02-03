@@ -175,6 +175,7 @@ class Dataset(BaseModel):
     dtag: str
     pdb: str
     xmap: str
+    mtz: str
     ligand_binding_events: LigandBindingEvents
 
 
