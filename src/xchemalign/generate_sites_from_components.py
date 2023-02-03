@@ -102,8 +102,8 @@ def get_sites_from_subsites(
     sites = []
     j = 0
     for component in cc:
-        print(f"Component: {component}")
-        print(f"Subsites: {subsites}")
+        print(f"Component: {component} {len(component)}")
+        print(f"Subsites: {subsites} {len(subsites)}")
         members = list(
             set(sum([subsites[j].members for j in component], start=[]))
         )
