@@ -3,14 +3,12 @@ XChemAlign again
 
 |code_ci| |docs_ci| |coverage| |pypi_version| |license|
 
-.. note::
 
-    This project contains template code only. For documentation on how to
-    adopt this skeleton project see
-    https://xchem.github.io/xchemalign-cli
+XChemAlign is a small command line interface and library for constructing data models of fragment screening results, identifying groupings of fragments and aligning structures and ccp4 maps into a common reference frame.
 
-This is where you should write a short paragraph that describes what your module does,
-how it does it, and why people should use it.
+XChemAlign is designed to work in the presence of crystallographic symmetry, non-crystallographic symmetry, multiple space groups and conformational hetrogeneity among the source data.
+
+If you have seen XChemAlign fail to correctly parse data, identify sites or subsites, align structures or xmaps or otherwise have any suggestions, please raise an issue on this github!
 
 ============== ==============================================================
 PyPI           ``pip install xchemalign``
@@ -19,19 +17,48 @@ Documentation  https://xchem.github.io/xchemalign
 Releases       https://github.com/xchem/xchemalign/releases
 ============== ==============================================================
 
-This is where you should put some images or code snippets that illustrate
-some relevant examples. If it is a library then you might put some
-introductory code here:
+Basic usage of XChemAlign begins with initializing a project::
 
-.. code-block:: python
+    $ python -m xchemalign.cli init /path/to/project/dir
 
-    from xchemalign import __version__
+After this datasources can be added::
 
-    print(f"Hello xchemalign {__version__}")
+    $ python -m xchemalign.cli add_datasource /path/to/project/dir /path/to/datasource
 
-Or if it is a commandline tool then you might put some example commands here::
+In order to align PanDDA event maps, the PanDDA directory in which these maps were modelled with PanDDA inspect must be added::
 
-    $ python -m xchemalign --version
+    $ python -m xchemalign.cli add_datasource /path/to/project/dir /path/to/pandda
+
+Multiple datasources can be added to a single project, as can multiple PanDDAs. Be cautious if the fragment was modelled in multiple of these PanDDAs, as only the xmaps from the first added PanDDA will be included.
+
+After sources and PanDDAs have been added, they can be parsed to produced a combined dataset::
+
+    $ python -m xchemalign.cli parse_data_sources /path/to/project/dir 
+
+Once the combined datasource has been produced, the alignment graph can be calculated. This graph encodes the transformations necessary to align any two fragments based on their local protein environment (assuming this is possible)::
+
+    $ python -m xchemalign.cli build_graph /path/to/project/dir 
+
+Once the local alignment graph has been determined, subsites can be calculated based on the connected components (ligands that can be directly or indirectly aligned to one another based on their local protein environment), and then sites can be determined from those subsites which share significant numbers of residues::
+
+    $ python -m xchemalign.cli generate_sites_from_components /path/to/project/dir 
+
+Once the sites and subsites have been generated, all of the structures can be aligned to a common reference frame. This first aligns all structures to the reference ligand in their subsite, then all subsites in a site to their reference subsite, then all sites to the reference site:: 
+
+    $ python -m xchemalign.cli align_structures /path/to/project/dir 
+
+Finally, the refined 2Fo-Fc maps and any event maps from PanDDAs can be aligned to their respective aligned structures::
+
+    $ python -m xchemalign.cli align_xmaps /path/to/project/dir 
+
+In order to inspect all of the structures in a site, there is a convenience function to open them all at once in coot::
+
+    $ python -m xchemalign.cli open_site /path/to/project/dir site_number
+
+If new datasources or PanDDAs have been added, or manual changes have been made to the sites or subsites, then these changes can be conveniently propogated to a new set of final sites, subsites, structures and xmaps using the update command::
+
+    $ python -m xchemalign.cli update /path/to/project/dir 
+
 
 .. |code_ci| image:: https://github.com/xchem/xchemalign/actions/workflows/code.yml/badge.svg?branch=main
     :target: https://github.com/xchem/xchemalign/actions/workflows/code.yml
