@@ -50,12 +50,13 @@ def get_subsites_from_components(
             n: LigandNeighbourhood = neighbourhoods.get_neighbourhood(lid)
             lrs: list[ResidueID] = get_residues_from_neighbourhood(n)
             rs += lrs
+        component_members = list(component)
         s = SubSite(
             id=j,
             name="",
             residues=list(set(rs)),
-            members=component,
-            reference_ligand_id=component[0],
+            members=component_members,
+            reference_ligand_id=component_members[0],
         )
         j += 1
         ss.append(s)
