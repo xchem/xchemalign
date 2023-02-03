@@ -19,7 +19,7 @@ Releases       https://github.com/xchem/xchemalign/releases
 
 The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json:
 
-.. code-block:: json
+.. code-block:: javascript
     {
         "source_dir": "/path/to/source/dir", 
         "datasources": ["/path/to/datasource/1", "/path/to/datasource/2"], 
