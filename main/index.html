@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>XChemAlign again &#8212; xchemalign 0.1.dev298+g3180e2f documentation</title>
+    <title>XChemAlign again &#8212; xchemalign 0.1.dev306+gb8cec80 documentation</title>
   
   
   
@@ -377,7 +377,19 @@
 </tr>
 </tbody>
 </table>
-<p>Basic usage of XChemAlign begins with initializing a project:</p>
+<p>The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;source_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;/path/to/source/dir&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;datasources&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/path/to/datasource/1&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/datasource/2&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;panddas&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/path/to/pandda/1&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/pandda/2&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>And then run the process option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python -m xchemalign.cli process /path/to/option/json
+</pre></div>
+</div>
+<p>However, XChemAlign can be manually used as follows. This begins with initializing a project:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python -m xchemalign.cli init /path/to/project/dir
 </pre></div>
 </div>
