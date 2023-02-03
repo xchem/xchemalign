@@ -2,6 +2,7 @@ import os
 
 # import os
 import subprocess
+import sys
 from pathlib import Path
 
 import fire
@@ -45,6 +46,9 @@ from xchemalign.make_data_json import (
     get_ligand_binding_events_from_structure,
     make_data_json_from_pandda_dir,
 )
+
+logger.add(sys.stdout, colorize=True, format="{time} {level} \n{message}")
+
 
 # def _update_sites(source_dir: Path):
 
