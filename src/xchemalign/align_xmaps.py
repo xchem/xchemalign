@@ -253,6 +253,85 @@ def interpolate_range(
     return new_xmap
 
 
+def align_xmap(
+    neighbourhoods: LigandNeighbourhoods,
+    g,
+    transforms: Transforms,
+    site_transforms: SiteTransforms,
+    reference_xmap,
+    subsite_reference_id: LigandID,
+    site_id: int,
+    subsite_id: int,
+    lid: LigandID,
+    xmap_path: Path,
+    output_path: Path,
+):
+    # Get the ligand neighbourhood
+    neighbourhood: LigandNeighbourhood = neighbourhoods.get_neighbourhood(lid)
+
+    # Get the xmap
+    xmap = read_xmap(xmap_path)
+
+    # Get the Transform to reference
+    running_transform = gemmi.Transform()
+    shortest_path = nx.shortest_path(g, lid, subsite_reference_id)
+    logger.debug(f"Shortest path: {shortest_path}")
+
+    previous_ligand_id = lid
+    for next_ligand_id in shortest_path:
+        # Get the transform from previous frame to new one
+        # Transform is 2 onto 1
+        if next_ligand_id != previous_ligand_id:
+
+            transform = transforms.get_transform(
+                (
+                    next_ligand_id,
+                    previous_ligand_id,
+                ),
+            )
+            running_transform = transform.combine(running_transform)
+        # Apply the translation to the new frame
+        previous_ligand_id = next_ligand_id
+
+    # Get the subsite transform
+    subsite_transform = transform_to_gemmi(
+        site_transforms.get_subsite_transform(site_id, subsite_id)
+    )
+
+    # Get the site transform
+    site_transform = transform_to_gemmi(
+        site_transforms.get_site_transform(site_id)
+    )
+
+    # Running transform
+    running_transform = site_transform.combine(
+        subsite_transform.combine(running_transform)
+    )
+
+    logger.debug(f"Transform is: {gemmi_to_transform(running_transform)}")
+
+    # Define the interpolation range
+    interpolation_range = get_interpolation_range(
+        neighbourhood, running_transform, reference_xmap
+    )
+
+    # Interpolate
+    new_xmap = interpolate_range(
+        reference_xmap,
+        xmap,
+        interpolation_range,
+        running_transform.inverse(),
+    )
+
+    # Output the xmap
+    write_xmap(
+        new_xmap,
+        output_path,
+        neighbourhood,
+        running_transform,
+    )
+
+
 def _align_xmaps(
     system_data: SystemData,
     structures,
@@ -310,83 +389,47 @@ def _align_xmaps(
                 # neighbourhoods.ligand_neighbourhoods):
                 logger.debug(f"Aligning xmap: {lid}")
 
-                # Get the ligand neighbourhood
-                neighbourhood: LigandNeighbourhood = (
-                    neighbourhoods.get_neighbourhood(lid)
-                )
-
                 # Get the ligand binding event
-                lbe: LigandBindingEvent = system_data.get_dataset(
-                    DatasetID(dtag=lid.dtag)
-                ).ligand_binding_events[lid]
+                dataset = system_data.get_dataset(DatasetID(dtag=lid.dtag))
+                lbe: LigandBindingEvent = dataset.ligand_binding_events[lid]
 
                 # Get the xmap path
                 xmap_path: Path = Path(lbe.xmap)
                 logger.debug(f"Xmap path: {xmap_path}")
 
-                # Get the xmap
-                xmap = read_xmap(xmap_path)
-
-                # Get the Transform to reference
-                running_transform = gemmi.Transform()
-                shortest_path = nx.shortest_path(g, lid, subsite_reference_id)
-                logger.debug(f"Shortest path: {shortest_path}")
-
-                previous_ligand_id = lid
-                for next_ligand_id in shortest_path:
-                    # Get the transform from previous frame to new one
-                    # Transform is 2 onto 1
-                    if next_ligand_id != previous_ligand_id:
-
-                        transform = transforms.get_transform(
-                            (
-                                next_ligand_id,
-                                previous_ligand_id,
-                            ),
-                        )
-                        running_transform = transform.combine(
-                            running_transform
-                        )
-                    # Apply the translation to the new frame
-                    previous_ligand_id = next_ligand_id
-
-                # Get the subsite transform
-                subsite_transform = transform_to_gemmi(
-                    site_transforms.get_subsite_transform(site_id, subsite_id)
-                )
-
-                # Get the site transform
-                site_transform = transform_to_gemmi(
-                    site_transforms.get_site_transform(site_id)
-                )
-
-                # Running transform
-                running_transform = site_transform.combine(
-                    subsite_transform.combine(running_transform)
-                )
-
-                logger.debug(
-                    f"Transform is: {gemmi_to_transform(running_transform)}"
-                )
-
-                # Define the interpolation range
-                interpolation_range = get_interpolation_range(
-                    neighbourhood, running_transform, reference_xmap
-                )
-
-                # Interpolate
-                new_xmap = interpolate_range(
-                    reference_xmap,
-                    xmap,
-                    interpolation_range,
-                    running_transform.inverse(),
-                )
-
-                # Output the xmap
-                write_xmap(
-                    new_xmap,
+                output_path = (
                     subsite_xmaps_dir
-                    / f"{lid.dtag}_{lid.chain}_{lid.residue}.ccp4",
-                    neighbourhood,
-                    running_transform,
+                    / f"{lid.dtag}_{lid.chain}_{lid.residue}.ccp4"
+                )
+                # Align the event map
+                align_xmap(
+                    neighbourhoods,
+                    g,
+                    transforms,
+                    site_transforms,
+                    reference_xmap,
+                    subsite_reference_id,
+                    site_id,
+                    subsite_id,
+                    lid,
+                    xmap_path,
+                    output_path,
+                )
+                output_path = (
+                    subsite_xmaps_dir
+                    / f"{lid.dtag}_{lid.chain}_{lid.residue}_refine.ccp4"
+                )
+                # Align the refined map
+                align_xmap(
+                    neighbourhoods,
+                    g,
+                    transforms,
+                    site_transforms,
+                    reference_xmap,
+                    subsite_reference_id,
+                    site_id,
+                    subsite_id,
+                    lid,
+                    Path(dataset.xmap),
+                    output_path,
                 )

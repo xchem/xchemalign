@@ -277,6 +277,11 @@ def _parse_data_sources(_source_dir: Path):
                 ligand_binding_events = get_ligand_binding_events_from_panddas(
                     pandda_event_tables, pdb, dtag
                 )
+                if len(ligand_binding_events.ligand_ids) == 0:
+                    logger.warning(
+                        f"Dataset {dtag} has no ligand binding events!"
+                    )
+                    continue
                 dataset = Dataset(
                     dtag=dtag,
                     pdb=str(pdb),
@@ -301,6 +306,11 @@ def _parse_data_sources(_source_dir: Path):
                 ligand_binding_events = (
                     get_ligand_binding_events_from_structure(pdb, xmap, dtag)
                 )
+                if len(ligand_binding_events.ligand_ids) == 0:
+                    logger.warning(
+                        f"Dataset {dtag} has no ligand binding events!"
+                    )
+                    continue
                 dataset = Dataset(
                     dtag=dtag,
                     pdb=str(pdb),
