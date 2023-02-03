@@ -7,6 +7,7 @@ from pathlib import Path
 import fire
 import pandas as pd
 from loguru import logger
+from rich import print
 
 from xchemalign import constants
 from xchemalign.align_xmaps import _align_xmaps
@@ -394,6 +395,11 @@ class CLI:
 
     def suggest_merges(self):
         ...
+
+    def pretty_print_dataset(self, source_dir: str):
+        _source_dir = Path(source_dir)
+        system_data = read_system_data(_source_dir)
+        print(system_data)
 
     def align(
         self,
