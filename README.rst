@@ -17,9 +17,8 @@ Documentation  https://xchem.github.io/xchemalign
 Releases       https://github.com/xchem/xchemalign/releases
 ============== ==============================================================
 
-The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json
-
-.. code:: json
+The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json::
+    
     {
         "source_dir": "/path/to/source/dir", 
         "datasources": ["/path/to/datasource/1", "/path/to/datasource/2"], 
