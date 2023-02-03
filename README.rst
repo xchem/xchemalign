@@ -17,7 +17,18 @@ Documentation  https://xchem.github.io/xchemalign
 Releases       https://github.com/xchem/xchemalign/releases
 ============== ==============================================================
 
-Basic usage of XChemAlign begins with initializing a project::
+The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json::
+    {
+        "source_dir": "./source_dir", 
+        "datasources": ["/dls/labxchem/data/lb32627/lb32627-1/processing/analysis/model_building"], 
+        "panddas": ["/dls/labxchem/data/lb32627/lb32627-1/processing/analysis/panddas/pandda_1_20221128"]
+    }
+
+And then run the process option::
+
+    $ python -m xchemalign.cli process /path/to/option/json
+
+However, XChemAlign can be manually used as follows. This begins with initializing a project::
 
     $ python -m xchemalign.cli init /path/to/project/dir
 
