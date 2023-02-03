@@ -20,6 +20,7 @@ from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     Datasource,
     LigandID,
     LigandNeighbourhoods,
+    Options,
     PanDDA,
     Sites,
     SystemData,
@@ -330,6 +331,34 @@ def _parse_data_sources(_source_dir: Path):
 
 
 class CLI:
+    def process(self, option_json: str):
+        options = Options.parse_file(option_json)
+        self.init(options.source_dir)
+        for datasource_dir in options.datasources:
+            self.add_data_source(options.source_dir, datasource_dir)
+
+        for pandda_dir in options.panddas:
+            self.add_pandda(options.source_dir, pandda_dir)
+
+        self.parse_data_sources(options.source_dir)
+        self.build_graph(options.source_dir)
+        self.generate_sites_from_components(options.source_dir)
+        self.align_structures(options.source_dir)
+        self.align_xmaps(options.source_dir)
+
+    def write_options_json(self, source_dir, options_json):
+        _source_dir = Path(source_dir)
+        _options_json = Path(options_json)
+
+        system_data = read_system_data(_source_dir)
+        options = Options(
+            source_dir=source_dir,
+            datasources=[ds.path for ds in system_data.datasources],
+            panddas=[pandda.path for pandda in system_data.panddas],
+        )
+        with open(_options_json, "w") as f:
+            f.write(options.json())
+
     def init(self, source_dir: str):
         _source_dir = Path(source_dir)
 

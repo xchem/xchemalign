@@ -527,3 +527,9 @@ def save_sites(sites: Sites, path: Path):
 def save_data(system_data: SystemData, output_dir: Path):
     with open(output_dir / constants.DATA_JSON_PATH, "w") as f:
         f.write(system_data.json())
+
+
+class Options(BaseModel):
+    source_dir: str
+    datasources: list[str]
+    panddas: list[str]
