@@ -19,13 +19,13 @@ Releases       https://github.com/xchem/xchemalign/releases
 
 The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json:
 
-.. code-block:: javascript
+```javascript
     {
         "source_dir": "/path/to/source/dir", 
         "datasources": ["/path/to/datasource/1", "/path/to/datasource/2"], 
         "panddas": ["/path/to/pandda/1", "/path/to/pandda/2"]
     }
-
+```
 
 And then run the process option::
 
