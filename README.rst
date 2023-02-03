@@ -19,9 +19,9 @@ Releases       https://github.com/xchem/xchemalign/releases
 
 The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json::
     {
-        "source_dir": "./source_dir", 
-        "datasources": ["/dls/labxchem/data/lb32627/lb32627-1/processing/analysis/model_building"], 
-        "panddas": ["/dls/labxchem/data/lb32627/lb32627-1/processing/analysis/panddas/pandda_1_20221128"]
+        "source_dir": "/path/to/source/dir", 
+        "datasources": ["/path/to/datasource/1", "/path/to/datasource/2"], 
+        "panddas": ["/path/to/pandda/1", "/path/to/pandda/2"]
     }
 
 And then run the process option::
