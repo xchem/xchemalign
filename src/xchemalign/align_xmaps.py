@@ -414,21 +414,23 @@ def _align_xmaps(
                 lbe: LigandBindingEvent = dataset.ligand_binding_events[lid]
 
                 # Get the xmap path
-                xmap_path: Path = Path(lbe.xmap)
-                logger.debug(f"Xmap path: {xmap_path}")
-                mtz_path: Path = Path(dataset.mtz)
-                logger.debug(f"Mtz path is: {mtz_path}")
 
+                if lbe.xmap:
+                    xmap_path: Path = Path(lbe.xmap)
+                    logger.debug(f"Xmap path: {xmap_path}")
+
+                    xmap = read_xmap(xmap_path)
+                else:
+                    mtz_path: Path = Path(dataset.mtz)
+                    logger.debug(f"Mtz path is: {mtz_path}")
+
+                    xmap = read_xmap_from_mtz(mtz_path)
+
+                # Align the event map
                 output_path = (
                     subsite_xmaps_dir
                     / f"{lid.dtag}_{lid.chain}_{lid.residue}.ccp4"
                 )
-                # Align the event map
-                if xmap_path:
-                    xmap = read_xmap(xmap_path)
-                else:
-                    xmap = read_xmap_from_mtz(mtz_path)
-
                 align_xmap(
                     neighbourhoods,
                     g,
