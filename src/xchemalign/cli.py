@@ -148,6 +148,10 @@ def _change_subsite_reference(
 
 def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     system_data = read_system_data(_source_dir)
+    datasource_paths = [
+        _datasource.path for _datasource in system_data.datasources
+    ]
+    logger.info(f"Datasources are: {datasource_paths}")
 
     # for model_dir in _source_dir.glob("*"):
     #     dtag = model_dir.name
