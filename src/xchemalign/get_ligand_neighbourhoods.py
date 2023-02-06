@@ -22,12 +22,15 @@ def get_structure_fragments(
     # lig_number: int = 0
     for model in structure:
         for chain in model:
-            for residue in chain:
+            for residue in chain.get_ligands():
                 for lbe in dataset.ligand_binding_events.ligand_binding_events:
-                    if (
-                        (residue.name == "LIG")
-                        & (lbe.chain == chain.name)
-                        & (lbe.residue == residue.seqid.num)
+                    # if (
+                    #     (residue.name == "LIG")
+                    #     & (lbe.chain == chain.name)
+                    #     & (lbe.residue == residue.seqid.num)
+                    # ):
+                    if (lbe.chain == chain.name) & (
+                        lbe.residue == residue.seqid.num
                     ):
                         ligand_id: LigandID = LigandID(
                             dtag=dataset.dtag,

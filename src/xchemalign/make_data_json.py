@@ -23,18 +23,18 @@ def get_closest_lig(structure, coord):
     distances = {}
     for model in structure:
         for chain in model:
-            for residue in chain:
-                if residue.name == "LIG":
-                    poss = []
-                    for atom in residue:
-                        pos = atom.pos
-                        poss.append([pos.x, pos.y, pos.z])
+            for residue in chain.get_ligands():
+                # if residue.name == "LIG":
+                poss = []
+                for atom in residue:
+                    pos = atom.pos
+                    poss.append([pos.x, pos.y, pos.z])
 
-                    arr = np.array(poss)
-                    mean = np.mean(arr, axis=0)
-                    mean_pos = gemmi.Position(*mean)
-                    distance = coord_gemmi.dist(mean_pos)
-                    distances[(chain.name, residue.seqid.num)] = distance
+                arr = np.array(poss)
+                mean = np.mean(arr, axis=0)
+                mean_pos = gemmi.Position(*mean)
+                distance = coord_gemmi.dist(mean_pos)
+                distances[(chain.name, residue.seqid.num)] = distance
 
     if len(distances) == 0:
         return None, None
@@ -54,7 +54,7 @@ def get_ligand_binding_events_from_structure(
     lids = []
     for model in structure:
         for chain in model:
-            for residue in chain:
+            for residue in chain.get_ligands():
                 lids.append(
                     LigandID(
                         dtag=dtag, chain=chain.name, residue=residue.seqid.num
