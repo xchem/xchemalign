@@ -16,6 +16,16 @@ class DatasetID(BaseModel):
     def __hash__(self):
         return hash(self.dtag)
 
+    def __eq__(self, other):
+        try:
+            if other.dtag == self.dtag:
+                return True
+        except Exception:
+            if self.dtag == other:
+                return True
+            else:
+                return False
+
 
 class LigandID(BaseModel):
     dtag: str
