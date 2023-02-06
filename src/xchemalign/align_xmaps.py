@@ -355,14 +355,17 @@ def _align_xmaps(
     referance_ds: Dataset = system_data.get_dataset(
         DatasetID(dtag=reference_lid.dtag)
     )
-    reference_binding_site = referance_ds.ligand_binding_events[reference_lid]
+    # reference_binding_site = referance_ds.ligand_binding_events[
+    # reference_lid]
     logger.debug(f"PDB: {referance_ds.pdb}")
 
     # Reference_xmap_path
-    reference_xmap_path: Path = Path(reference_binding_site.xmap)
+    # reference_xmap_path: Path = Path(reference_binding_site.xmap)
+    reference_mtz_path = Path(referance_ds.mtz)
 
     # Load the site reference xmap
-    reference_xmap = read_xmap(reference_xmap_path)
+    # reference_xmap = read_xmap(reference_xmap_path)
+    reference_xmap = read_xmap_from_mtz(reference_mtz_path)
 
     #
     xmaps_dir = _output_dir / "aligned_xmaps"
