@@ -163,22 +163,22 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     # ligand_binding_events=ligand_binding_events)
     #     initial_dataset = InitialDataset(dtag=dtag, mtz, pdb, xmap)
 
-    datasouce = Datasource(
+    datasource = Datasource(
         path=str(_data_source_dir), datasource_type="model_building"
     )
 
     if not system_data.datasources:
         logger.info("No Datasources: Creating new list!")
         system_data.datasources = [
-            datasouce,
+            datasource,
         ]
     else:
         new_datasources = [
             _datasource
             for _datasource in system_data.datasources
-            if datasouce.path != str(_data_source_dir)
+            if _datasource.path != str(_data_source_dir)
         ] + [
-            datasouce,
+            datasource,
         ]
         system_data.datasources = new_datasources
 
@@ -193,21 +193,21 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
 def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
     system_data = read_system_data(_source_dir)
 
-    datasouce = Datasource(
+    datasource = Datasource(
         path=str(_data_source_dir), datasource_type="manual"
     )
 
     if not system_data.datasources:
         system_data.datasources = [
-            datasouce,
+            datasource,
         ]
     else:
         new_datasources = [
             _datasource
             for _datasource in system_data.datasources
-            if datasouce.path != str(_data_source_dir)
+            if _datasource.path != str(_data_source_dir)
         ] + [
-            datasouce,
+            datasource,
         ]
         system_data.datasources = new_datasources
 
