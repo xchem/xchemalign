@@ -148,6 +148,10 @@ def _change_subsite_reference(
 
 def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     system_data = read_system_data(_source_dir)
+
+    if not _source_dir.exists():
+        raise Exception(f"No such dir: {_source_dir}")
+
     datasource_paths = [
         _datasource.path for _datasource in system_data.datasources
     ]
@@ -192,6 +196,9 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
 
 def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
     system_data = read_system_data(_source_dir)
+
+    if not _source_dir.exists():
+        raise Exception(f"No such dir: {_source_dir}")
 
     datasource = Datasource(
         path=str(_data_source_dir), datasource_type="manual"
