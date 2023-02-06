@@ -415,7 +415,7 @@ def _align_xmaps(
 
                 # Get the xmap path
 
-                if lbe.xmap:
+                if lbe.xmap != "None":
                     xmap_path: Path = Path(lbe.xmap)
                     logger.debug(f"Xmap path: {xmap_path}")
 
