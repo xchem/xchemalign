@@ -244,7 +244,7 @@ def _add_pandda(_source_dir: Path, _pandda_dir: Path):
 
         save_data(system_data, _source_dir)
     else:
-        raise Exception()
+        raise Exception(f"No event table at: {event_table_path}")
 
     logger.info(f"Added PanDDA {_pandda_dir} to panddas")
     pandda_paths = [_pandda.path for _pandda in system_data.panddas]
@@ -311,8 +311,19 @@ def _parse_data_sources(_source_dir: Path):
                     continue
 
                 pdb = next(model_dir.glob("*.pdb"))
-                xmap = next(model_dir.glob("*.ccp4"))
-                mtz = next(model_dir.glob("*.mtz"))
+                try:
+                    xmap = next(model_dir.glob("*.ccp4"))
+                except Exception as e:
+                    print(e)
+                    xmap = None
+                    logger.warning("No xmap!")
+                try:
+                    mtz = next(model_dir.glob("*.mtz"))
+                except Exception as e:
+                    print(e)
+                    mtz = None
+                    logger.warning("No mtz!")
+
                 ligand_binding_events = (
                     get_ligand_binding_events_from_structure(pdb, xmap, dtag)
                 )
@@ -364,8 +375,21 @@ class CLI:
     def process(self, option_json: str):
         options = Options.parse_file(option_json)
         self.init(options.source_dir)
-        for datasource_dir in options.datasources:
-            self.add_data_source(options.source_dir, datasource_dir)
+        for datasource_dir, datasource_type in zip(
+            options.datasources, options.datasource_types
+        ):
+            if datasource_type == "model_building":
+                self.add_data_source(
+                    options.source_dir,
+                    datasource_dir,
+                    source_type=datasource_type,
+                )
+            elif datasource_type == "manual":
+                self.add_data_source(
+                    options.source_dir,
+                    datasource_dir,
+                    source_type=datasource_type,
+                )
 
         for pandda_dir in options.panddas:
             self.add_pandda(options.source_dir, pandda_dir)
