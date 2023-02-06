@@ -274,16 +274,16 @@ def _parse_data_sources(_source_dir: Path):
     logger.info(f"Read {len(pandda_event_tables)} PanDDA event tables")
 
     # Get the
-    dataset_ids = []
-    datasets = []
+    datasets = {}
     for datasource in system_data.datasources:
         logger.info(f"Parsing datasource: {datasource.path}")
         if datasource.datasource_type == "model_building":
             for model_dir in Path(datasource.path).glob("*"):
                 dtag = model_dir.name
                 dataset_id = DatasetID(dtag=dtag)
-                if dataset_id in system_data.dataset_ids:
-                    logger.warning(f"Dataset ID {dataset_id} already found!")
+                if dataset_id in datasets:
+                    st = f"Dataset ID {dataset_id} already found! Using new!"
+                    logger.warning(st)
                     continue
 
                 # mtz = model_dir / constants.MODEL_DIR_MTZ
@@ -309,8 +309,8 @@ def _parse_data_sources(_source_dir: Path):
                     mtz=str(mtz),
                     ligand_binding_events=ligand_binding_events,
                 )
-                dataset_ids.append(dataset_id)
-                datasets.append(dataset)
+                # dataset_ids.append(dataset_id)
+                datasets[dataset_id] = dataset
                 logger.debug(f"Added dataset: {dataset_id}")
 
         elif datasource.datasource_type == "manual":
@@ -318,9 +318,9 @@ def _parse_data_sources(_source_dir: Path):
                 dtag = model_dir.name
                 dataset_id = DatasetID(dtag=dtag)
 
-                if dataset_id in system_data.dataset_ids:
-                    logger.warning(f"Dataset ID {dataset_id} already found!")
-                    continue
+                if dataset_id in datasets:
+                    st = f"Dataset ID {dataset_id} already found! Using new!"
+                    logger.warning(st)
 
                 pdb = next(model_dir.glob("*.pdb"))
                 try:
@@ -351,16 +351,16 @@ def _parse_data_sources(_source_dir: Path):
                     mtz=str(mtz),
                     ligand_binding_events=ligand_binding_events,
                 )
-                dataset_ids.append(dataset_id)
-                datasets.append(dataset)
+                # dataset_ids.append(dataset_id)
+                datasets[dataset_id] = dataset
                 logger.debug(f"Added dataset: {dataset_id}")
 
-    system_data.dataset_ids = dataset_ids
-    system_data.datasets = datasets
+    system_data.dataset_ids = list(datasets.keys())
+    system_data.datasets = list(datasets.values())
 
     save_data(system_data, _source_dir)
 
-    logger.info(f"Found {len(dataset_ids)} datasets!")
+    logger.info(f"Found {len(system_data.dataset_ids)} datasets!")
 
 
 def save_schema(model, path):
