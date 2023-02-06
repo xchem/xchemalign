@@ -333,8 +333,20 @@ def align_xmap(
 
 def read_xmap_from_mtz(mtz_path: Path):
     mtz = gemmi.read_mtz_file(str(mtz_path))
-    grid = mtz.transform_f_phi_to_map("2FOFCWT", "PH2FOFCWT", sample_rate=4)
-    return grid
+    try:
+        grid = mtz.transform_f_phi_to_map(
+            "2FOFCWT", "PH2FOFCWT", sample_rate=4
+        )
+        return grid
+    except Exception:
+        logger.warning("Trying FWT PHWT")
+    try:
+        grid = mtz.transform_f_phi_to_map("FWT", "PHWT", sample_rate=4)
+        return grid
+    except Exception:
+        logger.warning("Failed to find structure factors!")
+
+    raise Exception(f"Couldn't open {mtz_path}!")
 
 
 def _align_xmaps(
