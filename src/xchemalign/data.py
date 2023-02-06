@@ -13,6 +13,9 @@ Structure = gemmi.Structure
 class DatasetID(BaseModel):
     dtag: str
 
+    def __hash__(self):
+        return hash(self.dtag)
+
 
 class LigandID(BaseModel):
     dtag: str
