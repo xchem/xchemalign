@@ -206,7 +206,7 @@ def interpolate_range(
         reference_xmap.nu, reference_xmap.nv, reference_xmap.nw
     )
     new_xmap.set_unit_cell(reference_xmap.unit_cell)
-    new_xmap.spacegroup = reference_xmap.spacegroup
+    new_xmap.spacegroup = gemmi.find_spacegroup_by_name("P1")
     grid_np = np.array(new_xmap, copy=False)
     logger.debug(f"Xmap shape is: {grid_np.shape}")
 
