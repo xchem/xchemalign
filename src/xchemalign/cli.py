@@ -168,6 +168,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     )
 
     if not system_data.datasources:
+        logger.info("No Datasources: Creating new list!")
         system_data.datasources = [
             datasouce,
         ]
@@ -186,7 +187,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     datasource_paths = [
         _datasource.path for _datasource in system_data.datasources
     ]
-    logger.info(f"Datasources are: {datasource_paths}")
+    logger.info(f"Datasources are now: {datasource_paths}")
 
 
 def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
