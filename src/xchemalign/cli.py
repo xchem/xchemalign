@@ -25,6 +25,7 @@ from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     Options,
     PanDDA,
     Sites,
+    SiteTransforms,
     SystemData,
     Transforms,
     XtalForms,
@@ -339,7 +340,27 @@ def _parse_data_sources(_source_dir: Path):
     logger.info(f"Found {len(dataset_ids)} datasets!")
 
 
+def save_schema(model, path):
+    with open(path / model.__name__, "w") as f:
+        f.write(model.schema_json(indent=2))
+
+
 class CLI:
+    def schema(self, output_dir: str):
+        _output_dir = Path(output_dir)
+
+        if not _output_dir.exists():
+            os.mkdir(_output_dir)
+
+        save_schema(SystemData, _output_dir)
+        save_schema(LigandNeighbourhoods, _output_dir)
+        save_schema(Sites, _output_dir)
+        save_schema(Transforms, _output_dir)
+        save_schema(SiteTransforms, _output_dir)
+        save_schema(SystemData, _output_dir)
+        save_schema(SystemData, _output_dir)
+        save_schema(SystemData, _output_dir)
+
     def process(self, option_json: str):
         options = Options.parse_file(option_json)
         self.init(options.source_dir)
