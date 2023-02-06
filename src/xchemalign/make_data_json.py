@@ -25,6 +25,8 @@ def get_closest_lig(structure, coord):
         for chain in model:
             for residue in chain.get_ligands():
                 # if residue.name == "LIG":
+                if residue.name == "DMS":
+                    continue
                 poss = []
                 for atom in residue:
                     pos = atom.pos
@@ -55,6 +57,9 @@ def get_ligand_binding_events_from_structure(
     for model in structure:
         for chain in model:
             for residue in chain.get_ligands():
+
+                if residue.name == "DMS":
+                    continue
                 lids.append(
                     LigandID(
                         dtag=dtag, chain=chain.name, residue=residue.seqid.num
