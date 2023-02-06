@@ -51,9 +51,15 @@ def get_ligand_binding_events_from_structure(
     event_id = 0
 
     lbes = []
+    lids = []
     for model in structure:
         for chain in model:
             for residue in chain:
+                lids.append(
+                    LigandID(
+                        dtag=dtag, chain=chain.name, residue=residue.seqid.num
+                    )
+                )
                 lbe = LigandBindingEvent(
                     id=event_id,
                     dtag=dtag,
@@ -64,7 +70,7 @@ def get_ligand_binding_events_from_structure(
             event_id += 1
             lbes.append(lbe)
 
-    return lbes
+    return LigandBindingEvents(ligand_ids=lids, ligand_binding_events=lbes)
 
 
 def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):

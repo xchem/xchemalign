@@ -354,6 +354,10 @@ def _parse_data_sources(_source_dir: Path):
                 # dataset_ids.append(dataset_id)
                 datasets[dataset_id] = dataset
                 logger.debug(f"Added dataset: {dataset_id}")
+        else:
+            raise Exception(
+                f"Source type {datasource.datasource_type} unknown!"
+            )
 
     system_data.dataset_ids = list(datasets.keys())
     system_data.datasets = list(datasets.values())
