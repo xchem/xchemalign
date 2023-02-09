@@ -130,16 +130,32 @@ class CanonicalSite(BaseModel):
     members: list[LigandID]
 
 
+# class XtalForm(BaseModel):
+#     id: int
+#     space_group: int
+#     unit_cell: tuple[float, float, float, float, float, float]
+#     members: list[DatasetID]
+#     transforms: list[Transform]
+
+
+class AssemblyGenerator(BaseModel):
+    chain: str
+    triplet: str
+
+
 class XtalForm(BaseModel):
     id: int
-    space_group: int
-    unit_cell: tuple[float, float, float, float, float, float]
-    members: list[DatasetID]
-    transforms: list[Transform]
+    reference: DatasetID
+    generators: list[AssemblyGenerator]
 
 
 class XtalForms(BaseModel):
+    xtalform_ids: list[int]
     xtalforms: list[XtalForm]
+
+    def iter(self):
+        for xtalform_id, xtalform in zip(self.xtalform_ids, self.xtalforms):
+            yield xtalform_id, xtalform
 
 
 class XtalFormSite(BaseModel):
@@ -218,6 +234,10 @@ class SystemData(BaseModel):
                 return dataset
 
         raise Exception(f"{did} : {self.dataset_ids}")
+
+    def iter(self):
+        for dataset_id, dataset in zip(self.dataset_ids, self.datasets):
+            yield dataset_id, dataset
 
 
 class LigandNeighbourhood(BaseModel):
@@ -548,3 +568,24 @@ class Options(BaseModel):
     datasources: list[str]
     datasource_types: list[str]
     panddas: list[str]
+    xtalforms: list[XtalForm]
+
+
+class AssignedXtalForms(BaseModel):
+    dataset_ids: list[DatasetID]
+    xtalform_ids: list[int]
+
+    def iter(self):
+        for dataset_id, xtalform_id in zip(
+            self.dataset_ids, self.xtalform_ids
+        ):
+            yield dataset_id, xtalform_id
+
+
+def read_assigned_xtalforms(path: Path):
+    return AssignedXtalForms.parse_file(path / "assigned_xtalforms.json")
+
+
+def save_assigned_xtalforms(path: Path, assigned_xtalforms: AssignedXtalForms):
+    with open(path / "assigned_xtalforms.json", "w") as f:
+        f.write(assigned_xtalforms.json())

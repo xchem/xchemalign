@@ -17,6 +17,9 @@ Documentation  https://xchem.github.io/xchemalign
 Releases       https://github.com/xchem/xchemalign/releases
 ============== ==============================================================
 
+The best way to install is to create an anaconda environment and then run::
+    git clone 
+
 The prefferred and more reproducible way to use XChemAlign to create a new project is to create an options json::
 
     {

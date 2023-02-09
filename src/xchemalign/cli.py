@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 import fire
+import numpy as np
 import pandas as pd
 from loguru import logger
 from rich import print
@@ -17,6 +18,7 @@ from xchemalign.align_xmaps import _align_xmaps
 # from xchemalign.get_system_sites import get_system_sites
 from xchemalign.build_alignment_graph import build_alignment_graph
 from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
+    AssignedXtalForms,
     Dataset,
     DatasetID,
     Datasource,
@@ -36,6 +38,7 @@ from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     read_structures,
     read_system_data,
     read_transforms,
+    save_assigned_xtalforms,
     save_data,
     save_sites,
 )
@@ -372,6 +375,61 @@ def save_schema(model, path):
         f.write(model.schema_json(indent=2))
 
 
+def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
+    xtalform_deltas = {}
+    for xtalform_id, xtalform in xtalforms.iter():
+        ref_structure = structures[xtalform.reference]
+        ref_structure_cell = ref_structure.unit_cell
+        structure = structures[dataset_id]
+        structure_cell = structure.unit_cell
+        deltas = np.array(
+            [
+                structure_cell.a / ref_structure_cell.a,
+                structure_cell.b / ref_structure_cell.b,
+                structure_cell.c / ref_structure_cell.c,
+                structure_cell.alpha / ref_structure_cell.alpha,
+                structure_cell.beta / ref_structure_cell.beta,
+                structure_cell.gamma / ref_structure_cell.gamma,
+            ]
+        )
+        xtalform_deltas[xtalform_id] = deltas
+
+    closest_xtalform = min(
+        xtalform_deltas,
+        key=lambda _xtalform_id: np.sum(
+            np.mod(xtalform_deltas[_xtalform_id] - 1)
+        ),
+    )
+
+    return closest_xtalform, xtalform_deltas[closest_xtalform]
+
+
+def _assign_xtalforms(_source_dir: Path):
+    system_data: SystemData = read_system_data(_source_dir)
+    # ligand_neighbourhoods = read_neighbourhoods(_source_dir)
+    xtalforms = read_xtalforms(_source_dir)
+    structures = read_structures(system_data)
+
+    dataset_ids = []
+    xtalform_ids = []
+    for dataset_id, dataset in system_data.iter():
+        closest_xtalform_id, deltas = get_closest_xtalform(
+            xtalforms, structures, dataset_id
+        )
+
+        if np.any(deltas > 1.1) | np.any(deltas < 0.9):
+            raise Exception(f"No reference for dataset: {dataset_id}!")
+
+        dataset_ids.append(dataset_id)
+        xtalform_ids.append(closest_xtalform_id)
+
+    assigned_xtalforms = AssignedXtalForms(
+        dataset_ids=dataset_ids, xtalform_ids=xtalform_ids
+    )
+
+    save_assigned_xtalforms(_source_dir, assigned_xtalforms)
+
+
 class CLI:
     def schema(self, output_dir: str):
         _output_dir = Path(output_dir)
@@ -411,10 +469,16 @@ class CLI:
             self.add_pandda(options.source_dir, pandda_dir)
 
         self.parse_data_sources(options.source_dir)
+        self.assign_xtalforms(options.source_dir)
         self.build_graph(options.source_dir)
         self.generate_sites_from_components(options.source_dir)
         self.align_structures(options.source_dir)
         self.align_xmaps(options.source_dir)
+
+    def assign_xtalforms(self, source_dir: str):
+        _source_dir = Path(source_dir)
+
+        _assign_xtalforms(_source_dir)
 
     def write_options_json(self, source_dir, options_json):
         _source_dir = Path(source_dir)
