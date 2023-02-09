@@ -126,7 +126,7 @@ def generate_assembly(xtalform: XtalForm, structure):
                     [atom_frac.x, atom_frac.y, atom_frac.z]
                 )
                 new_pos_orth = structure.cell.orthogonalize(
-                    gemmi.Position(*new_pos_frac)
+                    gemmi.Fractional(*new_pos_frac)
                 )
 
                 atom.pos = gemmi.Position(*new_pos_orth)
