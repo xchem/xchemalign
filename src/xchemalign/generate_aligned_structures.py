@@ -14,10 +14,9 @@ from xchemalign.data import (  # Transform,; AlignableSite,; XtalForms,
     XtalForms,
     transform_to_gemmi,
 )
-from xchemalign.structures import (  # get_structures,; get_transforms,
+from xchemalign.structures import (
     generate_assembly,
-    remove_non_contact_chains,
-)
+)  # remove_non_contact_chains,
 
 
 def superpose_structure(transform, structure):
@@ -317,7 +316,8 @@ def _align_structures_from_sites(
                 neighbourhood = neighbourhoods.get_neighbourhood(
                     moving_ligand_id
                 )
-                remove_non_contact_chains(assembly, neighbourhood)
+                neighbourhood = neighbourhood
+                # remove_non_contact_chains(assembly, neighbourhood)
 
                 _structure = superpose_structure(running_transform, assembly)
 
