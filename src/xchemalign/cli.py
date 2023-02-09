@@ -327,7 +327,7 @@ def _parse_data_sources(_source_dir: Path):
                 try:
                     pdb = next(model_dir.glob("*.pdb"))
                 except Exception:
-                    print(f"Could not find pdb in dir: {model_dir}")
+                    raise Exception(f"Could not find pdb in dir: {model_dir}")
                 try:
                     xmap = next(model_dir.glob("*.ccp4"))
                 except Exception as e:
