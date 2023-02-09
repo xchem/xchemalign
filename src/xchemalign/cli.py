@@ -379,9 +379,9 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
     xtalform_deltas = {}
     for xtalform_id, xtalform in xtalforms.iter():
         ref_structure = structures[xtalform.reference]
-        ref_structure_cell = ref_structure.unit_cell
+        ref_structure_cell = ref_structure.cell
         structure = structures[dataset_id]
-        structure_cell = structure.unit_cell
+        structure_cell = structure.cell
         deltas = np.array(
             [
                 structure_cell.a / ref_structure_cell.a,
