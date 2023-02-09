@@ -398,6 +398,9 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
         )
         xtalform_deltas[xtalform_id] = deltas
 
+    if len(deltas) == 0:
+        return None, None
+
     closest_xtalform = min(
         xtalform_deltas,
         key=lambda _xtalform_id: np.sum(
@@ -421,8 +424,13 @@ def _assign_xtalforms(_source_dir: Path):
             xtalforms, structures, dataset_id
         )
 
+        if (closest_xtalform_id is None) & (deltas is None):
+            logger.info(f"No reference in same spacegroup for: {dataset_id}")
+            logger.info(f"Structure path is: {dataset.pdb}")
+
         if np.any(deltas > 1.1) | np.any(deltas < 0.9):
             logger.info(f"No reference for dataset: {dataset_id}")
+            logger.info(f"Deltas to closest unit cell are: {deltas}")
             logger.info(f"Structure path is: {dataset.pdb}")
 
             raise Exception()
