@@ -691,6 +691,7 @@ class CLI:
         sites: Sites = read_sites(_source_dir)
         system_data: SystemData = read_system_data(_source_dir)
         site_transforms = read_site_transforms(_source_dir)
+        xtalforms = read_xtalforms(_source_dir)
 
         # get Structures
         structures = read_structures(system_data)
@@ -701,6 +702,7 @@ class CLI:
             sites,
             transforms,
             neighbourhoods,
+            xtalforms,
             assigned_xtalforms,
             g,
             site_transforms,
