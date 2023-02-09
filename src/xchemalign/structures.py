@@ -128,7 +128,12 @@ def generate_assembly(xtalform: XtalForm, structure):
                 atom.pos = gemmi.Position(*new_pos)
         chain_clone.name = f"{generator.chain}{j}"
         assembly[0].add_chain(chain_clone)
-    logger.debug(f"Generated {len(assembly[0])} assembly chains")
+
+    num_chains = 0
+    for model in assembly:
+        for chain in model:
+            num_chains += 1
+    logger.debug(f"Generated {num_chains} assembly chains")
 
     return assembly
 
