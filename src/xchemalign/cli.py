@@ -379,12 +379,12 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
     xtalform_deltas = {}
     for xtalform_id, xtalform in xtalforms.iter():
         ref_structure = structures[xtalform.reference]
-        ref_spacegroup = ref_structure.spacegroup
+        ref_spacegroup = ref_structure.spacegroup_hm
         ref_structure_cell = ref_structure.cell
         structure = structures[dataset_id]
-        structure_spacegroup = structure.spacegroup
+        structure_spacegroup = structure.spacegroup_hm
         structure_cell = structure.cell
-        if structure_spacegroup.number != ref_spacegroup.number:
+        if ref_spacegroup != structure_spacegroup:
             continue
         deltas = np.array(
             [
