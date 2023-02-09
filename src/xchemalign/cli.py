@@ -427,6 +427,7 @@ def _assign_xtalforms(_source_dir: Path):
         if (closest_xtalform_id is None) & (deltas is None):
             logger.info(f"No reference in same spacegroup for: {dataset_id}")
             logger.info(f"Structure path is: {dataset.pdb}")
+            raise Exception()
 
         if np.any(deltas > 1.1) | np.any(deltas < 0.9):
             logger.info(f"No reference for dataset: {dataset_id}")
