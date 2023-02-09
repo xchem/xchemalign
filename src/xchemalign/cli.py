@@ -324,8 +324,10 @@ def _parse_data_sources(_source_dir: Path):
                 if dataset_id in datasets:
                     st = f"Dataset ID {dataset_id} already found! Using new!"
                     logger.warning(st)
-
-                pdb = next(model_dir.glob("*.pdb"))
+                try:
+                    pdb = next(model_dir.glob("*.pdb"))
+                except Exception:
+                    print(f"Could not find pdb in dir: {model_dir}")
                 try:
                     xmap = next(model_dir.glob("*.ccp4"))
                 except Exception as e:
