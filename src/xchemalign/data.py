@@ -157,6 +157,11 @@ class XtalForms(BaseModel):
         for xtalform_id, xtalform in zip(self.xtalform_ids, self.xtalforms):
             yield xtalform_id, xtalform
 
+    def get_xtalform(self, item):
+        for xtalform_id, xtalform in self.iter():
+            if xtalform_id == item:
+                return xtalform
+
 
 class XtalFormSite(BaseModel):
     id: int
@@ -580,6 +585,11 @@ class AssignedXtalForms(BaseModel):
             self.dataset_ids, self.xtalform_ids
         ):
             yield dataset_id, xtalform_id
+
+    def get_xtalform_id(self, item):
+        for dataset_id, xtalform_id in self.iter():
+            if dataset_id == item:
+                return xtalform_id
 
 
 def read_assigned_xtalforms(path: Path):

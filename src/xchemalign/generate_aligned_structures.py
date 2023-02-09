@@ -11,10 +11,13 @@ from xchemalign.data import (  # Transform,; AlignableSite,; XtalForms,
     Sites,
     SiteTransforms,
     Transforms,
+    XtalForms,
     transform_to_gemmi,
 )
-
-# from xchemalign.structures import get_structures, get_transforms
+from xchemalign.structures import (  # get_structures,; get_transforms,
+    generate_assembly,
+    remove_non_contact_chains,
+)
 
 
 def superpose_structure(transform, structure):
@@ -216,6 +219,7 @@ def _align_structures_from_sites(
     sites: Sites,
     transforms: Transforms,
     neighbourhoods: LigandNeighbourhoods,
+    xtalforms: XtalForms,
     assigned_xtalforms: AssignedXtalForms,
     g,
     site_transforms: SiteTransforms,
@@ -253,9 +257,9 @@ def _align_structures_from_sites(
                 _structure = structures[moving_ligand_id.dtag].clone()
 
                 # Expand structure
-                structure = expand_structure(
-                    _structure, assigned_xtalforms, moving_ligand_id
-                )
+                # structure = expand_structure(
+                #     _structure, assigned_xtalforms, moving_ligand_id
+                # )
 
                 # Walk the path, iteratively applying transforms
                 shortest_path = nx.shortest_path(
@@ -295,11 +299,31 @@ def _align_structures_from_sites(
                 )
                 site_transform.combine(running_transform)
 
-                structure = superpose_structure(running_transform, structure)
+                _structure = superpose_structure(running_transform, _structure)
 
                 # Write the fully aligned structure
                 out_path = (
                     subsite_dir
                     / f"{moving_ligand_id.dtag}_{moving_ligand_id.residue}.pdb"
                 )
-                structure.write_pdb(str(out_path))
+                _structure.write_pdb(str(out_path))
+
+                # Transform the artefacts
+                xtalform = xtalforms.get_xtalform(
+                    assigned_xtalforms.get_xtalform_id(moving_ligand_id.dtag)
+                )
+                assembly = generate_assembly(xtalform, _structure)
+                neighbourhood = neighbourhoods.get_neighbourhood(
+                    moving_ligand_id
+                )
+                remove_non_contact_chains(assembly, neighbourhood)
+
+                _structure = superpose_structure(running_transform, assembly)
+
+                # Write the fully aligned structure
+                out_name = "{dtag}_{residue}_assembly.pdb"
+                out_path = subsite_dir / out_name.format(
+                    dtag=moving_ligand_id.dtag,
+                    residue=moving_ligand_id.residue,
+                )
+                _structure.write_pdb(str(out_path))

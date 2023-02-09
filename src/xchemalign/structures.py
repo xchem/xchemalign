@@ -1,7 +1,12 @@
 import gemmi
 from loguru import logger
 
-from xchemalign.data import LigandNeighbourhood, ResidueID, SystemData
+from xchemalign.data import (
+    LigandNeighbourhood,
+    ResidueID,
+    SystemData,
+    XtalForm,
+)
 from xchemalign.matching import match_atom
 
 
@@ -103,3 +108,52 @@ def get_transforms(
     # logger.debug(f"Superposition: rmsd {sup.rmsd} n {len(alignable_cas)}")
 
     return sup.transform, [ligand_id for ligand_id in alignable_cas.keys()]
+
+
+def generate_assembly(xtalform: XtalForm, structure):
+    assembly = structure.clone()
+    for model in assembly:
+        for chain in model:
+            del assembly[model.name][chain.name]
+
+    for j, generator in enumerate(xtalform.generators):
+        op = gemmi.Op(generator.triplet)
+        chain_clone = structure[0][generator.chain].clone()
+        for residue in chain_clone:
+            for atom in residue:
+                atom_frac = structure.cell.fractionalize(atom.pos)
+                new_pos = op.apply_to_xyz(
+                    atom_frac.x, atom_frac.y, atom_frac.z
+                )
+                atom.pos = gemmi.Position(*new_pos)
+        assembly[0][f"{generator.chain}_{j}"] = chain_clone
+
+    return assembly
+
+
+def remove_non_contact_chains(assembly, neighbourhood: LigandNeighbourhood):
+
+    contact_chains_list = []
+    for model in assembly:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    for atom_id, art_atom in zip(
+                        neighbourhood.artefact_atom_ids,
+                        neighbourhood.artefact_atoms,
+                    ):
+                        if (
+                            atom.pos.dist(
+                                gemmi.Position(
+                                    art_atom.x, art_atom.y, art_atom.z
+                                )
+                            )
+                            < 0.1
+                        ):
+                            contact_chains_list.append(chain.name)
+
+    contact_chains = list(set(contact_chains_list))
+    for model in assembly:
+        for chain in model:
+            if chain.name not in contact_chains:
+                del model[chain.name]

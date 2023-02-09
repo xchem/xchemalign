@@ -331,6 +331,9 @@ def get_dataset_neighbourhoods(
     structure: Structure = gemmi.read_structure(dataset.pdb)
     logger.debug(f"{structure.cell}")
 
+    # Get the rest of the assembly
+    # assembly = generate_assembly(xtalform, structure)
+
     # Get the bound fragments
     fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(
         dataset, structure
