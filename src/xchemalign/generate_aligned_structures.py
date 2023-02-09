@@ -252,6 +252,7 @@ def _align_structures_from_sites(
 
             # For each other ligand
             for moving_ligand_id in ligand_ids:
+                logger.info(f"Alligning ligand: {moving_ligand_id}")
                 # Get the shortest alignment path to the reference
                 # Initial structure
                 _structure = structures[moving_ligand_id.dtag].clone()
