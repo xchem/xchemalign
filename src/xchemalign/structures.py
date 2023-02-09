@@ -128,6 +128,7 @@ def generate_assembly(xtalform: XtalForm, structure):
                 atom.pos = gemmi.Position(*new_pos)
         chain_clone.name = f"{generator.chain}{j}"
         assembly[0].add_chain(chain_clone)
+    logger.debug(f"Generated {len(assembly[0])} assembly chains")
 
     return assembly
 
@@ -154,6 +155,7 @@ def remove_non_contact_chains(assembly, neighbourhood: LigandNeighbourhood):
                             contact_chains_list.append(chain.name)
 
     contact_chains = list(set(contact_chains_list))
+    logger.debug(f"Num contact chains: {len(contact_chains)}")
     for model in assembly:
         for chain in model:
             if chain.name not in contact_chains:
