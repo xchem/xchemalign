@@ -379,9 +379,13 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
     xtalform_deltas = {}
     for xtalform_id, xtalform in xtalforms.iter():
         ref_structure = structures[xtalform.reference]
+        ref_spacegroup = ref_structure.spacegroup
         ref_structure_cell = ref_structure.cell
         structure = structures[dataset_id]
+        structure_spacegroup = structure.spacegroup
         structure_cell = structure.cell
+        if structure_spacegroup.number != ref_spacegroup.number:
+            continue
         deltas = np.array(
             [
                 structure_cell.a / ref_structure_cell.a,
@@ -418,7 +422,10 @@ def _assign_xtalforms(_source_dir: Path):
         )
 
         if np.any(deltas > 1.1) | np.any(deltas < 0.9):
-            raise Exception(f"No reference for dataset: {dataset_id}!")
+            logger.info(f"No reference for dataset: {dataset_id}")
+            logger.info(f"Structure path is: {dataset.pdb}")
+
+            raise Exception()
 
         dataset_ids.append(dataset_id)
         xtalform_ids.append(closest_xtalform_id)
