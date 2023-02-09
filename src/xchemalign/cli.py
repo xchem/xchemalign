@@ -397,7 +397,7 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
     closest_xtalform = min(
         xtalform_deltas,
         key=lambda _xtalform_id: np.sum(
-            np.mod(xtalform_deltas[_xtalform_id] - 1)
+            np.abs(xtalform_deltas[_xtalform_id] - 1)
         ),
     )
 
