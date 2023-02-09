@@ -126,7 +126,8 @@ def generate_assembly(xtalform: XtalForm, structure):
                     [atom_frac.x, atom_frac.y, atom_frac.z]
                 )
                 atom.pos = gemmi.Position(*new_pos)
-        assembly[0][f"{generator.chain}_{j}"] = chain_clone
+        chain_clone.name = f"{generator.chain}_{j}"
+        assembly[0].add_chain(chain_clone)
 
     return assembly
 
