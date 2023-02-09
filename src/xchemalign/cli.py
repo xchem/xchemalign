@@ -31,6 +31,7 @@ from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     SystemData,
     Transforms,
     XtalForms,
+    read_assigned_xtalforms,
     read_graph,
     read_neighbourhoods,
     read_site_transforms,
@@ -686,7 +687,7 @@ class CLI:
         transforms: Transforms = read_transforms(_source_dir)
         neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
         # xtalforms: XtalForms = read_xtalforms(_source_dir)
-        xtalforms = XtalForms(xtalforms=[])
+        assigned_xtalforms = read_assigned_xtalforms(_source_dir)
         sites: Sites = read_sites(_source_dir)
         system_data: SystemData = read_system_data(_source_dir)
         site_transforms = read_site_transforms(_source_dir)
@@ -700,7 +701,7 @@ class CLI:
             sites,
             transforms,
             neighbourhoods,
-            xtalforms,
+            assigned_xtalforms,
             g,
             site_transforms,
             _source_dir,

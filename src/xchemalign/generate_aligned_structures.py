@@ -5,12 +5,12 @@ import gemmi
 import networkx as nx
 from loguru import logger
 
-from xchemalign.data import (  # Transform,; AlignableSite,
+from xchemalign.data import (  # Transform,; AlignableSite,; XtalForms,
+    AssignedXtalForms,
     LigandNeighbourhoods,
     Sites,
     SiteTransforms,
     Transforms,
-    XtalForms,
     transform_to_gemmi,
 )
 
@@ -139,7 +139,9 @@ def superpose_structure(transform, structure):
 #         #     )
 
 
-def expand_structure(_structure, xtalforms: XtalForms, moving_ligand_id):
+def expand_structure(
+    _structure, xtalforms: AssignedXtalForms, moving_ligand_id
+):
     # TODO: Make this work
     return _structure
     ...
@@ -214,7 +216,7 @@ def _align_structures_from_sites(
     sites: Sites,
     transforms: Transforms,
     neighbourhoods: LigandNeighbourhoods,
-    xtalforms: XtalForms,
+    assigned_xtalforms: AssignedXtalForms,
     g,
     site_transforms: SiteTransforms,
     _output_dir: Path,
@@ -252,7 +254,7 @@ def _align_structures_from_sites(
 
                 # Expand structure
                 structure = expand_structure(
-                    _structure, xtalforms, moving_ligand_id
+                    _structure, assigned_xtalforms, moving_ligand_id
                 )
 
                 # Walk the path, iteratively applying transforms
