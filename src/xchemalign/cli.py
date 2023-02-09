@@ -398,7 +398,7 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
         )
         xtalform_deltas[xtalform_id] = deltas
 
-    if len(deltas) == 0:
+    if len(xtalform_deltas) == 0:
         return None, None
 
     closest_xtalform = min(
