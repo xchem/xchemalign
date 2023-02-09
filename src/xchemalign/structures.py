@@ -122,10 +122,14 @@ def generate_assembly(xtalform: XtalForm, structure):
         for residue in chain_clone:
             for atom in residue:
                 atom_frac = structure.cell.fractionalize(atom.pos)
-                new_pos = op.apply_to_xyz(
+                new_pos_frac = op.apply_to_xyz(
                     [atom_frac.x, atom_frac.y, atom_frac.z]
                 )
-                atom.pos = gemmi.Position(*new_pos)
+                new_pos_orth = structure.cell.orthogonalize(
+                    gemmi.Position(*new_pos_frac)
+                )
+
+                atom.pos = gemmi.Position(*new_pos_orth)
         chain_clone.name = f"{generator.chain}{j}"
         assembly[0].add_chain(chain_clone)
 
