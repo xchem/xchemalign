@@ -38,9 +38,11 @@ from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     read_structures,
     read_system_data,
     read_transforms,
+    read_xtalforms,
     save_assigned_xtalforms,
     save_data,
     save_sites,
+    save_xtalforms,
 )
 from xchemalign.generate_aligned_structures import _align_structures_from_sites
 from xchemalign.generate_sites_from_components import (
@@ -61,10 +63,6 @@ from xchemalign.make_data_json import (
 
 
 def _suggest_merges(sites: Sites):
-    ...
-
-
-def read_xtalforms(path: Path):
     ...
 
 
@@ -469,6 +467,12 @@ class CLI:
 
         for pandda_dir in options.panddas:
             self.add_pandda(options.source_dir, pandda_dir)
+
+        xtalforms = XtalForms(
+            xtalform_ids=[_xtalform.id for _xtalform in options.xtalforms],
+            xtalforms=[_xtalform for _xtalform in options.xtalforms],
+        )
+        save_xtalforms(Path(options.source_dir), xtalforms)
 
         self.parse_data_sources(options.source_dir)
         self.assign_xtalforms(options.source_dir)

@@ -583,9 +583,20 @@ class AssignedXtalForms(BaseModel):
 
 
 def read_assigned_xtalforms(path: Path):
-    return AssignedXtalForms.parse_file(path / "assigned_xtalforms.json")
+    return AssignedXtalForms.parse_file(
+        path / constants.ASSIGNED_XTALFORMS_FILE_NAME
+    )
 
 
 def save_assigned_xtalforms(path: Path, assigned_xtalforms: AssignedXtalForms):
-    with open(path / "assigned_xtalforms.json", "w") as f:
+    with open(path / constants.ASSIGNED_XTALFORMS_FILE_NAME, "w") as f:
         f.write(assigned_xtalforms.json())
+
+
+def save_xtalforms(path: Path, xtalforms: XtalForms):
+    with open(path / constants.XTALFORMS_FILE_NAME, "w") as f:
+        f.write(xtalforms.json())
+
+
+def read_xtalforms(path: Path):
+    return XtalForms.parse_file(path / constants.XTALFORMS_FILE_NAME)

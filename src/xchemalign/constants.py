@@ -3,7 +3,8 @@ TRANSFORMS_FILE_NAME: str = "transforms.json"
 NEIGHBOURHOODS_FILE_NAME: str = "neighbourhoods.json"
 DATA_JSON_PATH: str = "data.json"
 SITES_TRANSFORMS_FILE_NAME: str = "site_transforms.json"
-
+XTALFORMS_FILE_NAME: str = "xtalforms.json"
+ASSIGNED_XTALFORMS_FILE_NAME: str = "assigned_xtalforms.json"
 
 OBSERVED_SITES_FILE_NAME: str = ""
 SITES_FILE_NAME: str = "sites.json"
