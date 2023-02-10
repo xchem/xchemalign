@@ -112,9 +112,13 @@ def get_transforms(
 
 def generate_assembly(xtalform: XtalForm, structure):
     assembly = structure.clone()
+    chains_to_delete = []
     for model in assembly:
         for chain in model:
-            del assembly[model.name][chain.name]
+            chains_to_delete.append((model.name, chain.name))
+
+    for model_name, chain_name in chains_to_delete:
+        del assembly[model_name][chain_name]
 
     for j, generator in enumerate(xtalform.generators):
         op = gemmi.Op(generator.triplet)
