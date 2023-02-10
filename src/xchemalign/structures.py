@@ -148,6 +148,13 @@ def generate_assembly(xtalform: XtalForm, structure):
 
 def remove_non_contact_chains(assembly, neighbourhood: LigandNeighbourhood):
 
+    chains_list = []
+    for model in assembly:
+        for chain in model:
+            chains_list.append((model.name, chain.name))
+
+    chains = list(set(chains_list))
+
     contact_chains_list = []
     for model in assembly:
         for chain in model:
@@ -165,11 +172,13 @@ def remove_non_contact_chains(assembly, neighbourhood: LigandNeighbourhood):
                             )
                             < 0.1
                         ):
-                            contact_chains_list.append(chain.name)
+                            contact_chains_list.append(
+                                (model.name, chain.name)
+                            )
 
     contact_chains = list(set(contact_chains_list))
     logger.debug(f"Num contact chains: {len(contact_chains)}")
-    for model in assembly:
-        for chain in model:
-            if chain.name not in contact_chains:
-                del model[chain.name]
+
+    for model_name, chain_name in chains:
+        if (model_name, chain_name) not in contact_chains:
+            del assembly[model_name][chain_name]
