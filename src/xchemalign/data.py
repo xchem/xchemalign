@@ -610,3 +610,40 @@ def save_xtalforms(path: Path, xtalforms: XtalForms):
 
 def read_xtalforms(path: Path):
     return XtalForms.parse_file(path / constants.XTALFORMS_FILE_NAME)
+
+
+class ChainOutput(BaseModel):
+    aligned_structures: dict[int, str]
+    aligned_artefacts: dict[int, str]
+    aligned_xmaps: dict[int, str]
+
+
+class DatasetOutput(BaseModel):
+    aligned_chain_output: dict[str, ChainOutput]
+    # aligned_structures: dict[str, ChainOutput]
+    # aligned_xmaps: dict[str, ChainOutput]
+
+
+class Output(BaseModel):
+    source_dir: str
+    system_data: str
+    xtalforms: str
+    assigned_xtalforms: str
+    neighbourhoods: str
+    graph: str
+    transforms: str
+    sites: str
+    site_transforms: str
+    dataset_output: dict[str, DatasetOutput]
+
+
+def save_output(
+    output,
+    path,
+):
+    with open(path / constants.OUTPUT_JSON_PATH, "w") as f:
+        f.write(output.json())
+
+
+def read_output(path):
+    return Output.parse_file(path / constants.OUTPUT_JSON_PATH)

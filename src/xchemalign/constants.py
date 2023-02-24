@@ -26,3 +26,10 @@ ALIGNED_XMAPS_DIR: str = "aligned_xmaps"
 MODEL_DIR_PDB: str = "refine.pdb"
 MODEL_DIR_XMAP: str = "refine.ccp4"
 MODEL_DIR_MTZ: str = "refine.mtz"
+
+OUTPUT_JSON_PATH: str = "output.json"
+ALIGNED_STRUCTURE_TEMPLATE: str = "{dtag}_{chain}_{residue}.pdb"
+ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE: str = (
+    "{dtag}_{chain}_{residue}_artefacts.pdb"
+)
+ALIGNED_XMAP_TEMPLATE: str = "{dtag}_{chain}_{residue}.ccp4"

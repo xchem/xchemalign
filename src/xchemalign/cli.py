@@ -19,12 +19,15 @@ from xchemalign.align_xmaps import _align_xmaps
 from xchemalign.build_alignment_graph import build_alignment_graph
 from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     AssignedXtalForms,
+    ChainOutput,
     Dataset,
     DatasetID,
+    DatasetOutput,
     Datasource,
     LigandID,
     LigandNeighbourhoods,
     Options,
+    Output,
     PanDDA,
     Sites,
     SiteTransforms,
@@ -34,6 +37,7 @@ from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     read_assigned_xtalforms,
     read_graph,
     read_neighbourhoods,
+    read_output,
     read_site_transforms,
     read_sites,
     read_structures,
@@ -42,6 +46,7 @@ from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
     read_xtalforms,
     save_assigned_xtalforms,
     save_data,
+    save_output,
     save_sites,
     save_xtalforms,
 )
@@ -466,6 +471,7 @@ class CLI:
     def process(self, option_json: str):
         options = Options.parse_file(option_json)
         self.init(options.source_dir)
+
         for datasource_dir, datasource_type in zip(
             options.datasources, options.datasource_types
         ):
@@ -495,6 +501,57 @@ class CLI:
         self.assign_xtalforms(options.source_dir)
         self.build_graph(options.source_dir)
         self.generate_sites_from_components(options.source_dir)
+
+        # sites = read_sites(Path(options.source_dir))
+        neighbourhoods = read_neighbourhoods(Path(options.source_dir))
+        output = read_output(Path(options.source_dir))
+        dataset_output_dict = {}
+        for ligand_id in neighbourhoods.ligand_ids:
+            dtag, chain, residue = (
+                ligand_id.dtag,
+                ligand_id.chain,
+                ligand_id.residue,
+            )
+
+            if dtag not in dataset_output_dict:
+                dataset_output = DatasetOutput(aligned_chain_output={})
+                dataset_output_dict[dtag] = dataset_output
+            else:
+                dataset_output = dataset_output_dict[dtag]
+
+            if chain not in dataset_output.aligned_chain_output:
+                chain_output = ChainOutput(
+                    aligned_structures={},
+                    aligned_artefacts={},
+                    aligned_xmaps={},
+                )
+                dataset_output_dict[dtag].aligned_chain_output[
+                    chain
+                ] = chain_output
+            else:
+                chain_output = dataset_output_dict[dtag].aligned_chain_output[
+                    chain
+                ]
+
+            chain_output.aligned_structures[
+                residue
+            ] = constants.ALIGNED_STRUCTURE_TEMPLATE.format(
+                dtag=dtag, chain=chain, residue=residue
+            )
+            chain_output.aligned_artefacts[
+                residue
+            ] = constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                dtag=dtag, chain=chain, residue=residue
+            )
+            chain_output.aligned_xmaps[
+                residue
+            ] = constants.ALIGNED_XMAP_TEMPLATE.format(
+                dtag=dtag, chain=chain, residue=residue
+            )
+
+        output.dataset_output = dataset_output_dict
+        save_output(output, Path(options.source_dir))
+
         self.align_structures(options.source_dir)
         self.align_xmaps(options.source_dir)
 
@@ -527,6 +584,26 @@ class CLI:
         )
 
         save_data(system_data, _source_dir)
+
+        output = Output(
+            source_dir=str(_source_dir),
+            system_data=str(_source_dir / constants.DATA_JSON_PATH),
+            xtalforms=str(_source_dir / constants.XTALFORMS_FILE_NAME),
+            assigned_xtalforms=str(
+                _source_dir / constants.ASSIGNED_XTALFORMS_FILE_NAME
+            ),
+            neighbourhoods=str(
+                _source_dir / constants.NEIGHBOURHOODS_FILE_NAME
+            ),
+            graph=str(_source_dir / constants.ALIGNABILITY_GRAPH_FILE_NAME),
+            transforms=str(_source_dir / constants.TRANSFORMS_FILE_NAME),
+            sites=str(_source_dir / constants.SITES_FILE_NAME),
+            site_transforms=str(
+                _source_dir / constants.SITES_TRANSFORMS_FILE_NAME
+            ),
+            dataset_output={},
+        )
+        save_output(output, _source_dir)
 
     def add_data_source(
         self,
