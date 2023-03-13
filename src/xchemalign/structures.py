@@ -104,14 +104,14 @@ def get_transforms(
 
 
 def generate_assembly(xtalform: XtalForm, structure):
-    assembly = structure.clone()
+    full_st = structure.clone()
     chains_to_delete = []
-    for model in assembly:
+    for model in full_st:
         for chain in model:
             chains_to_delete.append((model.name, chain.name))
 
     for model_name, chain_name in chains_to_delete:
-        del assembly[model_name][chain_name]
+        del full_st[model_name][chain_name]
 
     for assembly_id, assembly in xtalform.assemblies.items():
         for generator_id, generator in assembly.generators.items():
@@ -125,10 +125,10 @@ def generate_assembly(xtalform: XtalForm, structure):
 
                     atom.pos = gemmi.Position(*new_pos_orth)
             chain_clone.name = generator.reference_chain
-            assembly[0].add_chain(chain_clone)
+            full_st[0].add_chain(chain_clone)
 
     num_chains = 0
-    for model in assembly:
+    for model in full_st:
         for chain in model:
             num_chains += 1
     logger.debug(f"Generated {num_chains} assembly chains")
