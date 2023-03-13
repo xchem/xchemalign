@@ -114,7 +114,7 @@ def generate_assembly(xtalform: XtalForm, structure):
         del assembly[model_name][chain_name]
 
     for assembly_id, assembly in xtalform.assemblies.items():
-        for generator in assembly.generators:
+        for generator_id, generator in assembly.generators.items():
             op = gemmi.Op(generator.triplet)
             chain_clone = structure[0][generator.chain].clone()
             for residue in chain_clone:
