@@ -648,6 +648,14 @@ class AssignedXtalForms(BaseModel):
             if dataset_id == item:
                 return xtalform_id
 
+    @classmethod
+    def read(cls, path: Path):
+        return cls.parse_file(path)
+
+    def save(self, path: Path):
+        with open(path, "w") as f:
+            f.write(self.json())
+
 
 def read_assigned_xtalforms(path: Path):
     return AssignedXtalForms.parse_file(path / constants.ASSIGNED_XTALFORMS_FILE_NAME)

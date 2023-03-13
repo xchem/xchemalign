@@ -6,7 +6,6 @@ from loguru import logger
 
 from xchemalign import constants
 from xchemalign.data import (
-    Assemblies,
     AssignedXtalForms,
     AtomID,
     CanonicalSite,
@@ -254,7 +253,8 @@ def _generate_sites_from_components(_source_dir: Path):
     system_data = read_system_data(_source_dir)
 
     # Get the assemblies
-    assemblies = Assemblies.read(_source_dir / constants.ASSEMBLIES_FILE_NAME)
+    # assemblies = Assemblies.read(_source_dir / constants.ASSEMBLIES_FILE_NAME)
+    assigned_xtalforms = AssignedXtalForms.read(_source_dir / constants.ASSIGNED_XTALFORMS_FILE_NAME)
 
     # Get the xtalforms
     xtalforms = XtalForms.read(_source_dir / constants.XTALFORMS_FILE_NAME)
@@ -288,8 +288,9 @@ def _generate_sites_from_components(_source_dir: Path):
     # Get the xtalform sites
     xtalform_sites: XtalFormSites = get_xtalform_sites_from_canonical_sites(
         canonical_sites,
+        assigned_xtalforms,
         xtalforms,
-        assemblies,
+        # assemblies,
     )
     xtalform_sites.save(_source_dir / constants.XTALFORM_SITE_FILE)
 
