@@ -166,7 +166,7 @@ def get_xtalform_sites_from_canonical_sites(
     """
 
     xtalform_site_num = 0
-    xtalform_sites: dict = {}
+    xtalform_sites: dict[tuple, XtalFormSite] = {}
 
     for site_id, site in canonical_sites.iter():
         # site_residues = site.residues
@@ -179,7 +179,7 @@ def get_xtalform_sites_from_canonical_sites(
             # Determine which crystallographic chain the ligand is part of
             # by finding the chain that generated it (normally the same chain)
             for assembly_id, assembly in xtalform.assemblies.items():
-                for generator in assembly.generators:
+                for generator_id, generator in assembly.generators.items():
                     if chain == generator.reference_chain:
                         crystallographic_chain = generator.chain
 
@@ -187,8 +187,9 @@ def get_xtalform_sites_from_canonical_sites(
             xtalform_site_key = (site_id, xtalform_id, crystallographic_chain)
 
             # Check if the xtalform assembly pair has a site, add if so
-            if xtalform_site_key not in xtalform_sites:
-                xtalform_sites[xtalform_site_key].members.append(ligand_id)
+            if xtalform_site_key in xtalform_sites:
+                if ligand_id not in xtalform_sites[xtalform_site_key].members:
+                    xtalform_sites[xtalform_site_key].members.append(ligand_id)
 
             # Create a new xtalform site for the xtalform-assembly pair
             else:
