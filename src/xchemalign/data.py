@@ -147,7 +147,7 @@ class Assembly(BaseModel):
     id: int
     reference_assembly: int
     reference: DatasetID
-    assembly: list[AssemblyGenerator]
+    assembly: dict[int, AssemblyGenerator]
 
 
 class Assemblies(BaseModel):
