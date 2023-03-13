@@ -794,7 +794,7 @@ class CLI:
         neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
         # xtalforms: XtalForms = read_xtalforms(_source_dir)
         # xtalforms = XtalForms(xtalforms=[])
-        sites: CanonicalSites = read_canonical_sites(_source_dir)
+        sites: CanonicalSites = CanonicalSites.read(_source_dir / constants.CANONICAL_SITE_FILE)
         system_data: SystemData = read_system_data(_source_dir)
         site_transforms = read_site_transforms(_source_dir)
 
