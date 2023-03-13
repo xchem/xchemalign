@@ -628,7 +628,7 @@ class Options(BaseModel):
     panddas: list[str]
     assemblies_json: str
     xtalforms_json: str
-    dataset_xtalforms_json: str
+    # dataset_xtalforms_json: str
 
 
 class AssignedXtalForms(BaseModel):
