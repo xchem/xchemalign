@@ -192,6 +192,10 @@ class XtalForms(BaseModel):
     def read(cls, path: Path):
         return cls.parse_file(path)
 
+    def save(self, path: Path):
+        with open(path, "w") as f:
+            f.write(self.json())
+
 
 class DatasetXtalforms(BaseModel):
     dataset_xtalforms: dict[str, int]
