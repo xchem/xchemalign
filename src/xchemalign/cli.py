@@ -17,7 +17,7 @@ from xchemalign.align_xmaps import _align_xmaps
 
 # from xchemalign.get_system_sites import get_system_sites
 from xchemalign.build_alignment_graph import build_alignment_graph
-from xchemalign.data import (
+from xchemalign.data import (  # save_xtalforms,
     Assemblies,
     AssignedXtalForms,
     CanonicalSites,
@@ -51,7 +51,6 @@ from xchemalign.data import (
     save_canonical_sites,
     save_data,
     save_output,
-    save_xtalforms,
 )
 from xchemalign.generate_aligned_structures import _align_structures_from_sites
 from xchemalign.generate_sites_from_components import _generate_sites_from_components
@@ -475,8 +474,10 @@ class CLI:
         assemblies.save(Path(options.source_dir) / constants.ASSEMBLIES_FILE_NAME)
 
         # Copy the xtalform json into the source directory (checking validity)
-        xtalforms = read_xtalforms(Path(options.xtalforms_json))
-        save_xtalforms(Path(options.source_dir), xtalforms)
+        # xtalforms = read_xtalforms(Path(options.xtalforms_json))
+        # save_xtalforms(Path(options.source_dir), xtalforms)
+        xtalforms = XtalForms.read(Path(options.xtalforms_json))
+        xtalforms.save(Path(options.source_dir) / constants.XTALFORMS_FILE_NAME)
 
         # Parse the data sources and PanDDAs, matching ligands up to events
         self.parse_data_sources(options.source_dir)
