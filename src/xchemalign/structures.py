@@ -133,7 +133,7 @@ def generate_assembly(xtalform: XtalForm, structure):
             num_chains += 1
     logger.debug(f"Generated {num_chains} assembly chains")
 
-    return assembly
+    return full_st
 
 
 def remove_non_contact_chains(assembly, neighbourhood: LigandNeighbourhood):

@@ -239,7 +239,7 @@ def _add_pandda(_source_dir: Path, _pandda_dir: Path):
 
     logger.info(f"Added PanDDA {_pandda_dir} to panddas")
     pandda_paths = [_pandda.path for _pandda in system_data.panddas]
-    logger.info(f"PanDDAs are: {pandda_paths}")
+    logger.debug(f"PanDDAs are: {pandda_paths}")
 
 
 def _parse_data_sources(_source_dir: Path):
