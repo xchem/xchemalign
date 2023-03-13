@@ -496,7 +496,7 @@ class CLI:
         # Fully specify the output now that the sites are known
         # sites = read_sites(Path(options.source_dir))
         neighbourhoods = read_neighbourhoods(Path(options.source_dir))
-        canonical_sites = read_canonical_sites(Path(options.source_dir))
+        canonical_sites = CanonicalSites.read(Path(options.source_dir) / constants.CANONICAL_SITE_FILE)
         output = read_output(Path(options.source_dir))
         dataset_output_dict = {}
         for ligand_id in neighbourhoods.ligand_ids:
