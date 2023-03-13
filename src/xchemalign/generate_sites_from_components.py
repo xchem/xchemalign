@@ -4,22 +4,30 @@ import networkx as nx
 import numpy as np
 from loguru import logger
 
+from xchemalign import constants
 from xchemalign.data import (
+    Assemblies,
+    AssignedXtalForms,
     AtomID,
+    CanonicalSite,
+    CanonicalSites,
+    ConformerSite,
+    ConformerSites,
     LigandNeighbourhood,
     LigandNeighbourhoods,
     ResidueID,
-    Site,
-    Sites,
     SiteTransforms,
-    SubSite,
     Transform,
+    XtalForms,
+    XtalFormSite,
+    XtalFormSites,
     read_graph,
     read_neighbourhoods,
     read_system_data,
     save_site_transforms,
 )
-from xchemalign.save_sites import save_sites
+
+# from xchemalign.save_sites import save_sites
 from xchemalign.structures import get_structures, get_transform_from_residues
 
 
@@ -39,9 +47,7 @@ def get_residues_from_neighbourhood(n: LigandNeighbourhood):
     return list(set(rids))
 
 
-def get_subsites_from_components(
-    components, neighbourhoods: LigandNeighbourhoods
-):
+def get_conformer_sites_from_components(components, neighbourhoods: LigandNeighbourhoods):
     ss = []
     j = 0
     for component in components:
@@ -51,7 +57,7 @@ def get_subsites_from_components(
             lrs: list[ResidueID] = get_residues_from_neighbourhood(n)
             rs += lrs
         component_members = list(component)
-        s = SubSite(
+        s = ConformerSite(
             id=j,
             name="",
             residues=list(set(rs)),
@@ -61,22 +67,25 @@ def get_subsites_from_components(
         j += 1
         ss.append(s)
 
-    return ss
+    return ConformerSites(conformer_sites={site.id: site for site in ss})
 
 
-def get_sites_from_subsites(
-    subsites: list[SubSite], neighbourhoods: LigandNeighbourhoods
-):
+def get_sites_from_conformer_sites(conformer_sites: ConformerSites, neighbourhoods: LigandNeighbourhoods):
     g = nx.Graph()
 
     # Add the nodes
-    for ss in subsites:
+    for ss_id, ss in conformer_sites.iter():
         g.add_node(ss.id)
 
     # Form the site overlap matrix
-    arr = np.zeros((len(subsites), len(subsites)))
-    for ss1 in subsites:
-        for ss2 in subsites:
+    arr = np.zeros(
+        (
+            len(conformer_sites.conformer_sites),
+            len(conformer_sites.conformer_sites),
+        )
+    )
+    for ss_id1, ss1 in conformer_sites.iter():
+        for ss_id2, ss2 in conformer_sites.iter():
             if ss1.id == ss2.id:
                 continue
             v = set(ss1.residues).intersection(set(ss2.residues))
@@ -103,23 +112,33 @@ def get_sites_from_subsites(
     j = 0
     for component in cc:
         print(f"Component: {component} {len(component)}")
-        print(f"Subsites: {subsites} {len(subsites)}")
+        print((f"Conformer Sites: {conformer_sites}" f" {len(conformer_sites.conformer_sites)}"))
         _members = list(
-            set(sum([subsites[j].members for j in component], start=[]))
+            set(
+                sum(
+                    [conformer_sites.conformer_sites[j].members for j in component],
+                    start=[],
+                )
+            )
         )
-        _subsites = [subsites[j] for j in component]
+        _subsites = [conformer_sites.conformer_sites[j] for j in component]
 
-        s = Site(
+        s = CanonicalSite(
             id=j,
-            subsite_ids=[subsites[j].id for j in component],
+            subsite_ids=[conformer_sites.conformer_sites[j].id for j in component],
             subsites=_subsites,
             members=_members,
             residues=list(
-                set(sum([subsites[j].residues for j in component], start=[]))
+                set(
+                    sum(
+                        [conformer_sites.conformer_sites[j].residues for j in component],
+                        start=[],
+                    )
+                )
             ),
-            reference_ligand_id=subsites[0].reference_ligand_id,
-            reference_subsite_id=subsites[0].id,
-            reference_subsite=subsites[0],
+            reference_ligand_id=conformer_sites.conformer_sites[0].reference_ligand_id,
+            reference_subsite_id=conformer_sites.conformer_sites[0].id,
+            reference_subsite=conformer_sites.conformer_sites[0],
         )
         j += 1
         sites.append(s)
@@ -127,7 +146,68 @@ def get_sites_from_subsites(
     return sites
 
 
-def get_subsite_transforms(sites: Sites, structures):
+def get_xtalform_sites_from_canonical_sites(
+    canonical_sites: CanonicalSites,
+    assigned_xtalforms: AssignedXtalForms,
+    xtalforms: XtalForms,
+):
+    """
+    Each canonical site may occur in several forms, depending on the
+    combination of real and artefact chains involved. This function
+    partitions the site into xtalform sites, each of which contains
+    a single possible crystallographic context i.e. each
+    crystallographicly non-identical chain needs its own site.
+
+    Binding may occur to multiple crystallographically non-
+    identical chains in the same crystalform, giving rise to
+    multiple xtalform sites for that dataset. The easiest way to
+    check whether two chains are identical is whether one is
+    related to the other by a transform in the crystal form
+    assembly.
+    """
+
+    xtalform_site_num = 0
+    xtalform_sites: dict = {}
+
+    for site_id, site in canonical_sites.iter():
+        # site_residues = site.residues
+        for ligand_id in site.members:
+            chain = ligand_id.chain
+            dtag = ligand_id.dtag
+            xtalform_id = assigned_xtalforms.get_xtalform_id(dtag)
+            xtalform = xtalforms.get_xtalform(xtalform_id)
+
+            # Determine which crystallographic chain the ligand is part of
+            # by finding the chain that generated it (normally the same chain)
+            for assembly_id, assembly in xtalform.assemblies.items():
+                for generator in assembly.generators:
+                    if chain == generator.reference_chain:
+                        crystallographic_chain = generator.chain
+
+            # Define the site key
+            xtalform_site_key = (site_id, xtalform_id, crystallographic_chain)
+
+            # Check if the xtalform assembly pair has a site, add if so
+            if xtalform_site_key not in xtalform_sites:
+                xtalform_sites[xtalform_site_key].members.append(ligand_id)
+
+            # Create a new xtalform site for the xtalform-assembly pair
+            else:
+                xtalform_sites[xtalform_site_key] = XtalFormSite(
+                    id=xtalform_site_num,
+                    site_id=site_id,
+                    xtalform_id=xtalform_id,
+                    crystallographic_chain=crystallographic_chain,
+                    members=[
+                        ligand_id,
+                    ],
+                )
+                xtalform_site_num += 1
+
+    return XtalFormSites(xtalform_sites={xtalform_site.id: xtalform_site for xtalform_site in xtalform_sites.values()})
+
+
+def get_subsite_transforms(sites: CanonicalSites, structures):
 
     transforms = {}
     for site_id, site in zip(sites.site_ids, sites.sites):
@@ -139,36 +219,27 @@ def get_subsite_transforms(sites: Sites, structures):
             ssr = ss.reference_ligand_id.dtag
             ssrs = structures[ssr]
             transform = get_transform_from_residues(rs, srs, ssrs)
-            transforms[(site_id, 0, ssid)] = Transform(
-                vec=transform.vec.tolist(), mat=transform.mat.tolist()
-            )
+            transforms[(site_id, 0, ssid)] = Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
 
     return transforms
 
 
-def get_site_transforms(sites: Sites, structures):
+def get_site_transforms(sites: CanonicalSites, structures):
     transforms = {}
     rs = sites.reference_site
     rsid = sites.reference_site_id
 
     rss = structures[rs.reference_ligand_id.dtag]
     ref_site_all_ress = [
-        ResidueID(chain=chain.name, residue=res.seqid.num)
-        for model in rss
-        for chain in model
-        for res in chain
+        ResidueID(chain=chain.name, residue=res.seqid.num) for model in rss for chain in model for res in chain
     ]
 
     for site_id, site in zip(sites.site_ids, sites.sites):
         srs = site.reference_ligand_id.dtag
         site_structure = structures[srs]
 
-        transform = get_transform_from_residues(
-            ref_site_all_ress, rss, site_structure
-        )
-        transforms[(rsid, site_id)] = Transform(
-            vec=transform.vec.tolist(), mat=transform.mat.tolist()
-        )
+        transform = get_transform_from_residues(ref_site_all_ress, rss, site_structure)
+        transforms[(rsid, site_id)] = Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
 
     return transforms
 
@@ -182,6 +253,12 @@ def _generate_sites_from_components(_source_dir: Path):
 
     system_data = read_system_data(_source_dir)
 
+    # Get the assemblies
+    assemblies = Assemblies.read(_source_dir)
+
+    # Get the xtalforms
+    xtalforms = XtalForms.read(_source_dir / constants.XTALFORMS_FILE_NAME)
+
     # Get the connected components
     logger.info("Getiting connected components...")
     connected_components = get_components(g)
@@ -189,39 +266,47 @@ def _generate_sites_from_components(_source_dir: Path):
 
     # Get the subsites from the connected components with overlap
     logger.info("Geting sites...")
-    subsites: list[SubSite] = get_subsites_from_components(
-        connected_components, neighbourhoods
-    )
-    logger.info(f"Number of subsites: {len(subsites)}")
+    conformer_sites: ConformerSites = get_conformer_sites_from_components(connected_components, neighbourhoods)
+    logger.info(f"Number of subsites: {len(conformer_sites.conformer_sites)}")
+
+    # Save the conformer sites
+    conformer_sites.save(_source_dir / constants.CONFORMER_SITE_FILE)
 
     # Merge the connected components with shared residues into sites
     logger.info("Getting sites...")
-    _sites: list[Site] = get_sites_from_subsites(subsites, neighbourhoods)
+    _sites: list[CanonicalSite] = get_sites_from_conformer_sites(conformer_sites, neighbourhoods)
     logger.info(f"Number of sites: {len(_sites)}")
 
-    sites: Sites = Sites(
+    canonical_sites: CanonicalSites = CanonicalSites(
         site_ids=[s.id for s in _sites],
         sites=_sites,
         reference_site=_sites[0],
         reference_site_id=_sites[0].id,
     )
+    canonical_sites.save(_source_dir / constants.CANONICAL_SITE_FILE)
 
-    save_sites(sites, _source_dir)
+    # Get the xtalform sites
+    xtalform_sites: XtalFormSites = get_xtalform_sites_from_canonical_sites(
+        canonical_sites,
+        xtalforms,
+        assemblies,
+    )
+    xtalform_sites.save(_source_dir / constants.XTALFORM_SITE_FILE)
 
     # Get the subsite transforms
     logger.info("Getting transfroms between subsites...")
     structures = get_structures(system_data)
-    subsite_transforms = get_subsite_transforms(sites, structures)
+    subsite_transforms = get_subsite_transforms(canonical_sites, structures)
 
     # Get the site transforms
     logger.info("Getting transforms between sites...")
-    site_transforms = get_site_transforms(sites, structures)
+    site_transforms = get_site_transforms(canonical_sites, structures)
     site_transforms = SiteTransforms(
-        site_transform_ids=[key for key in site_transforms.keys()],
-        site_transforms=[tr for tr in site_transforms.values()],
-        subsite_transform_ids=[key for key in subsite_transforms.keys()],
-        subsite_transforms=[tr for tr in subsite_transforms.values()],
+        canonical_site_transform_ids=[key for key in site_transforms.keys()],
+        canonical_site_transforms=[tr for tr in site_transforms.values()],
+        conformer_site_transform_ids=[key for key in subsite_transforms.keys()],
+        conformer_site_transforms=[tr for tr in subsite_transforms.values()],
     )
     save_site_transforms(site_transforms, _source_dir)
 
-    return sites
+    return canonical_sites

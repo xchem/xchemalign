@@ -3,6 +3,7 @@ from loguru import logger
 
 # import loguru
 from xchemalign.data import (
+    AssignedXtalForms,
     Atom,
     AtomID,
     Dataset,
@@ -12,12 +13,13 @@ from xchemalign.data import (
     Structure,
     SystemData,
     Transform,
+    XtalForm,
+    XtalForms,
 )
+from xchemalign.structures import generate_assembly
 
 
-def get_structure_fragments(
-    dataset: Dataset, structure: Structure
-) -> dict[LigandID, gemmi.Residue]:
+def get_structure_fragments(dataset: Dataset, structure: Structure) -> dict[LigandID, gemmi.Residue]:
     fragments: dict[LigandID, gemmi.Residue] = {}
     # lig_number: int = 0
     for model in structure:
@@ -29,9 +31,7 @@ def get_structure_fragments(
                     #     & (lbe.chain == chain.name)
                     #     & (lbe.residue == residue.seqid.num)
                     # ):
-                    if (lbe.chain == chain.name) & (
-                        lbe.residue == residue.seqid.num
-                    ):
+                    if (lbe.chain == chain.name) & (lbe.residue == residue.seqid.num):
                         ligand_id: LigandID = LigandID(
                             dtag=dataset.dtag,
                             chain=chain.name,
@@ -44,9 +44,7 @@ def get_structure_fragments(
 
 
 def _get_model_and_artefact_atoms(
-    residue_neighbours: dict[
-        tuple[float, float, float], gemmi.NeighborSearch.Mark
-    ],
+    residue_neighbours: dict[tuple[float, float, float], gemmi.NeighborSearch.Mark],
     structure: Structure,
 ) -> tuple[list[gemmi.NeighborSearch.Mark], list[gemmi.NeighborSearch.Mark]]:
     # Check each mark for its image and partition them on this
@@ -60,9 +58,7 @@ def _get_model_and_artefact_atoms(
         logger.debug(f"Canonical atom pos: {cra.atom.pos}")
         logger.debug(f"Image idx: {mark.image_idx}")
 
-        nearest_image = structure.cell.find_nearest_pbc_image(
-            mark.pos(), cra.atom.pos, mark.image_idx
-        )
+        nearest_image = structure.cell.find_nearest_pbc_image(mark.pos(), cra.atom.pos, mark.image_idx)
         logger.debug(f"{nearest_image}")
         logger.debug(f"{nearest_image.sym_idx}")
         logger.debug(f"{nearest_image.pbc_shift}")
@@ -76,14 +72,9 @@ def _get_model_and_artefact_atoms(
 
 
 def __get_model_and_artefact_atoms(
-    residue_neighbours: dict[
-        tuple[float, float, float], gemmi.NeighborSearch.Mark
-    ],
+    residue_neighbours: dict[tuple[float, float, float], gemmi.NeighborSearch.Mark],
     structure: Structure,
-) -> tuple[
-    dict[gemmi.NeighborSearch.Mark, gemmi.CRA],
-    dict[gemmi.NeighborSearch.Mark, gemmi.CRA],
-]:
+) -> tuple[dict[gemmi.NeighborSearch.Mark, gemmi.CRA], dict[gemmi.NeighborSearch.Mark, gemmi.CRA]]:
     # Check each mark for its image and partition them on this
     model_atoms: dict[gemmi.NeighborSearch.Mark, gemmi.CRA] = {}
     artefact_atoms: dict[gemmi.NeighborSearch.Mark, gemmi.CRA] = {}
@@ -112,10 +103,7 @@ def get_model_and_artefact_atoms(
     residue_neighbours: list[tuple[gemmi.Position, gemmi.CRA]],
     structure: Structure,
     fragment,
-) -> tuple[
-    list[tuple[gemmi.Position, gemmi.CRA]],
-    list[tuple[gemmi.Position, gemmi.CRA]],
-]:
+) -> tuple[list[tuple[gemmi.Position, gemmi.CRA]], list[tuple[gemmi.Position, gemmi.CRA]]]:
     # Check each mark for its image and partition them on this
     model_atoms: list[tuple[gemmi.Position, gemmi.CRA]] = []
     artefact_atoms: list[tuple[gemmi.Position, gemmi.CRA]] = []
@@ -146,9 +134,7 @@ def get_model_and_artefact_atoms(
         # Canonical/model atom confirnmed: just see if already handled
         else:
             # Check there is not already a nearby atom in there
-            if all(
-                [model_atom[0].dist(pos) > 0.1 for model_atom in model_atoms]
-            ):
+            if all([model_atom[0].dist(pos) > 0.1 for model_atom in model_atoms]):
                 model_atoms.append((pos, cra))
 
         # rounded_pos = (
@@ -160,34 +146,15 @@ def get_model_and_artefact_atoms(
     for pos, cra in possible_artefact_atoms:
         # Check it isn't a ncs image by seeing if it overlays a model atom
         if all([model_atom[0].dist(pos) > 0.1 for model_atom in model_atoms]):
-            if all(
-                [
-                    model_atom[0].dist(pos) > 0.1
-                    for model_atom in artefact_atoms
-                ]
-            ):
+            if all([model_atom[0].dist(pos) > 0.1 for model_atom in artefact_atoms]):
                 artefact_atoms.append((pos, cra))
 
     updated_model_atoms = [
-        atom
-        for atom in model_atoms
-        if all(
-            [
-                fragment_atom.pos.dist(atom[0]) > 0.1
-                for fragment_atom in fragment
-            ]
-        )
+        atom for atom in model_atoms if all([fragment_atom.pos.dist(atom[0]) > 0.1 for fragment_atom in fragment])
     ]
 
     updated_artefact_atoms = [
-        atom
-        for atom in artefact_atoms
-        if all(
-            [
-                fragment_atom.pos.dist(atom[0]) > 0.1
-                for fragment_atom in fragment
-            ]
-        )
+        atom for atom in artefact_atoms if all([fragment_atom.pos.dist(atom[0]) > 0.1 for fragment_atom in fragment])
     ]
 
     # return model_atoms, artefact_atoms
@@ -231,9 +198,7 @@ def get_ligand_neighbourhood(
             # logger.debug(f"CRA: {cra}")
 
             # Nearest image of canon atom
-            nearest_image = structure.cell.find_nearest_pbc_image(
-                atom.pos, cra.atom.pos, neighbour.image_idx
-            )
+            nearest_image = structure.cell.find_nearest_pbc_image(atom.pos, cra.atom.pos, neighbour.image_idx)
 
             # logger.debug(f"{nearest_image}")
             # logger.debug(f"{nearest_image.sym_idx}")
@@ -260,9 +225,7 @@ def get_ligand_neighbourhood(
             residue_neighbours.append((pos, cra))
 
     # # Seperate out model and artefact atoms
-    _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(
-        residue_neighbours, structure, fragment
-    )
+    _model_atoms, _artefact_atoms = get_model_and_artefact_atoms(residue_neighbours, structure, fragment)
     logger.debug(f"Got {len(_model_atoms)} model atoms")
     logger.debug(f"Got {len(_artefact_atoms)} artefact atoms")
 
@@ -324,7 +287,7 @@ def get_ligand_neighbourhood(
 
 
 def get_dataset_neighbourhoods(
-    dataset: Dataset, max_radius: float = 7.0
+    dataset: Dataset, xtalform: XtalForm, max_radius: float = 7.0
 ) -> dict[LigandID, LigandNeighbourhood]:
     # Load the structure
     logger.debug(dataset.pdb)
@@ -332,41 +295,39 @@ def get_dataset_neighbourhoods(
     logger.debug(f"{structure.cell}")
 
     # Get the rest of the assembly
-    # assembly = generate_assembly(xtalform, structure)
+    assembly = generate_assembly(xtalform, structure)
 
     # Get the bound fragments
-    fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(
-        dataset, structure
-    )
+    fragments: dict[LigandID, gemmi.Residue] = get_structure_fragments(dataset, assembly)
     logger.debug(f"Get {len(fragments)} fragment neighbourhoods")
     logger.debug(fragments)
 
     # Construct the neighbourhood search
-    ns: gemmi.NeighborSearch = gemmi.NeighborSearch(
-        structure[0], structure.cell, max_radius
-    ).populate()
+    ns: gemmi.NeighborSearch = gemmi.NeighborSearch(assembly[0], assembly.cell, max_radius).populate()
 
     # For each bound fragment, identify the neighbourhood atoms and
     # partition them into model and artefact
     fragment_neighbourhoods: dict[LigandID, LigandNeighbourhood] = {}
     for ligand_id, fragment in fragments.items():
-        fragment_neighbourhoods[ligand_id] = get_ligand_neighbourhood(
-            structure, ns, fragment, max_dist=max_radius
-        )
+        fragment_neighbourhoods[ligand_id] = get_ligand_neighbourhood(assembly, ns, fragment, max_dist=max_radius)
 
     return fragment_neighbourhoods
 
 
 def get_ligand_neighbourhoods(
     system_data: SystemData,
+    xtalforms: XtalForms,
+    assigned_xtalforms: AssignedXtalForms,
 ) -> LigandNeighbourhoods:
     # Iterate over data, loading in structures, getting ligands for each
     # structure and finding their neighbourhoods
     ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood] = {}
-    for dataset in system_data.datasets:
-        dataset_ligand_neighbourhoods: dict[
-            LigandID, LigandNeighbourhood
-        ] = get_dataset_neighbourhoods(dataset)
+    for dataset_id, dataset in zip(system_data.dataset_ids, system_data.datasets):
+        assigned_xtalform = assigned_xtalforms.get_xtalform_id(dataset_id)
+        xtalform: XtalForm = xtalforms.get_xtalform(assigned_xtalform)
+        dataset_ligand_neighbourhoods: dict[LigandID, LigandNeighbourhood] = get_dataset_neighbourhoods(
+            dataset, xtalform
+        )
         ligand_neighbourhoods.update(dataset_ligand_neighbourhoods)
 
     return LigandNeighbourhoods(

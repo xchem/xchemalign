@@ -12,12 +12,12 @@ repos:
         name: Run black
         stages: [commit]
         language: system
-        entry: black --check --diff --line-length=79
+        entry: black --check --diff --line-length=119
         types: [python]
 
       - id: flake8
         name: Run flake8
         stages: [commit]
         language: system
-        entry: flake8 --ignore=E203,W503
+        entry: flake8 --ignore=E203,W503 --max-line-length=119
         types: [python]

@@ -17,43 +17,44 @@ from xchemalign.align_xmaps import _align_xmaps
 
 # from xchemalign.get_system_sites import get_system_sites
 from xchemalign.build_alignment_graph import build_alignment_graph
-from xchemalign.data import (  # LigandBindingEvent,; LigandBindingEvents,
+from xchemalign.data import (
+    Assemblies,
     AssignedXtalForms,
+    CanonicalSites,
     ChainOutput,
+    ConformerSites,
     Dataset,
     DatasetID,
     DatasetOutput,
     Datasource,
     LigandID,
     LigandNeighbourhoods,
+    LigandOutput,
     Options,
     Output,
     PanDDA,
-    Sites,
     SiteTransforms,
     SystemData,
     Transforms,
     XtalForms,
     read_assigned_xtalforms,
+    read_canonical_sites,
     read_graph,
     read_neighbourhoods,
     read_output,
     read_site_transforms,
-    read_sites,
     read_structures,
     read_system_data,
     read_transforms,
     read_xtalforms,
     save_assigned_xtalforms,
+    save_canonical_sites,
     save_data,
     save_output,
-    save_sites,
     save_xtalforms,
 )
 from xchemalign.generate_aligned_structures import _align_structures_from_sites
-from xchemalign.generate_sites_from_components import (
-    _generate_sites_from_components,
-)
+from xchemalign.generate_sites_from_components import _generate_sites_from_components
 from xchemalign.make_data_json import (
     get_ligand_binding_events_from_panddas,
     get_ligand_binding_events_from_structure,
@@ -68,7 +69,7 @@ from xchemalign.make_data_json import (
 #     ...
 
 
-def _suggest_merges(sites: Sites):
+def _suggest_merges(sites: CanonicalSites):
     ...
 
 
@@ -97,27 +98,23 @@ def cas_ligands():
 
 
 def _change_sites_reference(_source_dir: Path, site_id: int):
-    sites: Sites = read_sites(_source_dir)
+    sites: CanonicalSites = read_canonical_sites(_source_dir)
     sites.reference_site_id = site_id
-    save_sites(sites, _source_dir)
+    save_canonical_sites(sites, _source_dir)
 
-    logger.info(
-        'Run "update" to generate xmaps and structures with new reference'
-    )
+    logger.info('Run "update" to generate xmaps and structures with new reference')
 
 
 def _change_site_reference(_source_dir: Path, site_id: int, subsite_id: int):
-    sites: Sites = read_sites(_source_dir)
+    sites: CanonicalSites = read_canonical_sites(_source_dir)
     site = sites.get_site(site_id)
     site.reference_subsite_id = subsite_id
     new_reference_subsite = site.get_subsite(subsite_id)
     site.reference_subsite = new_reference_subsite
     site.reference_ligand_id = new_reference_subsite.reference_ligand_id
-    save_sites(sites, _source_dir)
+    save_canonical_sites(sites, _source_dir)
 
-    logger.info(
-        'Run "update" to generate xmaps and structures with new reference'
-    )
+    logger.info('Run "update" to generate xmaps and structures with new reference')
 
 
 def _change_subsite_reference(
@@ -128,7 +125,7 @@ def _change_subsite_reference(
     chain: str,
     residue: int,
 ):
-    sites: Sites = read_sites(_source_dir)
+    sites: CanonicalSites = read_canonical_sites(_source_dir)
     site = sites.get_site(site_id)
     site.reference_subsite_id = subsite_id
     subsite = site.get_subsite(subsite_id)
@@ -137,11 +134,9 @@ def _change_subsite_reference(
         raise Exception(f"LigandID {new_lid} not in {subsite.members}")
     subsite.reference_ligand_id = new_lid
 
-    save_sites(sites, _source_dir)
+    save_canonical_sites(sites, _source_dir)
 
-    logger.info(
-        'Run "update" to generate xmaps and structures with new reference'
-    )
+    logger.info('Run "update" to generate xmaps and structures with new reference')
 
 
 # def _ligand_binding_events_from_pdb(pdb: Path, xmap: Path):
@@ -159,9 +154,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     if not _source_dir.exists():
         raise Exception(f"No such dir: {_source_dir}")
 
-    datasource_paths = [
-        _datasource.path for _datasource in system_data.datasources
-    ]
+    datasource_paths = [_datasource.path for _datasource in system_data.datasources]
     logger.info(f"Datasources are: {datasource_paths}")
 
     # for model_dir in _source_dir.glob("*"):
@@ -174,9 +167,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
     # ligand_binding_events=ligand_binding_events)
     #     initial_dataset = InitialDataset(dtag=dtag, mtz, pdb, xmap)
 
-    datasource = Datasource(
-        path=str(_data_source_dir), datasource_type="model_building"
-    )
+    datasource = Datasource(path=str(_data_source_dir), datasource_type="model_building")
 
     if not system_data.datasources:
         logger.info("No Datasources: Creating new list!")
@@ -185,9 +176,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
         ]
     else:
         new_datasources = [
-            _datasource
-            for _datasource in system_data.datasources
-            if _datasource.path != str(_data_source_dir)
+            _datasource for _datasource in system_data.datasources if _datasource.path != str(_data_source_dir)
         ] + [
             datasource,
         ]
@@ -195,9 +184,7 @@ def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
 
     save_data(system_data, _source_dir)
     logger.info(f"Added dir {_data_source_dir} to datasources")
-    datasource_paths = [
-        _datasource.path for _datasource in system_data.datasources
-    ]
+    datasource_paths = [_datasource.path for _datasource in system_data.datasources]
     logger.info(f"Datasources are now: {datasource_paths}")
 
 
@@ -207,9 +194,7 @@ def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
     if not _source_dir.exists():
         raise Exception(f"No such dir: {_source_dir}")
 
-    datasource = Datasource(
-        path=str(_data_source_dir), datasource_type="manual"
-    )
+    datasource = Datasource(path=str(_data_source_dir), datasource_type="manual")
 
     if not system_data.datasources:
         system_data.datasources = [
@@ -217,9 +202,7 @@ def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
         ]
     else:
         new_datasources = [
-            _datasource
-            for _datasource in system_data.datasources
-            if _datasource.path != str(_data_source_dir)
+            _datasource for _datasource in system_data.datasources if _datasource.path != str(_data_source_dir)
         ] + [
             datasource,
         ]
@@ -227,9 +210,7 @@ def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
 
     save_data(system_data, _source_dir)
     logger.info(f"Added dir {_data_source_dir} to datasources")
-    datasource_paths = [
-        _datasource.path for _datasource in system_data.datasources
-    ]
+    datasource_paths = [_datasource.path for _datasource in system_data.datasources]
     logger.info(f"Datasources are: {datasource_paths}")
 
 
@@ -237,26 +218,18 @@ def _add_pandda(_source_dir: Path, _pandda_dir: Path):
     system_data = read_system_data(_source_dir)
 
     analyses_dir: Path = _pandda_dir / constants.PANDDA_ANALYSES_DIR
-    event_table_path: Path = (
-        analyses_dir / constants.PANDDA_EVENTS_INSPECT_TABLE_PATH
-    )
+    event_table_path: Path = analyses_dir / constants.PANDDA_EVENTS_INSPECT_TABLE_PATH
 
     if event_table_path.exists():
 
-        pandda = PanDDA(
-            path=str(_pandda_dir), event_table_path=str(event_table_path)
-        )
+        pandda = PanDDA(path=str(_pandda_dir), event_table_path=str(event_table_path))
 
         if not system_data.panddas:
             system_data.panddas = [
                 pandda,
             ]
         else:
-            new_panddas = [
-                _pandda
-                for _pandda in system_data.panddas
-                if _pandda.path != str(_pandda_dir)
-            ] + [
+            new_panddas = [_pandda for _pandda in system_data.panddas if _pandda.path != str(_pandda_dir)] + [
                 pandda,
             ]
             system_data.panddas = new_panddas
@@ -274,10 +247,7 @@ def _parse_data_sources(_source_dir: Path):
     system_data = read_system_data(_source_dir)
 
     # Get the PanDDA event tables
-    pandda_event_tables = {
-        pandda.path: pd.read_csv(pandda.event_table_path)
-        for pandda in system_data.panddas
-    }
+    pandda_event_tables = {pandda.path: pd.read_csv(pandda.event_table_path) for pandda in system_data.panddas}
     logger.info(f"Read {len(pandda_event_tables)} PanDDA event tables")
 
     # Get the
@@ -301,13 +271,9 @@ def _parse_data_sources(_source_dir: Path):
                     continue
                 # if not xmap.exists():
                 #     continue
-                ligand_binding_events = get_ligand_binding_events_from_panddas(
-                    pandda_event_tables, pdb, dtag
-                )
+                ligand_binding_events = get_ligand_binding_events_from_panddas(pandda_event_tables, pdb, dtag)
                 if len(ligand_binding_events.ligand_ids) == 0:
-                    logger.warning(
-                        f"Dataset {dtag} has no ligand binding events!"
-                    )
+                    logger.warning(f"Dataset {dtag} has no ligand binding events!")
                     continue
                 dataset = Dataset(
                     dtag=dtag,
@@ -345,13 +311,9 @@ def _parse_data_sources(_source_dir: Path):
                     mtz = None
                     logger.warning("No mtz!")
 
-                ligand_binding_events = (
-                    get_ligand_binding_events_from_structure(pdb, xmap, dtag)
-                )
+                ligand_binding_events = get_ligand_binding_events_from_structure(pdb, xmap, dtag)
                 if len(ligand_binding_events.ligand_ids) == 0:
-                    logger.warning(
-                        f"Dataset {dtag} has no ligand binding events!"
-                    )
+                    logger.warning(f"Dataset {dtag} has no ligand binding events!")
                     continue
                 dataset = Dataset(
                     dtag=dtag,
@@ -364,9 +326,7 @@ def _parse_data_sources(_source_dir: Path):
                 datasets[dataset_id] = dataset
                 logger.debug(f"Added dataset: {dataset_id}")
         else:
-            raise Exception(
-                f"Source type {datasource.datasource_type} unknown!"
-            )
+            raise Exception(f"Source type {datasource.datasource_type} unknown!")
 
     system_data.dataset_ids = list(datasets.keys())
     system_data.datasets = list(datasets.values())
@@ -382,16 +342,20 @@ def save_schema(model, path):
 
 
 def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
+    structure = structures[dataset_id]
+    structure_spacegroup = structure.spacegroup_hm
+    structure_cell = structure.cell
+
     xtalform_deltas = {}
+
     for xtalform_id, xtalform in xtalforms.iter():
         ref_structure = structures[xtalform.reference]
         ref_spacegroup = ref_structure.spacegroup_hm
         ref_structure_cell = ref_structure.cell
-        structure = structures[dataset_id]
-        structure_spacegroup = structure.spacegroup_hm
-        structure_cell = structure.cell
+
         if ref_spacegroup != structure_spacegroup:
             continue
+
         deltas = np.array(
             [
                 structure_cell.a / ref_structure_cell.a,
@@ -409,26 +373,35 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
 
     closest_xtalform = min(
         xtalform_deltas,
-        key=lambda _xtalform_id: np.sum(
-            np.abs(xtalform_deltas[_xtalform_id] - 1)
-        ),
+        key=lambda _xtalform_id: np.sum(np.abs(xtalform_deltas[_xtalform_id] - 1)),
     )
 
     return closest_xtalform, xtalform_deltas[closest_xtalform]
 
 
-def _assign_xtalforms(_source_dir: Path):
-    system_data: SystemData = read_system_data(_source_dir)
+def _assign_xtalforms(
+    _source_dir: Path,
+    assemblies: Assemblies,
+    xtalforms: XtalForms,
+    system_data: SystemData,
+    # dataset_xtalforms: DatasetXtalforms,
+):
+    # system_data: SystemData = read_system_data(_source_dir)
     # ligand_neighbourhoods = read_neighbourhoods(_source_dir)
-    xtalforms = read_xtalforms(_source_dir)
+    # assemblies = read_assemblies(_source_dir)
+    # xtalforms = read_xtalforms(_source_dir)
     structures = read_structures(system_data)
 
     dataset_ids = []
     xtalform_ids = []
     for dataset_id, dataset in system_data.iter():
-        closest_xtalform_id, deltas = get_closest_xtalform(
-            xtalforms, structures, dataset_id
-        )
+        # if dataset_id.dtag in dataset_xtalforms.dataset_xtalforms:
+        #     closest_xtalform_id = dataset_xtalforms.dataset_xtalforms[
+        #         dataset_id.dtag
+        #     ]
+
+        # else:
+        closest_xtalform_id, deltas = get_closest_xtalform(xtalforms, structures, dataset_id)
 
         if (closest_xtalform_id is None) & (deltas is None):
             logger.info(f"No reference in same spacegroup for: {dataset_id}")
@@ -445,9 +418,7 @@ def _assign_xtalforms(_source_dir: Path):
         dataset_ids.append(dataset_id)
         xtalform_ids.append(closest_xtalform_id)
 
-    assigned_xtalforms = AssignedXtalForms(
-        dataset_ids=dataset_ids, xtalform_ids=xtalform_ids
-    )
+    assigned_xtalforms = AssignedXtalForms(dataset_ids=dataset_ids, xtalform_ids=xtalform_ids)
 
     save_assigned_xtalforms(_source_dir, assigned_xtalforms)
 
@@ -461,7 +432,7 @@ class CLI:
 
         save_schema(SystemData, _output_dir)
         save_schema(LigandNeighbourhoods, _output_dir)
-        save_schema(Sites, _output_dir)
+        save_schema(CanonicalSites, _output_dir)
         save_schema(Transforms, _output_dir)
         save_schema(SiteTransforms, _output_dir)
         save_schema(SystemData, _output_dir)
@@ -470,11 +441,14 @@ class CLI:
 
     def process(self, option_json: str):
         options = Options.parse_file(option_json)
+
+        # Initialize the output directory and create empty
+        # jsons in it
         self.init(options.source_dir)
 
-        for datasource_dir, datasource_type in zip(
-            options.datasources, options.datasource_types
-        ):
+        # Add the datasources in the options json and add them to
+        # the datasource json
+        for datasource_dir, datasource_type in zip(options.datasources, options.datasource_types):
             if datasource_type == "model_building":
                 self.add_data_source(
                     options.source_dir,
@@ -488,22 +462,40 @@ class CLI:
                     source_type=datasource_type,
                 )
 
+        # Add the PanDDAs in the options json and add them to the pandda json
         for pandda_dir in options.panddas:
             self.add_pandda(options.source_dir, pandda_dir)
 
-        xtalforms = XtalForms(
-            xtalform_ids=[_xtalform.id for _xtalform in options.xtalforms],
-            xtalforms=[_xtalform for _xtalform in options.xtalforms],
-        )
+        # xtalforms = XtalForms(
+        #     xtalform_ids=[_xtalform.id for _xtalform in options.xtalforms],
+        #     xtalforms=[_xtalform for _xtalform in options.xtalforms],
+        # )
+        # Copy the assembly json into the source directory (checking validity)
+        assemblies = Assemblies.read(Path(options.assemblies_json))
+        assemblies.save(Path(options.source_dir) / constants.ASSEMBLIES_FILE_NAME)
+
+        # Copy the xtalform json into the source directory (checking validity)
+        xtalforms = read_xtalforms(Path(options.xtalforms_json))
         save_xtalforms(Path(options.source_dir), xtalforms)
 
+        # Parse the data sources and PanDDAs, matching ligands up to events
         self.parse_data_sources(options.source_dir)
+
+        # Assign each dataset to the clsoest xtalform and fail if this
+        # is not possible
         self.assign_xtalforms(options.source_dir)
+
+        # Build the alignment graph
         self.build_graph(options.source_dir)
+
+        # Generate canonical, conformer and xtalform sites from the
+        # alignment graph
         self.generate_sites_from_components(options.source_dir)
 
+        # Fully specify the output now that the sites are known
         # sites = read_sites(Path(options.source_dir))
         neighbourhoods = read_neighbourhoods(Path(options.source_dir))
+        canonical_sites = read_canonical_sites(Path(options.source_dir))
         output = read_output(Path(options.source_dir))
         dataset_output_dict = {}
         for ligand_id in neighbourhoods.ligand_ids:
@@ -521,44 +513,60 @@ class CLI:
 
             if chain not in dataset_output.aligned_chain_output:
                 chain_output = ChainOutput(
-                    aligned_structures={},
-                    aligned_artefacts={},
-                    aligned_xmaps={},
+                    aligned_ligands={},
                 )
-                dataset_output_dict[dtag].aligned_chain_output[
-                    chain
-                ] = chain_output
+                dataset_output_dict[dtag].aligned_chain_output[chain] = chain_output
             else:
-                chain_output = dataset_output_dict[dtag].aligned_chain_output[
-                    chain
-                ]
+                chain_output = dataset_output_dict[dtag].aligned_chain_output[chain]
 
-            chain_output.aligned_structures[
-                residue
-            ] = constants.ALIGNED_STRUCTURE_TEMPLATE.format(
-                dtag=dtag, chain=chain, residue=residue
+            chain_output.aligned_ligands[residue] = LigandOutput(
+                aligned_structures={},
+                aligned_artefacts={},
+                aligned_xmaps={},
             )
-            chain_output.aligned_artefacts[
-                residue
+
+            # Add output for each canonical site that the ligand is aligned to
+            for site_id, site in canonical_sites.iter():
+                if ligand_id not in site.members:
+                    continue
+
+            chain_output.aligned_ligands[residue].aligned_structures[
+                site_id
+            ] = constants.ALIGNED_STRUCTURE_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
+
+            chain_output.aligned_ligands[residue].aligned_artefacts[
+                site_id
             ] = constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
-                dtag=dtag, chain=chain, residue=residue
+                dtag=dtag, chain=chain, residue=residue, site=site_id
             )
-            chain_output.aligned_xmaps[
-                residue
-            ] = constants.ALIGNED_XMAP_TEMPLATE.format(
-                dtag=dtag, chain=chain, residue=residue
+
+            chain_output.aligned_ligands[residue].aligned_xmaps[site_id] = constants.ALIGNED_XMAP_TEMPLATE.format(
+                dtag=dtag, chain=chain, residue=residue, site=site_id
             )
 
         output.dataset_output = dataset_output_dict
         save_output(output, Path(options.source_dir))
 
+        # Align structures to each canonical site
         self.align_structures(options.source_dir)
+
+        # Align xmaps to each canonical site
         self.align_xmaps(options.source_dir)
 
     def assign_xtalforms(self, source_dir: str):
         _source_dir = Path(source_dir)
 
-        _assign_xtalforms(_source_dir)
+        assemblies = Assemblies.read(_source_dir / constants.ASSEMBLIES_FILE_NAME)
+        xtalforms = read_xtalforms(_source_dir)
+        system_data = read_system_data(_source_dir)
+        # dataset_xtalforms = read_dataset_xtalforms(_source_dir)
+
+        _assign_xtalforms(
+            _source_dir,
+            assemblies,
+            xtalforms,
+            system_data,  # dataset_xtalforms
+        )
 
     def write_options_json(self, source_dir, options_json):
         _source_dir = Path(source_dir)
@@ -579,9 +587,7 @@ class CLI:
         if not _source_dir.exists():
             os.mkdir(_source_dir)
 
-        system_data = SystemData(
-            datasources=[], panddas=[], dataset_ids=[], datasets=[]
-        )
+        system_data = SystemData(datasources=[], panddas=[], dataset_ids=[], datasets=[])
 
         save_data(system_data, _source_dir)
 
@@ -589,18 +595,12 @@ class CLI:
             source_dir=str(_source_dir),
             system_data=str(_source_dir / constants.DATA_JSON_PATH),
             xtalforms=str(_source_dir / constants.XTALFORMS_FILE_NAME),
-            assigned_xtalforms=str(
-                _source_dir / constants.ASSIGNED_XTALFORMS_FILE_NAME
-            ),
-            neighbourhoods=str(
-                _source_dir / constants.NEIGHBOURHOODS_FILE_NAME
-            ),
+            assigned_xtalforms=str(_source_dir / constants.ASSIGNED_XTALFORMS_FILE_NAME),
+            neighbourhoods=str(_source_dir / constants.NEIGHBOURHOODS_FILE_NAME),
             graph=str(_source_dir / constants.ALIGNABILITY_GRAPH_FILE_NAME),
             transforms=str(_source_dir / constants.TRANSFORMS_FILE_NAME),
             sites=str(_source_dir / constants.SITES_FILE_NAME),
-            site_transforms=str(
-                _source_dir / constants.SITES_TRANSFORMS_FILE_NAME
-            ),
+            site_transforms=str(_source_dir / constants.SITES_TRANSFORMS_FILE_NAME),
             dataset_output={},
         )
         save_output(output, _source_dir)
@@ -660,9 +660,7 @@ class CLI:
         p.communicate()
         # os.remove(script_path)
 
-    def merge_clusters(
-        self, cluster_1: int, cluster_2: int, sites_path: str = "."
-    ):
+    def merge_clusters(self, cluster_1: int, cluster_2: int, sites_path: str = "."):
         # sites = read_sites(sites_path)
         ...
 
@@ -734,9 +732,7 @@ class CLI:
 
         _change_sites_reference(_source_dir, site_id)
 
-    def change_site_reference(
-        self, source_dir: str, site_id: int, subsite_id: int
-    ):
+    def change_site_reference(self, source_dir: str, site_id: int, subsite_id: int):
         _source_dir: Path = Path(source_dir)
 
         _change_site_reference(_source_dir, site_id, subsite_id)
@@ -752,9 +748,7 @@ class CLI:
     ):
         _source_dir: Path = Path(source_dir)
 
-        _change_subsite_reference(
-            _source_dir, site_id, subsite_id, dtag, chain, residue
-        )
+        _change_subsite_reference(_source_dir, site_id, subsite_id, dtag, chain, residue)
 
     def align_structures(self, source_dir: str):
         _source_dir: Path = Path(source_dir)
@@ -765,10 +759,12 @@ class CLI:
         neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
         # xtalforms: XtalForms = read_xtalforms(_source_dir)
         assigned_xtalforms = read_assigned_xtalforms(_source_dir)
-        sites: Sites = read_sites(_source_dir)
+        canonical_sites: CanonicalSites = CanonicalSites.read(_source_dir / constants.CANONICAL_SITE_FILE)
+        conformer_sites: ConformerSites = ConformerSites.read(_source_dir / constants.CONFORMER_SITE_FILE)
         system_data: SystemData = read_system_data(_source_dir)
         site_transforms = read_site_transforms(_source_dir)
         xtalforms = read_xtalforms(_source_dir)
+        output = Output.read(_source_dir / constants.OUTPUT_JSON_PATH)
 
         # get Structures
         structures = read_structures(system_data)
@@ -776,7 +772,8 @@ class CLI:
         # Align structures
         _align_structures_from_sites(
             structures,
-            sites,
+            canonical_sites,
+            conformer_sites,
             transforms,
             neighbourhoods,
             xtalforms,
@@ -784,6 +781,7 @@ class CLI:
             g,
             site_transforms,
             _source_dir,
+            output,
         )
 
     def align_xmaps(self, source_dir: str):
@@ -795,7 +793,7 @@ class CLI:
         neighbourhoods: LigandNeighbourhoods = read_neighbourhoods(_source_dir)
         # xtalforms: XtalForms = read_xtalforms(_source_dir)
         # xtalforms = XtalForms(xtalforms=[])
-        sites: Sites = read_sites(_source_dir)
+        sites: CanonicalSites = read_canonical_sites(_source_dir)
         system_data: SystemData = read_system_data(_source_dir)
         site_transforms = read_site_transforms(_source_dir)
 

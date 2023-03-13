@@ -9,13 +9,13 @@ from loguru import logger
 
 from xchemalign.data import (
     Block,
+    CanonicalSites,
     Dataset,
     DatasetID,
     LigandBindingEvent,
     LigandID,
     LigandNeighbourhood,
     LigandNeighbourhoods,
-    Sites,
     SiteTransforms,
     SystemData,
     Transform,
@@ -156,9 +156,7 @@ def get_blocks(rglb, rgub, xmap):
     return blocks
 
 
-def get_interpolation_range(
-    neighbourhood: LigandNeighbourhood, transform, reference_xmap
-):
+def get_interpolation_range(neighbourhood: LigandNeighbourhood, transform, reference_xmap):
 
     # Get the gemmi transform
     transform_gemmi = transform
@@ -171,9 +169,7 @@ def get_interpolation_range(
     logger.debug(f"Neighbourhood bounds are: {lb} : {ub}")
 
     # Transform the bounds
-    rlb, rub = transform_gemmi.apply(
-        gemmi.Position(*lb)
-    ), transform_gemmi.apply(gemmi.Position(*ub))
+    rlb, rub = transform_gemmi.apply(gemmi.Position(*lb)), transform_gemmi.apply(gemmi.Position(*ub))
     logger.debug(f"Reference bounds are: {lb} : {ub}")
 
     # Get the new bounds
@@ -202,9 +198,7 @@ def interpolate_range(
     transform,
 ):
     # Make a xmap on reference template
-    new_xmap = gemmi.FloatGrid(
-        reference_xmap.nu, reference_xmap.nv, reference_xmap.nw
-    )
+    new_xmap = gemmi.FloatGrid(reference_xmap.nu, reference_xmap.nv, reference_xmap.nw)
     new_xmap.set_unit_cell(reference_xmap.unit_cell)
     new_xmap.spacegroup = gemmi.find_spacegroup_by_name("P1")
     grid_np = np.array(new_xmap, copy=False)
@@ -228,9 +222,7 @@ def interpolate_range(
 
         xmap.interpolate_values(
             arr,
-            transform.combine(
-                transform_to_gemmi(interpolation_range.transform)
-            ),
+            transform.combine(transform_to_gemmi(interpolation_range.transform)),
         )
 
         # Assign to blocks
@@ -293,26 +285,18 @@ def align_xmap(
         previous_ligand_id = next_ligand_id
 
     # Get the subsite transform
-    subsite_transform = transform_to_gemmi(
-        site_transforms.get_subsite_transform(site_id, subsite_id)
-    )
+    subsite_transform = transform_to_gemmi(site_transforms.get_conformer_site_transform(site_id, subsite_id))
 
     # Get the site transform
-    site_transform = transform_to_gemmi(
-        site_transforms.get_site_transform(site_id)
-    )
+    site_transform = transform_to_gemmi(site_transforms.get_canonical_site_transform(site_id))
 
     # Running transform
-    running_transform = site_transform.combine(
-        subsite_transform.combine(running_transform)
-    )
+    running_transform = site_transform.combine(subsite_transform.combine(running_transform))
 
     logger.debug(f"Transform is: {gemmi_to_transform(running_transform)}")
 
     # Define the interpolation range
-    interpolation_range = get_interpolation_range(
-        neighbourhood, running_transform, reference_xmap
-    )
+    interpolation_range = get_interpolation_range(neighbourhood, running_transform, reference_xmap)
 
     # Interpolate
     new_xmap = interpolate_range(
@@ -334,9 +318,7 @@ def align_xmap(
 def read_xmap_from_mtz(mtz_path: Path):
     mtz = gemmi.read_mtz_file(str(mtz_path))
     try:
-        grid = mtz.transform_f_phi_to_map(
-            "2FOFCWT", "PH2FOFCWT", sample_rate=4
-        )
+        grid = mtz.transform_f_phi_to_map("2FOFCWT", "PH2FOFCWT", sample_rate=4)
         return grid
     except Exception:
         logger.warning("Trying FWT PHWT")
@@ -352,7 +334,7 @@ def read_xmap_from_mtz(mtz_path: Path):
 def _align_xmaps(
     system_data: SystemData,
     structures,
-    sites: Sites,
+    sites: CanonicalSites,
     neighbourhoods: LigandNeighbourhoods,
     g,
     transforms: Transforms,
@@ -364,9 +346,7 @@ def _align_xmaps(
     reference_lid: LigandID = sites.reference_site.reference_ligand_id
 
     # Get that dataset
-    referance_ds: Dataset = system_data.get_dataset(
-        DatasetID(dtag=reference_lid.dtag)
-    )
+    referance_ds: Dataset = system_data.get_dataset(DatasetID(dtag=reference_lid.dtag))
     # reference_binding_site = referance_ds.ligand_binding_events[
     # reference_lid]
     logger.debug(f"PDB: {referance_ds.pdb}")
@@ -427,10 +407,7 @@ def _align_xmaps(
                     xmap = read_xmap_from_mtz(mtz_path)
 
                 # Align the event map
-                output_path = (
-                    subsite_xmaps_dir
-                    / f"{lid.dtag}_{lid.chain}_{lid.residue}.ccp4"
-                )
+                output_path = subsite_xmaps_dir / f"{lid.dtag}_{lid.chain}_{lid.residue}.ccp4"
                 align_xmap(
                     neighbourhoods,
                     g,
@@ -444,10 +421,7 @@ def _align_xmaps(
                     xmap,
                     output_path,
                 )
-                output_path = (
-                    subsite_xmaps_dir
-                    / f"{lid.dtag}_{lid.chain}_{lid.residue}_refine.ccp4"
-                )
+                output_path = subsite_xmaps_dir / f"{lid.dtag}_{lid.chain}_{lid.residue}_refine.ccp4"
                 # Align the refined map
                 if dataset.mtz:
                     xmap = read_xmap_from_mtz(Path(dataset.mtz))

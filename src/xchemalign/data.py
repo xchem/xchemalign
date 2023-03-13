@@ -100,9 +100,7 @@ class Transforms(BaseModel):
 
                 return transform
 
-        raise Exception(
-            f"Transform {transform_id} not in transforms {self.ligand_ids}!"
-        )
+        raise Exception(f"Transform {transform_id} not in transforms {self.ligand_ids}!")
 
 
 class Atom(BaseModel):
@@ -121,13 +119,13 @@ class AlignableSite(BaseModel):
     reference: LigandID
 
 
-class CanonicalSite(BaseModel):
-    id: int
-    name: str
-    refpdb: str
-    atoms: dict[AtomID, Atom]
-    literatureref: str
-    members: list[LigandID]
+# class CanonicalSite(BaseModel):
+#     id: int
+#     name: str
+#     refpdb: str
+#     atoms: dict[AtomID, Atom]
+#     literatureref: str
+#     members: list[LigandID]
 
 
 # class XtalForm(BaseModel):
@@ -139,22 +137,50 @@ class CanonicalSite(BaseModel):
 
 
 class AssemblyGenerator(BaseModel):
+    id: int
+    reference_chain: str
     chain: str
     triplet: str
+
+
+class Assembly(BaseModel):
+    id: int
+    reference_assembly: int
+    reference: DatasetID
+    assembly: list[AssemblyGenerator]
+
+
+class Assemblies(BaseModel):
+    assemblies: dict[int, Assembly]
+
+    @classmethod
+    def read(cls, path: Path):
+        return cls.parse_file(path)
+
+    def save(self, path: Path):
+        with open(path, "w") as f:
+            f.write(self.json())
+
+
+class XtalFormAssembly(BaseModel):
+    id: int
+    reference_assembly: int
+    generators: dict[int, AssemblyGenerator]
 
 
 class XtalForm(BaseModel):
     id: int
     reference: DatasetID
-    generators: list[AssemblyGenerator]
+    assemblies: dict[int, XtalFormAssembly]
 
 
 class XtalForms(BaseModel):
-    xtalform_ids: list[int]
-    xtalforms: list[XtalForm]
+    # xtalform_ids: list[int]
+    # xtalforms: list[XtalForm]
+    xtalforms: dict[int, XtalForm]
 
     def iter(self):
-        for xtalform_id, xtalform in zip(self.xtalform_ids, self.xtalforms):
+        for xtalform_id, xtalform in self.xtalforms.items():
             yield xtalform_id, xtalform
 
     def get_xtalform(self, item):
@@ -162,16 +188,44 @@ class XtalForms(BaseModel):
             if xtalform_id == item:
                 return xtalform
 
+    @classmethod
+    def read(cls, path: Path):
+        return cls.parse_file(path)
+
+
+class DatasetXtalforms(BaseModel):
+    dataset_xtalforms: dict[str, int]
+
+
+# class XtalFormSite(BaseModel):
+#     id: int
+#     canon_site_id: int
+#     xtal_form_id: int
+#     code: str
+#     refpdb: str
+#     atoms: dict[AtomID, Atom]
+#     artefact_atoms: dict[AtomID, Atom]
+#     members: list[LigandID]
+
 
 class XtalFormSite(BaseModel):
     id: int
-    canon_site_id: int
-    xtal_form_id: int
-    code: str
-    refpdb: str
-    atoms: dict[AtomID, Atom]
-    artefact_atoms: dict[AtomID, Atom]
+    site_id: int
+    xtalform_id: int
+    crystallographic_chain: str
     members: list[LigandID]
+
+
+class XtalFormSites(BaseModel):
+    xtalform_sites: dict[int, XtalFormSite]
+
+    @classmethod
+    def read(cls, path: Path):
+        return cls.parse_file(path)
+
+    def save(self, path: Path):
+        with open(path, "w") as f:
+            f.write(self.json())
 
 
 class SiteObservation(BaseModel):
@@ -257,11 +311,112 @@ class LigandNeighbourhoods(BaseModel):
     ligand_neighbourhoods: list[LigandNeighbourhood]
 
     def get_neighbourhood(self, ligand_id: LigandID):
-        for _ligand_id, _neighbourhood in zip(
-            self.ligand_ids, self.ligand_neighbourhoods
-        ):
+        for _ligand_id, _neighbourhood in zip(self.ligand_ids, self.ligand_neighbourhoods):
             if _ligand_id == ligand_id:
                 return _neighbourhood
+
+
+# class Site(BaseModel):
+#     members: list[LigandID]
+
+
+class Block(BaseModel):
+    xi: int
+    yi: int
+    zi: int
+    xmi: int
+    ymi: int
+    zmi: int
+    dx: int
+    dy: int
+    dz: int
+    transform: Transform
+
+
+class ResidueID(BaseModel):
+    chain: str
+    residue: int
+
+    def __hash__(self):
+        return hash((self.chain, self.residue))
+
+
+class ConformerSite(BaseModel):
+    id: int
+    name: str
+    residues: list[ResidueID]
+    members: list[LigandID]
+    reference_ligand_id: LigandID
+
+
+class ConformerSites(BaseModel):
+    # subsites: list[ConformerSite]
+    # reference_subsite: int
+    conformer_sites: dict[int, ConformerSite]
+
+    # def iter(self) -> Generator[tuple[int, ConformerSite], None, None]:
+    #     for subsite in self.subsites:
+    #         yield subsite.id, subsite
+
+    def iter(self) -> Generator[tuple[int, ConformerSite], None, None]:
+        for cs_id, cs in self.conformer_sites.items():
+            yield cs_id, cs
+
+    @classmethod
+    def read(cls, path: Path):
+        return cls.parse_file(path)
+
+    def save(self, path: Path):
+        with open(path, "w") as f:
+            f.write(self.json())
+
+
+class CanonicalSite(BaseModel):
+    id: int
+    subsite_ids: list[int]
+    subsites: list[ConformerSite]
+    members: list[LigandID]
+    residues: list[ResidueID]
+    reference_ligand_id: LigandID
+    reference_subsite_id: int
+    reference_subsite: ConformerSite
+
+    def iter(self) -> Generator[tuple[int, ConformerSite], None, None]:
+        for subsite_id, subsite in zip(self.subsite_ids, self.subsites):
+            yield subsite_id, subsite
+
+    def get_subsite(self, subsite_id: int):
+        for _subsite_id, subsite in self.iter():
+            if subsite_id == _subsite_id:
+                return subsite
+
+        raise Exception(f"Site {subsite_id} not in sites: {self.subsite_ids}")
+
+
+class CanonicalSites(BaseModel):
+    site_ids: list[int]
+    sites: list[CanonicalSite]
+    reference_site: CanonicalSite
+    reference_site_id: int
+
+    def iter(self) -> Generator[tuple[int, CanonicalSite], None, None]:
+        for site_id, site in zip(self.site_ids, self.sites):
+            yield site_id, site
+
+    def get_site(self, site_id: int):
+        for _site_id, site in self.iter():
+            if site_id == _site_id:
+                return site
+
+        raise Exception(f"Site {site_id} not in sites: {self.site_ids}")
+
+    @classmethod
+    def read(cls, path: Path):
+        return cls.parse_file(path)
+
+    def save(self, path: Path):
+        with open(path, "w") as f:
+            f.write(self.json())
 
 
 class SystemSites(BaseModel):
@@ -328,88 +483,6 @@ class SystemSites(BaseModel):
             assert site_num in site_nums
 
 
-# class Site(BaseModel):
-#     members: list[LigandID]
-
-
-class Block(BaseModel):
-    xi: int
-    yi: int
-    zi: int
-    xmi: int
-    ymi: int
-    zmi: int
-    dx: int
-    dy: int
-    dz: int
-    transform: Transform
-
-
-class ResidueID(BaseModel):
-    chain: str
-    residue: int
-
-    def __hash__(self):
-        return hash((self.chain, self.residue))
-
-
-class SubSite(BaseModel):
-    id: int
-    name: str
-    residues: list[ResidueID]
-    members: list[LigandID]
-    reference_ligand_id: LigandID
-
-
-class SubSites(BaseModel):
-    subsites: list[SubSite]
-    reference_subsite: int
-
-    def iter(self) -> Generator[tuple[int, SubSite], None, None]:
-        for subsite in self.subsites:
-            yield subsite.id, subsite
-
-
-class Site(BaseModel):
-    id: int
-    subsite_ids: list[int]
-    subsites: list[SubSite]
-    members: list[LigandID]
-    residues: list[ResidueID]
-    reference_ligand_id: LigandID
-    reference_subsite_id: int
-    reference_subsite: SubSite
-
-    def iter(self) -> Generator[tuple[int, SubSite], None, None]:
-        for subsite_id, subsite in zip(self.subsite_ids, self.subsites):
-            yield subsite_id, subsite
-
-    def get_subsite(self, subsite_id: int):
-        for _subsite_id, subsite in self.iter():
-            if subsite_id == _subsite_id:
-                return subsite
-
-        raise Exception(f"Site {subsite_id} not in sites: {self.subsite_ids}")
-
-
-class Sites(BaseModel):
-    site_ids: list[int]
-    sites: list[Site]
-    reference_site: Site
-    reference_site_id: int
-
-    def iter(self) -> Generator[tuple[int, Site], None, None]:
-        for site_id, site in zip(self.site_ids, self.sites):
-            yield site_id, site
-
-    def get_site(self, site_id: int):
-        for _site_id, site in self.iter():
-            if site_id == _site_id:
-                return site
-
-        raise Exception(f"Site {site_id} not in sites: {self.site_ids}")
-
-
 def read_xmap(path: Path):
     m = gemmi.read_ccp4_map(str(path), setup=True)
     return m.grid
@@ -434,34 +507,20 @@ def get_box(neighbourhood: LigandNeighbourhood, xmap, transform):
 
     box = gemmi.FractionalBox()
     for atom in neighbourhood.atoms:
-        transformed_pos = transform_gemmi.apply(
-            gemmi.Position(atom.x, atom.y, atom.z)
-        )
+        transformed_pos = transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
         box.extend(
-            xmap.unit_cell.fractionalize(
-                gemmi.Position(
-                    transformed_pos.x, transformed_pos.y, transformed_pos.z
-                )
-            )
+            xmap.unit_cell.fractionalize(gemmi.Position(transformed_pos.x, transformed_pos.y, transformed_pos.z))
         )
 
     for atom in neighbourhood.artefact_atoms:
-        transformed_pos = transform_gemmi.apply(
-            gemmi.Position(atom.x, atom.y, atom.z)
-        )
+        transformed_pos = transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
         box.extend(
-            xmap.unit_cell.fractionalize(
-                gemmi.Position(
-                    transformed_pos.x, transformed_pos.y, transformed_pos.z
-                )
-            )
+            xmap.unit_cell.fractionalize(gemmi.Position(transformed_pos.x, transformed_pos.y, transformed_pos.z))
         )
     return box
 
 
-def write_xmap(
-    xmap, path: Path, neighbourhood: LigandNeighbourhood, transform
-):
+def write_xmap(xmap, path: Path, neighbourhood: LigandNeighbourhood, transform):
 
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = xmap
@@ -486,22 +545,18 @@ def read_graph(path: Path):
 
 
 def read_neighbourhoods(path: Path):
-    neighbourhoods = LigandNeighbourhoods.parse_file(
-        str(path / constants.NEIGHBOURHOODS_FILE_NAME)
-    )
+    neighbourhoods = LigandNeighbourhoods.parse_file(str(path / constants.NEIGHBOURHOODS_FILE_NAME))
     return neighbourhoods
 
 
-def read_sites(path: Path):
-    sites = Sites.parse_file(str(path / constants.SITES_FILE_NAME))
+def read_canonical_sites(path: Path):
+    sites = CanonicalSites.parse_file(str(path / constants.SITES_FILE_NAME))
 
     return sites
 
 
 def read_transforms(path: Path):
-    transforms = Transforms.parse_file(
-        str(path / constants.TRANSFORMS_FILE_NAME)
-    )
+    transforms = Transforms.parse_file(str(path / constants.TRANSFORMS_FILE_NAME))
     return transforms
 
 
@@ -519,14 +574,14 @@ def read_system_data(path: Path):
 
 
 class SiteTransforms(BaseModel):
-    site_transform_ids: list[tuple[int, int]]
-    site_transforms: list[Transform]
-    subsite_transform_ids: list[tuple[int, int, int]]
-    subsite_transforms: list[Transform]
+    canonical_site_transform_ids: list[tuple[int, int]]
+    canonical_site_transforms: list[Transform]
+    conformer_site_transform_ids: list[tuple[int, int, int]]
+    conformer_site_transforms: list[Transform]
 
-    def get_subsite_transform(self, site_id, subsite_id):
+    def get_conformer_site_transform(self, site_id, subsite_id):
         for subsite_transform_id, subsite_transform in zip(
-            self.subsite_transform_ids, self.subsite_transforms
+            self.conformer_site_transform_ids, self.conformer_site_transforms
         ):
             if subsite_transform_id[0] == site_id:
                 if subsite_transform_id[2] == subsite_id:
@@ -534,12 +589,12 @@ class SiteTransforms(BaseModel):
 
         raise Exception()
 
-    def get_site_transform(
+    def get_canonical_site_transform(
         self,
         site_id,
     ):
         for site_transform_id, subsite_transform in zip(
-            self.site_transform_ids, self.site_transforms
+            self.canonical_site_transform_ids, self.canonical_site_transforms
         ):
             if site_transform_id[1] == site_id:
                 return subsite_transform
@@ -553,12 +608,10 @@ def save_site_transforms(site_transforms: SiteTransforms, path: Path):
 
 
 def read_site_transforms(path: Path):
-    return SiteTransforms.parse_file(
-        str(path / constants.SITES_TRANSFORMS_FILE_NAME)
-    )
+    return SiteTransforms.parse_file(str(path / constants.SITES_TRANSFORMS_FILE_NAME))
 
 
-def save_sites(sites: Sites, path: Path):
+def save_canonical_sites(sites: CanonicalSites, path: Path):
     with open(path / constants.SITES_FILE_NAME, "w") as f:
         f.write(sites.json())
 
@@ -573,7 +626,9 @@ class Options(BaseModel):
     datasources: list[str]
     datasource_types: list[str]
     panddas: list[str]
-    xtalforms: list[XtalForm]
+    assemblies_json: str
+    xtalforms_json: str
+    dataset_xtalforms_json: str
 
 
 class AssignedXtalForms(BaseModel):
@@ -581,9 +636,7 @@ class AssignedXtalForms(BaseModel):
     xtalform_ids: list[int]
 
     def iter(self):
-        for dataset_id, xtalform_id in zip(
-            self.dataset_ids, self.xtalform_ids
-        ):
+        for dataset_id, xtalform_id in zip(self.dataset_ids, self.xtalform_ids):
             yield dataset_id, xtalform_id
 
     def get_xtalform_id(self, item):
@@ -593,9 +646,7 @@ class AssignedXtalForms(BaseModel):
 
 
 def read_assigned_xtalforms(path: Path):
-    return AssignedXtalForms.parse_file(
-        path / constants.ASSIGNED_XTALFORMS_FILE_NAME
-    )
+    return AssignedXtalForms.parse_file(path / constants.ASSIGNED_XTALFORMS_FILE_NAME)
 
 
 def save_assigned_xtalforms(path: Path, assigned_xtalforms: AssignedXtalForms):
@@ -612,16 +663,26 @@ def read_xtalforms(path: Path):
     return XtalForms.parse_file(path / constants.XTALFORMS_FILE_NAME)
 
 
-class ChainOutput(BaseModel):
+class LigandOutput(BaseModel):
     aligned_structures: dict[int, str]
     aligned_artefacts: dict[int, str]
     aligned_xmaps: dict[int, str]
+
+
+class ChainOutput(BaseModel):
+    aligned_ligands: dict[int, LigandOutput]
+
+    def __getitem__(self, item):
+        return self.aligned_ligands[item]
 
 
 class DatasetOutput(BaseModel):
     aligned_chain_output: dict[str, ChainOutput]
     # aligned_structures: dict[str, ChainOutput]
     # aligned_xmaps: dict[str, ChainOutput]
+
+    def __getitem__(self, item):
+        return self.aligned_chain_output[item]
 
 
 class Output(BaseModel):
@@ -635,6 +696,17 @@ class Output(BaseModel):
     sites: str
     site_transforms: str
     dataset_output: dict[str, DatasetOutput]
+
+    @classmethod
+    def read(cls, path: Path):
+        return cls.parse_file(path)
+
+    def save(self, path: Path):
+        with open(path, "w") as f:
+            f.write(self.json())
+
+    def __getitem__(self, item):
+        return self.dataset_output[item]
 
 
 def save_output(

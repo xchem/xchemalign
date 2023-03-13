@@ -3,7 +3,12 @@ from pathlib import Path
 from loguru import logger
 
 from xchemalign import constants
-from xchemalign.data import LigandNeighbourhoods, SystemData
+from xchemalign.data import (
+    LigandNeighbourhoods,
+    SystemData,
+    read_assigned_xtalforms,
+    read_xtalforms,
+)
 from xchemalign.get_alignability import get_alignability
 from xchemalign.get_graph import get_graph
 from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
@@ -25,9 +30,14 @@ def build_alignment_graph(output_dir: Path):
 
     logger.debug(f"Got {num_input_datasets} datasets")
 
+    xtalforms = read_xtalforms(output_dir)
+    assigned_xtalforms = read_assigned_xtalforms(output_dir)
+
     # Identify sites in the input data
     ligand_neighbourhoods: LigandNeighbourhoods = get_ligand_neighbourhoods(
-        system_data
+        system_data,
+        xtalforms,
+        assigned_xtalforms,
     )
 
     num_neighbourhoods = len(ligand_neighbourhoods.ligand_neighbourhoods)
@@ -36,16 +46,12 @@ def build_alignment_graph(output_dir: Path):
     # Save the neighbourhoods
     logger.info("Saving neighbourhoods!")
 
-    save_neighbourhoods(
-        ligand_neighbourhoods, output_dir / "neighbourhoods.json"
-    )
+    save_neighbourhoods(ligand_neighbourhoods, output_dir / "neighbourhoods.json")
     logger.info("Saved neighbourhoods!")
 
     # Get alignability
     logger.info("Getting alignbaility matrix...!")
-    alignability_matrix, transforms = get_alignability(
-        ligand_neighbourhoods, system_data
-    )
+    alignability_matrix, transforms = get_alignability(ligand_neighbourhoods, system_data)
     logger.info("Got alignability matrix!")
 
     # logger.debug(alignability_matrix)

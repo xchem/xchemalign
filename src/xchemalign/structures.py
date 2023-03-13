@@ -1,12 +1,7 @@
 import gemmi
 from loguru import logger
 
-from xchemalign.data import (
-    LigandNeighbourhood,
-    ResidueID,
-    SystemData,
-    XtalForm,
-)
+from xchemalign.data import LigandNeighbourhood, ResidueID, SystemData, XtalForm
 from xchemalign.matching import match_atom
 
 
@@ -62,9 +57,7 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
 
         raise Exception()
 
-    sup = gemmi.superpose_positions(
-        [x[0].pos for x in acs], [x[1].pos for x in acs]
-    )
+    sup = gemmi.superpose_positions([x[0].pos for x in acs], [x[1].pos for x in acs])
 
     return sup.transform
 
@@ -120,22 +113,19 @@ def generate_assembly(xtalform: XtalForm, structure):
     for model_name, chain_name in chains_to_delete:
         del assembly[model_name][chain_name]
 
-    for j, generator in enumerate(xtalform.generators):
-        op = gemmi.Op(generator.triplet)
-        chain_clone = structure[0][generator.chain].clone()
-        for residue in chain_clone:
-            for atom in residue:
-                atom_frac = structure.cell.fractionalize(atom.pos)
-                new_pos_frac = op.apply_to_xyz(
-                    [atom_frac.x, atom_frac.y, atom_frac.z]
-                )
-                new_pos_orth = structure.cell.orthogonalize(
-                    gemmi.Fractional(*new_pos_frac)
-                )
+    for assembly_id, assembly in xtalform.assemblies.items():
+        for generator in assembly.generators:
+            op = gemmi.Op(generator.triplet)
+            chain_clone = structure[0][generator.chain].clone()
+            for residue in chain_clone:
+                for atom in residue:
+                    atom_frac = structure.cell.fractionalize(atom.pos)
+                    new_pos_frac = op.apply_to_xyz([atom_frac.x, atom_frac.y, atom_frac.z])
+                    new_pos_orth = structure.cell.orthogonalize(gemmi.Fractional(*new_pos_frac))
 
-                atom.pos = gemmi.Position(*new_pos_orth)
-        chain_clone.name = f"{generator.chain}{j}"
-        assembly[0].add_chain(chain_clone)
+                    atom.pos = gemmi.Position(*new_pos_orth)
+            chain_clone.name = generator.reference_chain
+            assembly[0].add_chain(chain_clone)
 
     num_chains = 0
     for model in assembly:
@@ -164,17 +154,8 @@ def remove_non_contact_chains(assembly, neighbourhood: LigandNeighbourhood):
                         neighbourhood.artefact_atom_ids,
                         neighbourhood.artefact_atoms,
                     ):
-                        if (
-                            atom.pos.dist(
-                                gemmi.Position(
-                                    art_atom.x, art_atom.y, art_atom.z
-                                )
-                            )
-                            < 0.1
-                        ):
-                            contact_chains_list.append(
-                                (model.name, chain.name)
-                            )
+                        if atom.pos.dist(gemmi.Position(art_atom.x, art_atom.y, art_atom.z)) < 0.1:
+                            contact_chains_list.append((model.name, chain.name))
 
     contact_chains = list(set(contact_chains_list))
     logger.debug(f"Num contact chains: {len(contact_chains)}")
