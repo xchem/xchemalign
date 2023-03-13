@@ -254,7 +254,7 @@ def _generate_sites_from_components(_source_dir: Path):
     system_data = read_system_data(_source_dir)
 
     # Get the assemblies
-    assemblies = Assemblies.read(_source_dir)
+    assemblies = Assemblies.read(_source_dir / constants.ASSEMBLIES_FILE_NAME)
 
     # Get the xtalforms
     xtalforms = XtalForms.read(_source_dir / constants.XTALFORMS_FILE_NAME)
