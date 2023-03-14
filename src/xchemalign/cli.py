@@ -798,6 +798,7 @@ class CLI:
         # xtalforms: XtalForms = read_xtalforms(_source_dir)
         # xtalforms = XtalForms(xtalforms=[])
         sites: CanonicalSites = CanonicalSites.read(_source_dir / constants.CANONICAL_SITE_FILE)
+        conformer_sites = ConformerSites.read(_source_dir / constants.CONFORMER_SITE_FILE)
         system_data: SystemData = read_system_data(_source_dir)
         site_transforms = read_site_transforms(_source_dir)
         output = Output.read(_source_dir / constants.OUTPUT_JSON_PATH)
@@ -809,6 +810,7 @@ class CLI:
             system_data,
             structures,
             sites,
+            conformer_sites,
             neighbourhoods,
             g,
             transforms,
