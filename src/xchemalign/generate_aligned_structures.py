@@ -327,9 +327,14 @@ def _align_structures_from_sites(
                 # Initial structure
                 _structure = structures[moving_ligand_id.dtag].clone()
 
-                ligand_output = output.dataset_output[moving_ligand_id.dtag][moving_ligand_id.chain][
-                    moving_ligand_id.residue
-                ]
+                # Get output path
+                aod = Path(output.source_dir) / output.aligned_dir
+                output_path = (
+                    aod
+                    / output.dataset_output[moving_ligand_id.dtag][moving_ligand_id.chain][
+                        moving_ligand_id.residue
+                    ].aligned_structures[canonical_site_id]
+                )
                 # Align the ligand
                 align_structure(
                     _structure,
@@ -340,7 +345,7 @@ def _align_structures_from_sites(
                     site_transforms,
                     canonical_site_id,
                     conformer_site_id,
-                    ligand_output.aligned_structures[canonical_site_id],
+                    output_path,
                 )
 
                 # Align the artefacts

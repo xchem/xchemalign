@@ -521,9 +521,7 @@ class CLI:
                 chain_output = dataset_output_dict[dtag].aligned_chain_output[chain]
 
             chain_output.aligned_ligands[residue] = LigandOutput(
-                aligned_structures={},
-                aligned_artefacts={},
-                aligned_xmaps={},
+                aligned_structures={}, aligned_artefacts={}, aligned_xmaps={}, aligned_event_maps={}
             )
 
             # Add output for each canonical site that the ligand is aligned to
@@ -544,6 +542,10 @@ class CLI:
             chain_output.aligned_ligands[residue].aligned_xmaps[site_id] = constants.ALIGNED_XMAP_TEMPLATE.format(
                 dtag=dtag, chain=chain, residue=residue, site=site_id
             )
+
+            chain_output.aligned_ligands[residue].aligned_event_maps[
+                site_id
+            ] = constants.ALIGNED_EVENT_MAP_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
 
         output.dataset_output = dataset_output_dict
         save_output(output, Path(options.source_dir))
@@ -594,14 +596,15 @@ class CLI:
 
         output = Output(
             source_dir=str(_source_dir),
-            system_data=str(_source_dir / constants.DATA_JSON_PATH),
-            xtalforms=str(_source_dir / constants.XTALFORMS_FILE_NAME),
-            assigned_xtalforms=str(_source_dir / constants.ASSIGNED_XTALFORMS_FILE_NAME),
-            neighbourhoods=str(_source_dir / constants.NEIGHBOURHOODS_FILE_NAME),
-            graph=str(_source_dir / constants.ALIGNABILITY_GRAPH_FILE_NAME),
-            transforms=str(_source_dir / constants.TRANSFORMS_FILE_NAME),
-            sites=str(_source_dir / constants.SITES_FILE_NAME),
-            site_transforms=str(_source_dir / constants.SITES_TRANSFORMS_FILE_NAME),
+            system_data=str(constants.DATA_JSON_PATH),
+            xtalforms=str(constants.XTALFORMS_FILE_NAME),
+            assigned_xtalforms=str(constants.ASSIGNED_XTALFORMS_FILE_NAME),
+            neighbourhoods=str(constants.NEIGHBOURHOODS_FILE_NAME),
+            graph=str(constants.ALIGNABILITY_GRAPH_FILE_NAME),
+            transforms=str(constants.TRANSFORMS_FILE_NAME),
+            sites=str(constants.SITES_FILE_NAME),
+            site_transforms=str(constants.SITES_TRANSFORMS_FILE_NAME),
+            aligned_dir=str(constants.ALIGNED_STRUCTURES_DIR),
             dataset_output={},
         )
         save_output(output, _source_dir)
@@ -797,6 +800,7 @@ class CLI:
         sites: CanonicalSites = CanonicalSites.read(_source_dir / constants.CANONICAL_SITE_FILE)
         system_data: SystemData = read_system_data(_source_dir)
         site_transforms = read_site_transforms(_source_dir)
+        output = Output.read(_source_dir / constants.OUTPUT_JSON_PATH)
 
         # get Structures
         structures = read_structures(system_data)
@@ -809,7 +813,7 @@ class CLI:
             g,
             transforms,
             site_transforms,
-            _source_dir,
+            output,
         )
 
     def generate_sites_from_components(self, source_dir: str):

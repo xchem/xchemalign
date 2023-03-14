@@ -679,6 +679,7 @@ class LigandOutput(BaseModel):
     aligned_structures: dict[int, str]
     aligned_artefacts: dict[int, str]
     aligned_xmaps: dict[int, str]
+    aligned_event_maps: dict[int, str]
 
 
 class ChainOutput(BaseModel):
@@ -707,6 +708,7 @@ class Output(BaseModel):
     transforms: str
     sites: str
     site_transforms: str
+    aligned_dir: str
     dataset_output: dict[str, DatasetOutput]
 
     @classmethod
