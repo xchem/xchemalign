@@ -9,6 +9,7 @@ from loguru import logger
 from xchemalign.data import (
     Block,
     CanonicalSites,
+    ConformerSites,
     Dataset,
     DatasetID,
     LigandBindingEvent,
@@ -334,7 +335,8 @@ def read_xmap_from_mtz(mtz_path: Path):
 def _align_xmaps(
     system_data: SystemData,
     structures,
-    sites: CanonicalSites,
+    canonical_sites: CanonicalSites,
+    conformer_sites: ConformerSites,
     neighbourhoods: LigandNeighbourhoods,
     g,
     transforms: Transforms,
@@ -343,48 +345,55 @@ def _align_xmaps(
 ):
 
     # Get the global reference
-    reference_lid: LigandID = sites.reference_site.reference_ligand_id
+    # reference_lid: LigandID = canonical_sites.reference_site.reference_ligand_id
 
     # Get that dataset
-    referance_ds: Dataset = system_data.get_dataset(DatasetID(dtag=reference_lid.dtag))
+    # referance_ds: Dataset = system_data.get_dataset(DatasetID(dtag=reference_lid.dtag))
     # reference_binding_site = referance_ds.ligand_binding_events[
     # reference_lid]
-    logger.debug(f"PDB: {referance_ds.pdb}")
+    # logger.debug(f"PDB: {referance_ds.pdb}")
 
     # Reference_xmap_path
     # reference_xmap_path: Path = Path(reference_binding_site.xmap)
-    reference_mtz_path = Path(referance_ds.mtz)
+    # reference_mtz_path = Path(referance_ds.mtz)
 
     # Load the site reference xmap
     # reference_xmap = read_xmap(reference_xmap_path)
-    reference_xmap = read_xmap_from_mtz(reference_mtz_path)
+    # reference_xmap = read_xmap_from_mtz(reference_mtz_path)
 
     #
     # xmaps_dir = _output_dir / "aligned_xmaps"
     # if not xmaps_dir.exists():
     #     os.mkdir(xmaps_dir)
 
-    for site_id, site in sites.iter():
-        logger.debug(f"Aligning site: {site_id}")
+    for canonical_site_id, canonical_site in canonical_sites.iter():
+        logger.debug(f"Aligning site: {canonical_site_id}")
         # site_reference_id = site.members[0]
 
         #
         # site_xmaps_dir = xmaps_dir / f"{site_id}"
         # if not site_xmaps_dir.exists():
         #     os.mkdir(site_xmaps_dir)
+        reference_lid: LigandID = canonical_site.reference_ligand_id
+        referance_ds: Dataset = system_data.get_dataset(DatasetID(dtag=reference_lid.dtag))
+        logger.debug(f"PDB: {referance_ds.pdb}")
+        reference_mtz_path = Path(referance_ds.mtz)
+        reference_xmap = read_xmap_from_mtz(reference_mtz_path)
 
-        for subsite_id, subsite in site.iter():
-            logger.debug(f"Aligning subsite: {subsite_id}")
+        for conformer_site_id, conformer_site in conformer_sites.iter():
+            if conformer_site_id not in canonical_site.subsites:
+                continue
+            logger.debug(f"Aligning subsite: {conformer_site_id}")
             # Get the site reference
             # TODO: Make work
-            subsite_reference_id = subsite.reference_ligand_id
+            conformer_site_reference_id = conformer_site.reference_ligand_id
 
             # subsite_xmaps_dir = site_xmaps_dir / f"{subsite_id}"
             # if not subsite_xmaps_dir.exists():
             #     os.mkdir(subsite_xmaps_dir)
 
             # For each ligand neighbourhood, find the xmap and transform
-            for lid in subsite.members:
+            for lid in conformer_site.members:
                 # for lid, neighbourhood in zip(neighbourhoods.ligand_ids,
                 # neighbourhoods.ligand_neighbourhoods):
                 logger.debug(f"Aligning xmap: {lid}")
@@ -415,22 +424,22 @@ def _align_xmaps(
                 aop = Path(output.source_dir) / output.aligned_dir
 
                 # Align the event map
-                output_path = aop / output.dataset_output[dtag][chain][residue].aligned_event_maps[site_id]
+                output_path = aop / output.dataset_output[dtag][chain][residue].aligned_event_maps[canonical_site_id]
                 align_xmap(
                     neighbourhoods,
                     g,
                     transforms,
                     site_transforms,
                     reference_xmap,
-                    subsite_reference_id,
-                    site_id,
-                    subsite_id,
+                    conformer_site_reference_id,
+                    canonical_site_id,
+                    conformer_site_id,
                     lid,
                     xmap,
                     output_path,
                 )
                 # Align the refined map
-                output_path = aop / output.dataset_output[dtag][chain][residue].aligned_xmaps[site_id]
+                output_path = aop / output.dataset_output[dtag][chain][residue].aligned_xmaps[canonical_site_id]
 
                 if dataset.mtz:
 
@@ -442,9 +451,9 @@ def _align_xmaps(
                         transforms,
                         site_transforms,
                         reference_xmap,
-                        subsite_reference_id,
-                        site_id,
-                        subsite_id,
+                        conformer_site_reference_id,
+                        canonical_site_id,
+                        conformer_site_id,
                         lid,
                         xmap,
                         output_path,
