@@ -381,7 +381,7 @@ def _align_xmaps(
         reference_xmap = read_xmap_from_mtz(reference_mtz_path)
 
         for conformer_site_id, conformer_site in conformer_sites.iter():
-            if conformer_site_id not in canonical_site.subsites:
+            if conformer_site_id not in canonical_site.subsite_ids:
                 continue
             logger.debug(f"Aligning subsite: {conformer_site_id}")
             # Get the site reference

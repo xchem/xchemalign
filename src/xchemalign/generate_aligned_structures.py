@@ -303,7 +303,7 @@ def _align_structures_from_sites(
         #     os.mkdir(site_dir)
 
         for conformer_site_id, conformer_site in conformer_sites.iter():
-            if conformer_site_id not in canonical_site.subsites:
+            if conformer_site_id not in canonical_site.subsite_ids:
                 continue
             # subsite_id: int = subsite.id
             # subsite_dir = site_dir / f"{canonical_site_id}"
