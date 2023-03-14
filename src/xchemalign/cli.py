@@ -607,6 +607,8 @@ class CLI:
             aligned_dir=str(constants.ALIGNED_STRUCTURES_DIR),
             dataset_output={},
         )
+        if not (_source_dir / constants.ALIGNED_STRUCTURES_DIR).exists():
+            os.mkdir(_source_dir / constants.ALIGNED_STRUCTURES_DIR)
         save_output(output, _source_dir)
 
     def add_data_source(
@@ -638,8 +640,15 @@ class CLI:
 
         _parse_data_sources(_source_dir)
 
-    def open_site(self, source_dir: str, site_id: int):
-        _source_dir = Path(source_dir)
+    def open_site(
+        self,
+        option_json: str,
+        site_id: int,
+    ):
+        options = Options.parse_file(option_json)
+        # output = Output.read(Path(options.source_dir) / constants.OUTPUT_JSON_PATH)
+
+        _source_dir = Path(options.source_dir)
         script_path = _source_dir / "coot_script.py"
         script = ""
         script += 'if __name__ == "__main__": \n'
@@ -656,6 +665,8 @@ class CLI:
                 for pdb in subsite_dir.glob("*"):
                     script += f'\tp = read_pdb("{pdb}")\n '
                     script += cas_ligands()
+
+        # for dataset in output.dataset_output
 
         with open(script_path, "w") as f:
             f.write(script)

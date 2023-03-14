@@ -76,6 +76,8 @@ def get_sites_from_conformer_sites(conformer_sites: ConformerSites, neighbourhoo
     for ss_id, ss in conformer_sites.iter():
         g.add_node(ss.id)
 
+    conformer_sites_dict = {ss.id: ss for ss_id, ss in conformer_sites.iter()}
+
     # Form the site overlap matrix
     arr = np.zeros(
         (
@@ -109,22 +111,23 @@ def get_sites_from_conformer_sites(conformer_sites: ConformerSites, neighbourhoo
     # Form the sites
     sites = []
     j = 0
+    logger.debug((f"Conformer Sites: {conformer_sites}" f" {len(conformer_sites.conformer_sites)}"))
+
     for component in cc:
-        print(f"Component: {component} {len(component)}")
-        print((f"Conformer Sites: {conformer_sites}" f" {len(conformer_sites.conformer_sites)}"))
+        logger.debug(f"Component: {component} {len(component)}")
         _members = list(
             set(
                 sum(
-                    [conformer_sites.conformer_sites[j].members for j in component],
+                    [conformer_sites_dict[k].members for k in component],
                     start=[],
                 )
             )
         )
-        _subsites = [conformer_sites.conformer_sites[j] for j in component]
+        _subsites = [conformer_sites_dict[k] for k in component]
 
         s = CanonicalSite(
             id=j,
-            subsite_ids=[conformer_sites.conformer_sites[j].id for j in component],
+            subsite_ids=[conformer_sites_dict[k].id for k in component],
             subsites=_subsites,
             members=_members,
             residues=list(
@@ -139,6 +142,7 @@ def get_sites_from_conformer_sites(conformer_sites: ConformerSites, neighbourhoo
             reference_subsite_id=conformer_sites.conformer_sites[0].id,
             reference_subsite=conformer_sites.conformer_sites[0],
         )
+        logger.debug(f"Canonical site: {j} has {len(s.subsites)} conformer sites")
         j += 1
         sites.append(s)
 
