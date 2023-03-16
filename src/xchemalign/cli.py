@@ -670,6 +670,7 @@ class CLI:
             for chain, chain_output in dataset_output.aligned_chain_output.items():
                 for residue, residue_output in chain_output.aligned_ligands.items():
                     for _site_id, pdb in residue_output.aligned_structures.items():
+                        logger.debug(_site_id)
                         if _site_id == site_id:
                             script += f'\tp = read_pdb("{options.source_dir}/{pdb}")\n '
                             script += cas_ligands()
