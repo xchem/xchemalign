@@ -646,7 +646,7 @@ class CLI:
         site_id: int,
     ):
         options = Options.parse_file(option_json)
-        # output = Output.read(Path(options.source_dir) / constants.OUTPUT_JSON_PATH)
+        output = Output.read(Path(options.source_dir) / constants.OUTPUT_JSON_PATH)
 
         _source_dir = Path(options.source_dir)
         script_path = _source_dir / "coot_script.py"
@@ -655,16 +655,24 @@ class CLI:
         script += '\tset_nomenclature_errors_on_read("ignore")\n'
         script += "\tset_recentre_on_read_pdb(0) \n"
 
-        str_dir = _source_dir / constants.ALIGNED_STRUCTURES_DIR
+        # str_dir = _source_dir / constants.ALIGNED_STRUCTURES_DIR
 
-        for site_dir in str_dir.glob("*"):
-            if site_dir.name != f"{site_id}":
-                continue
+        # for site_dir in str_dir.glob("*"):
+        #     if site_dir.name != f"{site_id}":
+        #         continue
 
-            for subsite_dir in site_dir.glob("*"):
-                for pdb in subsite_dir.glob("*"):
-                    script += f'\tp = read_pdb("{pdb}")\n '
-                    script += cas_ligands()
+        #     for subsite_dir in site_dir.glob("*"):
+        #         for pdb in subsite_dir.glob("*"):
+        #             script += f'\tp = read_pdb("{pdb}")\n '
+        #             script += cas_ligands()
+
+        for dtag, dataset_output in output.dataset_output.items():
+            for chain, chain_output in dataset_output.aligned_chain_output.items():
+                for residue, residue_output in chain_output.aligned_ligands.items():
+                    for _site_id, pdb in residue_output.aligned_structures.items():
+                        if _site_id == site_id:
+                            script += f'\tp = read_pdb("{pdb}")\n '
+                            script += cas_ligands()
 
         # for dataset in output.dataset_output
 
