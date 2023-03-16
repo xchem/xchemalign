@@ -529,24 +529,37 @@ class CLI:
                 if ligand_id not in site.members:
                     continue
 
-            chain_output.aligned_ligands[residue].aligned_structures[
-                site_id
-            ] = constants.ALIGNED_STRUCTURE_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
+                chain_output.aligned_ligands[residue].aligned_structures[site_id] = (
+                    output.aligned_dir
+                    + "/"
+                    + constants.ALIGNED_STRUCTURE_TEMPLATE.format(
+                        dtag=dtag, chain=chain, residue=residue, site=site_id
+                    )
+                )
 
-            chain_output.aligned_ligands[residue].aligned_artefacts[
-                site_id
-            ] = constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
-                dtag=dtag, chain=chain, residue=residue, site=site_id
-            )
+                chain_output.aligned_ligands[residue].aligned_artefacts[site_id] = (
+                    output.aligned_dir
+                    + "/"
+                    + constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                        dtag=dtag, chain=chain, residue=residue, site=site_id
+                    )
+                )
 
-            chain_output.aligned_ligands[residue].aligned_xmaps[site_id] = constants.ALIGNED_XMAP_TEMPLATE.format(
-                dtag=dtag, chain=chain, residue=residue, site=site_id
-            )
+                chain_output.aligned_ligands[residue].aligned_xmaps[site_id] = (
+                    output.aligned_dir
+                    + "/"
+                    + constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
+                )
 
-            chain_output.aligned_ligands[residue].aligned_event_maps[
-                site_id
-            ] = constants.ALIGNED_EVENT_MAP_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
+                chain_output.aligned_ligands[residue].aligned_event_maps[site_id] = (
+                    output.aligned_dir
+                    + "/"
+                    + constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
+                        dtag=dtag, chain=chain, residue=residue, site=site_id
+                    )
+                )
 
+        # Save the output file
         output.dataset_output = dataset_output_dict
         save_output(output, Path(options.source_dir))
 
