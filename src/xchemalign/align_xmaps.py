@@ -421,7 +421,7 @@ def _align_xmaps(
 
                     xmap = read_xmap_from_mtz(mtz_path)
 
-                aop = Path(output.source_dir) / output.aligned_dir
+                aop = Path(output.source_dir)
 
                 # Align the event map
                 output_path = aop / output.dataset_output[dtag][chain][residue].aligned_event_maps[canonical_site_id]

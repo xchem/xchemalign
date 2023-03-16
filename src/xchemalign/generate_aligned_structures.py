@@ -328,7 +328,7 @@ def _align_structures_from_sites(
                 _structure = structures[moving_ligand_id.dtag].clone()
 
                 # Get output path
-                aod = Path(output.source_dir) / output.aligned_dir
+                aod = Path(output.source_dir)
                 output_path = (
                     aod
                     / output.dataset_output[moving_ligand_id.dtag][moving_ligand_id.chain][
