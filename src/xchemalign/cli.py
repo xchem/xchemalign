@@ -592,7 +592,6 @@ class CLI:
 
         # Save the output file
         output.dataset_output = dataset_output_dict
-        save_output(output, Path(options.source_dir))
 
         # Align structures to each canonical site
         _align_structures_from_sites(

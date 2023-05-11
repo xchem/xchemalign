@@ -20,6 +20,8 @@ dependencies = [
     "networkx",
     "numpy",
     "rich",
+    "pandas",
+    "fire",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"

@@ -403,6 +403,8 @@ def _align_xmaps(
                     lid.chain,
                     lid.residue,
                 )
+                if dtag != "Mpro-J0055":
+                    continue
 
                 # Get the ligand binding event
                 dataset = system_data.get_dataset(DatasetID(dtag=lid.dtag))
