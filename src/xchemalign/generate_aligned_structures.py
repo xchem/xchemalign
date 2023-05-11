@@ -253,9 +253,7 @@ def align_structure(
     site_transform = transform_to_gemmi(site_transforms.get_canonical_site_transform(canonical_site_id))
     site_transform.combine(running_transform)
 
-    logger.debug(
-        f"Transform from native frame to subsite frame to site frame is: {gemmi_to_transform(running_transform)}"
-    )
+    logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
 
     _structure = superpose_structure(running_transform, _structure)
 
