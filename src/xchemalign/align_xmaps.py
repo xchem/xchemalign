@@ -293,13 +293,13 @@ def align_xmap(
         previous_ligand_id = next_ligand_id
 
     # Get the subsite transform
-    subsite_transform = transform_to_gemmi(site_transforms.get_conformer_site_transform(site_id, subsite_id))
+    # subsite_transform = transform_to_gemmi(site_transforms.get_conformer_site_transform(site_id, subsite_id))
 
     # Get the site transform
-    site_transform = transform_to_gemmi(site_transforms.get_canonical_site_transform(site_id))
+    # site_transform = transform_to_gemmi(site_transforms.get_canonical_site_transform(site_id))
 
     # Running transform
-    running_transform = site_transform.combine(subsite_transform.combine(running_transform))
+    # running_transform = site_transform.combine(subsite_transform.combine(running_transform))
 
     logger.debug(
         f"Transform from native frame to subsite frame to site frame is: {gemmi_to_transform(running_transform)}"
