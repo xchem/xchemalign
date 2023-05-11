@@ -324,8 +324,8 @@ def _align_structures_from_sites(
 
             # For each other ligand
             for moving_ligand_id in ligand_ids:
-                if moving_ligand_id.dtag != "Mpro-J0055":
-                    continue
+                # if moving_ligand_id.dtag != "Mpro-J0055":
+                #     continue
 
                 logger.info(f"Alligning ligand: {moving_ligand_id}")
                 # Get the shortest alignment path to the reference

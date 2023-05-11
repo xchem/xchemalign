@@ -412,8 +412,8 @@ def _align_xmaps(
                     lid.chain,
                     lid.residue,
                 )
-                if dtag != "Mpro-J0055":
-                    continue
+                # if dtag != "Mpro-J0055":
+                #     continue
 
                 logger.debug(f"Reference pdb: {referance_ds.pdb}")
                 logger.debug(f"Moving pdb: {system_data.get_dataset(DatasetID(dtag=lid.dtag)).pdb}")
