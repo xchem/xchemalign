@@ -411,6 +411,7 @@ def _align_xmaps(
                 lbe: LigandBindingEvent = dataset.ligand_binding_events[lid]
 
                 # Get the xmap path
+                #
 
                 if lbe.xmap != "None":
                     xmap_path: Path = Path(lbe.xmap)
