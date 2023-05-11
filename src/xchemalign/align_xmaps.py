@@ -1,3 +1,4 @@
+import itertools
 from math import ceil, floor
 from pathlib import Path
 
@@ -167,15 +168,21 @@ def get_interpolation_range(neighbourhood: LigandNeighbourhood, transform, refer
 
     # Find the bounds
     lb, ub = get_bounds(coord_arr)
-    logger.debug(f"Neighbourhood bounds are: {lb} : {ub}")
+    logger.debug(f"Bounds of interpolation range in native frame are: {lb} : {ub}")
 
     # Transform the bounds
-    rlb, rub = transform_gemmi.apply(gemmi.Position(*lb)), transform_gemmi.apply(gemmi.Position(*ub))
-    logger.debug(f"Reference bounds are: {lb} : {ub}")
+    corners = []
+    for xb, yb, zb in itertools.product([lb[0], ub[0]], [lb[1], ub[1]], [lb[2], ub[2]]):
+        # rlb, rub = transform_gemmi.apply(gemmi.Position(*lb)), transform_gemmi.apply(gemmi.Position(*ub))
+        corner = transform_gemmi.apply(gemmi.Position(xb, yb, zb))
+        corners.append([corner.x, corner.y, corner.z])
+    corner_array = np.array(corners)
+    logger.debug(f"Transformed Corner array: {corner_array}")
 
     # Get the new bounds
-    tlb, tub = get_transformed_bounds(rlb, rub)
-    logger.debug(f"Transformed bounds are: {tlb} : {tub}")
+    # tlb, tub = get_transformed_bounds(rlb, rub)
+    tlb, tub = get_bounds(corner_array)
+    logger.debug(f"Bounds of interpolation range bounds in reference frame are: {tlb} : {tub}")
 
     # Get grid bounds
     rglb, rgub = get_grid_bounds(tlb, tub, reference_xmap)
@@ -294,7 +301,9 @@ def align_xmap(
     # Running transform
     running_transform = site_transform.combine(subsite_transform.combine(running_transform))
 
-    logger.debug(f"Transform is: {gemmi_to_transform(running_transform)}")
+    logger.debug(
+        f"Transform from native frame to subsite frame to site frame is: {gemmi_to_transform(running_transform)}"
+    )
 
     # Define the interpolation range
     interpolation_range = get_interpolation_range(neighbourhood, running_transform, reference_xmap)
@@ -405,7 +414,7 @@ def _align_xmaps(
                 )
                 if dtag != "Mpro-J0055":
                     continue
-
+                logger.debug(f"{referance_ds.pdb}")
                 # Get the ligand binding event
                 dataset = system_data.get_dataset(DatasetID(dtag=lid.dtag))
                 lbe: LigandBindingEvent = dataset.ligand_binding_events[lid]
