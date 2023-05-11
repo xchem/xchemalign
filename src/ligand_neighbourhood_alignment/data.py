@@ -6,7 +6,7 @@ import networkx as nx
 from loguru import logger
 from pydantic import BaseModel, validator
 
-from xchemalign import constants
+from ligand_neighbourhood_alignment import constants
 
 Structure = gemmi.Structure
 

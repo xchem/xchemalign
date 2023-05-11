@@ -1,13 +1,13 @@
 # from loguru import logger
 
-from xchemalign.data import (  # XtalFormSite,
+from ligand_neighbourhood_alignment.data import (  # XtalFormSite,
     CanonicalSite,
     LigandID,
     LigandNeighbourhood,
     SystemSites,
 )
 
-# from xchemalign.matching import match_atoms
+# from ligand_neighbourhood_alignment.matching import match_atoms
 
 
 def get_xtal_form_sites(

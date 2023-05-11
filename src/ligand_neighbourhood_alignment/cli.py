@@ -12,12 +12,12 @@ import pandas as pd
 from loguru import logger
 from rich import print
 
-from xchemalign import constants
-from xchemalign.align_xmaps import _align_xmaps
+from ligand_neighbourhood_alignment import constants
+from ligand_neighbourhood_alignment.align_xmaps import _align_xmaps
 
-# from xchemalign.get_system_sites import get_system_sites
-from xchemalign.build_alignment_graph import build_alignment_graph
-from xchemalign.data import (  # save_xtalforms,
+# from ligand_neighbourhood_alignment.get_system_sites import get_system_sites
+from ligand_neighbourhood_alignment.build_alignment_graph import build_alignment_graph
+from ligand_neighbourhood_alignment.data import (  # save_xtalforms,
     Assemblies,
     AssignedXtalForms,
     CanonicalSites,
@@ -52,8 +52,8 @@ from xchemalign.data import (  # save_xtalforms,
     save_data,
     save_output,
 )
-from xchemalign.generate_aligned_structures import _align_structures_from_sites
-from xchemalign.generate_sites_from_components import (  # get_xtalform_sites_from_canonical_sites,
+from ligand_neighbourhood_alignment.generate_aligned_structures import _align_structures_from_sites
+from ligand_neighbourhood_alignment.generate_sites_from_components import (  # get_xtalform_sites_from_canonical_sites,
     _generate_sites_from_components,
     get_components,
     get_conformer_sites_from_components,
@@ -62,10 +62,10 @@ from xchemalign.generate_sites_from_components import (  # get_xtalform_sites_fr
     get_structures,
     get_subsite_transforms,
 )
-from xchemalign.get_alignability import get_alignability
-from xchemalign.get_graph import get_graph
-from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
-from xchemalign.make_data_json import (
+from ligand_neighbourhood_alignment.get_alignability import get_alignability
+from ligand_neighbourhood_alignment.get_graph import get_graph
+from ligand_neighbourhood_alignment.get_ligand_neighbourhoods import get_ligand_neighbourhoods
+from ligand_neighbourhood_alignment.make_data_json import (
     get_ligand_binding_events_from_panddas,
     get_ligand_binding_events_from_structure,
     make_data_json_from_pandda_dir,

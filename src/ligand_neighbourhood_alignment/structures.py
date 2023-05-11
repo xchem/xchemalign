@@ -1,8 +1,8 @@
 import gemmi
 from loguru import logger
 
-from xchemalign.data import LigandNeighbourhood, ResidueID, SystemData, XtalForm
-from xchemalign.matching import match_atom
+from ligand_neighbourhood_alignment.data import LigandNeighbourhood, ResidueID, SystemData, XtalForm
+from ligand_neighbourhood_alignment.matching import match_atom
 
 
 def get_structures(system_data: SystemData):

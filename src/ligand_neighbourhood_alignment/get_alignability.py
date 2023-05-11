@@ -2,14 +2,14 @@ import gemmi
 import numpy as np
 from loguru import logger
 
-from xchemalign.data import (
+from ligand_neighbourhood_alignment.data import (
     LigandNeighbourhood,
     LigandNeighbourhoods,
     SystemData,
     Transform,
     Transforms,
 )
-from xchemalign.matching import match_atom
+from ligand_neighbourhood_alignment.matching import match_atom
 
 
 def match_cas(

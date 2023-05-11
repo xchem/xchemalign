@@ -1,4 +1,4 @@
-from xchemalign.data import LigandID
+from ligand_neighbourhood_alignment.data import LigandID
 
 
 def merge_components(components: list[list[LigandID]]):

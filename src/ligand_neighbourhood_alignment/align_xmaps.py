@@ -7,7 +7,7 @@ import networkx as nx
 import numpy as np
 from loguru import logger
 
-from xchemalign.data import (
+from ligand_neighbourhood_alignment.data import (
     Block,
     CanonicalSites,
     ConformerSites,

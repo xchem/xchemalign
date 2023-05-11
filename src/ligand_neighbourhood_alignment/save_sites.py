@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from xchemalign import constants
-from xchemalign.data import CanonicalSites
+from ligand_neighbourhood_alignment import constants
+from ligand_neighbourhood_alignment.data import CanonicalSites
 
 
 def save_sites(sites: CanonicalSites, path: Path):

@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 
-from xchemalign.data import LigandNeighbourhoods
+from ligand_neighbourhood_alignment.data import LigandNeighbourhoods
 
 # from loguru import logger
 # from matplotlib import pyplot as plt

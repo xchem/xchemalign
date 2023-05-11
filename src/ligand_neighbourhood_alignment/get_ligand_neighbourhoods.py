@@ -2,7 +2,7 @@ import gemmi
 from loguru import logger
 
 # import loguru
-from xchemalign.data import (
+from ligand_neighbourhood_alignment.data import (
     AssignedXtalForms,
     Atom,
     AtomID,
@@ -16,7 +16,7 @@ from xchemalign.data import (
     XtalForm,
     XtalForms,
 )
-from xchemalign.structures import generate_assembly
+from ligand_neighbourhood_alignment.structures import generate_assembly
 
 
 def get_structure_fragments(dataset: Dataset, structure: Structure) -> dict[LigandID, gemmi.Residue]:

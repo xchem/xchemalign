@@ -1,4 +1,4 @@
-from xchemalign.data import Atom, AtomID, CanonicalSite, LigandNeighbourhood
+from ligand_neighbourhood_alignment.data import Atom, AtomID, CanonicalSite, LigandNeighbourhood
 
 
 def match_atom(

@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from xchemalign import constants
-from xchemalign.data import (
+from ligand_neighbourhood_alignment import constants
+from ligand_neighbourhood_alignment.data import (
     Dataset,
     DatasetID,
     LigandBindingEvent,

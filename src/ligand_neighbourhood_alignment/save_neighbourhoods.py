@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from xchemalign.data import LigandNeighbourhoods
+from ligand_neighbourhood_alignment.data import LigandNeighbourhoods
 
 
 def save_neighbourhoods(

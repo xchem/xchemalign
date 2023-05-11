@@ -1,13 +1,13 @@
 import gemmi
 
-from xchemalign.data import (
+from ligand_neighbourhood_alignment.data import (
     LigandID,
     LigandNeighbourhood,
     LigandNeighbourhoods,
     Transform,
     Transforms,
 )
-from xchemalign.matching import match_atom
+from ligand_neighbourhood_alignment.matching import match_atom
 
 
 def get_transform(

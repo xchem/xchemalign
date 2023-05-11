@@ -4,8 +4,8 @@ import networkx as nx
 import numpy as np
 from loguru import logger
 
-from xchemalign import constants
-from xchemalign.data import (
+from ligand_neighbourhood_alignment import constants
+from ligand_neighbourhood_alignment.data import (
     AssignedXtalForms,
     AtomID,
     CanonicalSite,
@@ -26,8 +26,8 @@ from xchemalign.data import (
     save_site_transforms,
 )
 
-# from xchemalign.save_sites import save_sites
-from xchemalign.structures import get_structures, get_transform_from_residues
+# from ligand_neighbourhood_alignment.save_sites import save_sites
+from ligand_neighbourhood_alignment.structures import get_structures, get_transform_from_residues
 
 
 def get_components(g):

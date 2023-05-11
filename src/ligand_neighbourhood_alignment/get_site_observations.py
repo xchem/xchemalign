@@ -1,6 +1,6 @@
 # import gemmi
 # import loguru
-# from xchemalign.data import (
+# from ligand_neighbourhood_alignment.data import (
 #     LigandID,
 #     LigandNeighbourhood,
 #     SiteObservation,

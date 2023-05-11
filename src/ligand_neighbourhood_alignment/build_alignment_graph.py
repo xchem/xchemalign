@@ -2,19 +2,19 @@ from pathlib import Path
 
 from loguru import logger
 
-from xchemalign import constants
-from xchemalign.data import (
+from ligand_neighbourhood_alignment import constants
+from ligand_neighbourhood_alignment.data import (
     LigandNeighbourhoods,
     SystemData,
     read_assigned_xtalforms,
     read_xtalforms,
 )
-from xchemalign.get_alignability import get_alignability
-from xchemalign.get_graph import get_graph
-from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
-from xchemalign.save_graph import save_graph
-from xchemalign.save_neighbourhoods import save_neighbourhoods
-from xchemalign.save_transforms import save_transforms
+from ligand_neighbourhood_alignment.get_alignability import get_alignability
+from ligand_neighbourhood_alignment.get_graph import get_graph
+from ligand_neighbourhood_alignment.get_ligand_neighbourhoods import get_ligand_neighbourhoods
+from ligand_neighbourhood_alignment.save_graph import save_graph
+from ligand_neighbourhood_alignment.save_neighbourhoods import save_neighbourhoods
+from ligand_neighbourhood_alignment.save_transforms import save_transforms
 
 
 def build_alignment_graph(output_dir: Path):

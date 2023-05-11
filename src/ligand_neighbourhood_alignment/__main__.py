@@ -11,6 +11,6 @@ def main(args=None):
     args = parser.parse_args(args)
 
 
-# test with: python -m xchemalign
+# test with: python -m ligand_neighbourhood_alignment
 if __name__ == "__main__":
     main()

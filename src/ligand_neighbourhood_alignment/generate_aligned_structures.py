@@ -5,7 +5,7 @@ import gemmi
 import networkx as nx
 from loguru import logger
 
-from xchemalign.data import (  # Transform,; AlignableSite,; XtalForms,
+from ligand_neighbourhood_alignment.data import (  # Transform,; AlignableSite,; XtalForms,
     AssignedXtalForms,
     CanonicalSites,
     ConformerSites,
