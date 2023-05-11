@@ -185,7 +185,7 @@ def get_interpolation_range(neighbourhood: LigandNeighbourhood, transform, refer
     blocks: list[Block] = get_blocks(rglb, rgub, reference_xmap)
     logger.debug(f"Num blocks: {blocks}")
     for b in blocks:
-        s = f"Block: {b.xi} {b.yi} {b.zi} {b.dx} {b.dy} {b.dz}"
+        s = f"Block: xi {b.xi} yi {b.yi} zi {b.zi} dx {b.dx} dy {b.dy} dz {b.dz}"
         logger.debug(s)
         logger.debug(b.transform)
 
@@ -233,9 +233,9 @@ def interpolate_range(
         ryf = interpolation_range.ymi + interpolation_range.dy
         rzi = interpolation_range.zmi
         rzf = interpolation_range.zmi + interpolation_range.dz
-        logger.debug(f"Block X Range: {rxi} : {rxf}")
-        logger.debug(f"Block Y Range: {ryi} : {ryf}")
-        logger.debug(f"Block Z Range: {rzi} : {rzf}")
+        logger.debug(f"Block X Range in output xmap: {rxi} : {rxf}")
+        logger.debug(f"Block Y Range in output xmap: {ryi} : {ryf}")
+        logger.debug(f"Block Z Range in output xmap: {rzi} : {rzf}")
 
         grid_np[
             rxi:rxf,
@@ -428,6 +428,7 @@ def _align_xmaps(
 
                 # Align the event map
                 output_path = aop / output.dataset_output[dtag][chain][residue].aligned_event_maps[canonical_site_id]
+                logger.debug("Aligning event map...")
                 align_xmap(
                     neighbourhoods,
                     g,
@@ -445,6 +446,7 @@ def _align_xmaps(
                 output_path = aop / output.dataset_output[dtag][chain][residue].aligned_xmaps[canonical_site_id]
 
                 if dataset.mtz:
+                    logger.debug("Aligning 2Fo-Fc map...")
 
                     xmap = read_xmap_from_mtz(Path(dataset.mtz))
 

@@ -3,6 +3,7 @@ from typing import Generator
 
 import gemmi
 import networkx as nx
+from loguru import logger
 from pydantic import BaseModel, validator
 
 from xchemalign import constants
@@ -532,6 +533,11 @@ def write_xmap(xmap, path: Path, neighbourhood: LigandNeighbourhood, transform):
     ccp4.update_ccp4_header()
 
     box = get_box(neighbourhood, xmap, transform)
+    box_min = box.minimum
+    box_max = box.maximum
+    box_min_str = f"{round(box_min.x, 2)} {round(box_min.y, 2)} {round(box_min.z, 2)}"
+    box_max_str = f"{round(box_max.x, 2)} {round(box_max.y, 2)} {round(box_max.z, 2)}"
+    logger.debug(f"Box Extent is: min {box_min_str} : max {box_max_str}")
     ccp4.set_extent(box)
     ccp4.setup(float("nan"))
     ccp4.update_ccp4_header()
