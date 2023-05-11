@@ -1,4 +1,4 @@
-import os
+# import os
 from pathlib import Path
 
 import gemmi
@@ -289,12 +289,12 @@ def _align_structures_from_sites(
     assigned_xtalforms: AssignedXtalForms,
     g,
     site_transforms: SiteTransforms,
-    _output_dir: Path,
+    # _output_dir: Path,
     output: Output,
 ):
-    asd = _output_dir / "aligned"
-    if not asd.exists():
-        os.mkdir(asd)
+    # asd = _output_dir / "aligned"
+    # if not asd.exists():
+    #     os.mkdir(asd)
     # Iterate sites
     for canonical_site_id, canonical_site in canonical_sites.iter():
         logger.debug(f"Canonical Site id is: {canonical_site_id}")
