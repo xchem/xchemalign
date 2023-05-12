@@ -7,7 +7,7 @@ filing a new one. If you have a great idea but it involves big changes, please
 file a ticket before making a pull request! We want to make sure you don't spend
 your time coding something that might not fit the scope of the project.
 
-.. _GitHub: https://github.com/xchem/xchemalign/issues
+.. _GitHub: https://github.com/ConorFWild/ligand_neighbourhood_alignment/issues
 
 Issue or Discussion?
 --------------------
@@ -16,7 +16,7 @@ Github also offers discussions_ as a place to ask questions and share ideas. If
 your issue is open ended and it is not obvious when it can be "closed", please
 raise it as a discussion instead.
 
-.. _discussions: https://github.com/xchem/xchemalign/discussions
+.. _discussions: https://github.com/ConorFWild/ligand_neighbourhood_alignment/discussions
 
 Code coverage
 -------------
