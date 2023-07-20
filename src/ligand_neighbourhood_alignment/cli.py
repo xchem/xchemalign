@@ -99,12 +99,12 @@ def _change_site_reference(_source_dir: Path, site_id: int, subsite_id: int):
 
 
 def _change_subsite_reference(
-    _source_dir: Path,
-    site_id: int,
-    subsite_id: int,
-    dtag: int,
-    chain: str,
-    residue: int,
+        _source_dir: Path,
+        site_id: int,
+        subsite_id: int,
+        dtag: int,
+        chain: str,
+        residue: int,
 ):
     sites: CanonicalSites = read_canonical_sites(_source_dir)
     site = sites.get_site(site_id)
@@ -121,7 +121,6 @@ def _change_subsite_reference(
 
 
 def _add_model_building_dir_to_system_data(system_data: SystemData, _data_source_dir: Path):
-
     datasource = Datasource(path=str(_data_source_dir), datasource_type="model_building")
 
     if not system_data.datasources:
@@ -131,17 +130,17 @@ def _add_model_building_dir_to_system_data(system_data: SystemData, _data_source
         ]
     else:
         new_datasources = [
-            _datasource for _datasource in system_data.datasources if _datasource.path != str(_data_source_dir)
-        ] + [
-            datasource,
-        ]
+                              _datasource for _datasource in system_data.datasources if
+                              _datasource.path != str(_data_source_dir)
+                          ] + [
+                              datasource,
+                          ]
         system_data.datasources = new_datasources
 
     return system_data
 
 
 def _add_model_building_dir(_source_dir: Path, _data_source_dir: Path):
-
     if not _source_dir.exists():
         raise Exception(f"No such dir: {_source_dir}")
     system_data = read_system_data(_source_dir)
@@ -166,10 +165,11 @@ def _add_manual_dir_to_system_data(system_data: SystemData, _data_source_dir: Pa
         ]
     else:
         new_datasources = [
-            _datasource for _datasource in system_data.datasources if _datasource.path != str(_data_source_dir)
-        ] + [
-            datasource,
-        ]
+                              _datasource for _datasource in system_data.datasources if
+                              _datasource.path != str(_data_source_dir)
+                          ] + [
+                              datasource,
+                          ]
         system_data.datasources = new_datasources
 
     return system_data
@@ -190,7 +190,6 @@ def _add_manual_dir(_source_dir: Path, _data_source_dir: Path):
 
 
 def _add_pandda_to_system_data(system_data: SystemData, _pandda_dir: Path):
-
     analyses_dir: Path = _pandda_dir / constants.PANDDA_ANALYSES_DIR
     event_table_path: Path = analyses_dir / constants.PANDDA_EVENTS_INSPECT_TABLE_PATH
 
@@ -365,6 +364,9 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
     return closest_xtalform, xtalform_deltas[closest_xtalform]
 
 
+from ligand_neighbourhood_alignment import dt
+
+
 def _get_assigned_xtalforms(system_data, xtalforms):
     structures = read_structures(system_data)
 
@@ -395,12 +397,11 @@ def _get_assigned_xtalforms(system_data, xtalforms):
 
 
 def _assign_xtalforms(
-    _source_dir: Path,
-    assemblies: Assemblies,
-    xtalforms: XtalForms,
-    system_data: SystemData,
+        _source_dir: Path,
+        assemblies: Assemblies,
+        xtalforms: XtalForms,
+        system_data: SystemData,
 ):
-
     assigned_xtalforms = _get_assigned_xtalforms(system_data, xtalforms)
 
     save_assigned_xtalforms(_source_dir, assigned_xtalforms)
@@ -408,27 +409,23 @@ def _assign_xtalforms(
     return assigned_xtalforms
 
 
-from ligand_neighbourhood_alignment import dt
-
-
 def _update(
-            fs_model: dt.FSModel,
-            datasets: dict[str, dt.Dataset],
-            reference_datasets: dict[str, dt.Dataset],
-            new_datasets: dict[str, dt.Dataset],
-            assemblies: dict[str, dt.Assembly],
-            xtalforms: dict[str, dt.XtalForm],
-            dataset_assignments: dict[str, str],
-            ligand_neighbourhoods: dict[tuple[str, str, int], dt.Neighbourhood],
-            alignability_graph: dt.AlignabilityGraph,
-            ligand_neighbourhood_transforms: dict[tuple[tuple[str,str,int], tuple[str,str,int]], dt.Transform],
-            conformer_sites: dict[str, dt.ConformerSite],
-            conformer_site_transforms: dict[tuple[str, str], dt.Transform],
-            canonical_sites: dict[str, dt.CanonicalSite],
-            canonical_site_transforms: dict[str, dt.Transform],
-            xtalform_sites: dict[str, dt.XtalFormSite],
-        ):
-
+        fs_model: dt.FSModel,
+        datasets: dict[str, dt.Dataset],
+        reference_datasets: dict[str, dt.Dataset],
+        new_datasets: dict[str, dt.Dataset],
+        assemblies: dict[str, dt.Assembly],
+        xtalforms: dict[str, dt.XtalForm],
+        dataset_assignments: dict[str, str],
+        ligand_neighbourhoods: dict[tuple[str, str, int], dt.Neighbourhood],
+        alignability_graph: dt.AlignabilityGraph,
+        ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, int], tuple[str, str, int]], dt.Transform],
+        conformer_sites: dict[str, dt.ConformerSite],
+        conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+        canonical_sites: dict[str, dt.CanonicalSite],
+        canonical_site_transforms: dict[str, dt.Transform],
+        xtalform_sites: dict[str, dt.XtalFormSite],
+):
     # Get the structures
     structures = _get_structures(datasets)
 
@@ -521,22 +518,22 @@ def _update(
             for lid in conformer_site.ligand_ids:
                 _update_aligned_xmaps()
 
+
 def _load_assemblies(assemblies_file, new_assemblies_yaml):
     assemblies = {}
 
     if assemblies_file.exists():
 
         with open(assemblies_file, 'r') as f:
-            dic = json.load(assemblies_file)
+            dic = yaml.safe_load(f)
 
         for assembly_id, assembly_info in dic.items():
-           assemblies[assembly_id] = dt.Assembly.from_dict(assembly_info)
-
+            assemblies[assembly_id] = dt.Assembly.from_dict(assembly_info)
 
     # Load new info and update
     if new_assemblies_yaml.exists():
         with open(new_assemblies_yaml, 'r') as f:
-            new_assemblies_dict = yaml.safe_load(new_assemblies_yaml)
+            new_assemblies_dict = yaml.safe_load(f)
     else:
         new_assemblies_dict = {}
 
@@ -548,7 +545,148 @@ def _load_assemblies(assemblies_file, new_assemblies_yaml):
     return assemblies
 
 
+def _load_xtalforms(xtalforms_file, new_xtalforms_yaml):
+    xtalforms = {}
 
+    if xtalforms_file.exists():
+
+        with open(xtalforms_file, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for xtalform_id, xtalform_info in dic.items():
+            xtalforms[xtalform_id] = dt.XtalForm.from_dict(xtalform_info)
+
+    # Load new info and update
+    if new_xtalforms_yaml.exists():
+        with open(new_xtalforms_yaml, 'r') as f:
+            new_xtalforms_dict = yaml.safe_load(f)
+    else:
+        new_xtalforms_dict = {}
+
+    for xtalform_id, xtalform_info in new_xtalforms_dict.items():
+        if xtalform_id in xtalforms:
+            continue
+        xtalforms[xtalform_id] = dt.XtalForm.from_dict(xtalform_info)
+
+    return xtalforms
+
+
+def _load_dataset_assignments(dataset_assignments_yaml):
+    dataset_assignments = {}
+    if dataset_assignments_yaml.exists():
+
+        with open(dataset_assignments_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for dtag, assignment in dic.items():
+            dataset_assignments[dtag] = assignment
+    return dataset_assignments_yaml
+
+
+def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
+    ligand_neighbourhoods: dict[tuple[str, str, int], dt.Neighbourhood] = {}
+
+    if ligand_neighbourhoods_yaml.exists():
+
+        with open(ligand_neighbourhoods_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for ligand_id, neighbourhood_info in dic.items():
+            dtag, chain, residue = ligand_id.split("/")
+            neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
+            ligand_neighbourhoods[(dtag, chain, residue)] = neighbourhood
+
+    return ligand_neighbourhoods
+
+
+def _load_alignability_graph(alignability_graph):
+    if alignability_graph.exists():
+        return nx.read_gml(
+            str(alignability_graph),
+            destringizer=lambda x: x.split("/"),
+        )
+
+    else:
+        return None
+
+
+def _load_ligand_neighbourhood_transforms(ligand_neighbourhood_transforms_yaml):
+    ligand_neighbourhood_transforms = {}
+    if ligand_neighbourhood_transforms_yaml.exists():
+
+        with open(ligand_neighbourhood_transforms_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for ligand_transform_key, ligand_transform in dic.items():
+            ligand_1_id, ligand_2_id = ligand_transform_key.split("~")
+            dtag_1, chain_1, residue_1 = ligand_1_id.split("/")
+            dtag_2, chain_2, residue_2 = ligand_1_id.split("/")
+            ligand_neighbourhood_transforms[(
+                (dtag_1, chain_1, residue_1),
+                (dtag_2, chain_2, residue_2)
+            )] = dt.Transform.from_dict(ligand_transform)
+
+    return ligand_neighbourhood_transforms
+
+
+def _load_conformer_sites(conformer_sites_yaml):
+    conformer_sites = {}
+    if conformer_sites_yaml.exists():
+        with open(conformer_sites_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+        for conformer_site_id, conformer_site_info in dic.items():
+            conformer_sites[conformer_site_id] = dt.ConformerSite.from_dict(conformer_site_info)
+
+
+    return conformer_sites
+
+
+def _load_conformer_site_transforms(conformer_site_transforms_yaml):
+    conformer_site_transforms = {}
+    if conformer_site_transforms_yaml.exists():
+        with open(conformer_site_transforms_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for conformer_site_transform_id, conformer_site_transform_info in dic.items():
+            conformer_site_1, conformer_site_2 = conformer_site_transform_id.split("/")
+
+            conformer_site_transforms[(conformer_site_1, conformer_site_2)] = dt.Transform.from_dict(conformer_site_transform_info)
+
+    return conformer_site_transforms
+
+
+def _load_canonical_sites(canonical_sites_yaml):
+    canonical_sites = {}
+    if canonical_sites_yaml.exists():
+        with open(canonical_sites_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for canonical_site_id, canonical_site_info in dic.items():
+            canonical_sites[canonical_site_id] = dt.CanonicalSite.from_dict(canonical_site_info)
+
+    return canonical_sites
+
+def _load_canonical_site_transforms(canonical_site_transforms_yaml):
+    canonical_site_transforms = {}
+    if canonical_site_transforms_yaml.exists():
+        with open(canonical_site_transforms_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for canonical_site_id, canonical_site_transform_info in dic.items():
+            canonical_site_transforms[canonical_site_id] = dt.Transform.from_dict(canonical_site_transform_info)
+
+    return canonical_site_transforms
+
+def _load_xtalform_sites(xtalform_sites_yaml):
+    xtalform_sites = {}
+    if xtalform_sites_yaml.exists():
+        with open(xtalform_sites_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for xtalform_site_id, xtalform_site_info in dic.items():
+            xtalform_sites[xtalform_site_id] = dt.XtalFormSite.from_dict(xtalform_site_info)
+
+    return xtalform_sites
 
 class CLI:
     def schema(self, output_dir: str):
@@ -582,37 +720,38 @@ class CLI:
         datasets, reference_datasets, new_datasets = source_data_model.get_datasets()
 
         # Get assemblies
-        assemblies = load_assemblies(fs_model.assemblies, options.assemblies_json)
+        assemblies = _load_assemblies(fs_model.assemblies, options.assemblies_json)
 
         # Get xtalforms
-        xtalforms = load_xtalforms(fs_model.xtalforms, options.xtalforms_json)
+        xtalforms = _load_xtalforms(fs_model.xtalforms, options.xtalforms_json)
 
         # Get the dataset assignments
-        dataset_assignments = load_dataset_assignments(fs_model.dataset_assignments)
+        dataset_assignments = _load_dataset_assignments(fs_model.dataset_assignments)
 
         # Get Ligand neighbourhoods
-        ligand_neighbourhoods = load_ligand_neighbourhoods(fs_model.ligand_neighbourhoods)
+        ligand_neighbourhoods = _load_ligand_neighbourhoods(fs_model.ligand_neighbourhoods)
 
         # Get alignability graph
-        alignability_graph = load_alignability_graph(fs_model.alignability_graph)
+        alignability_graph = _load_alignability_graph(fs_model.alignability_graph)
 
         #
-        ligand_neighbourhood_transforms = load_ligand_neighbourhood_transforms(fs_model.ligand_neighbourhood_transforms)
+        ligand_neighbourhood_transforms = _load_ligand_neighbourhood_transforms(
+            fs_model.ligand_neighbourhood_transforms)
 
         # Get conformer sites
-        conformer_sites = load_conformer_sites(fs_model.conformer_sites)
+        conformer_sites = _load_conformer_sites(fs_model.conformer_sites)
 
         #
-        conformer_site_transforms= load_conformer_site_transforms(fs_model.conformer_site_transforms)
+        conformer_site_transforms = _load_conformer_site_transforms(fs_model.conformer_site_transforms)
 
         # Get canonical sites
-        canonical_sites = load_canonical_sites(fs_model.canonical_sites)
+        canonical_sites = _load_canonical_sites(fs_model.canonical_sites)
 
         #
-        canonical_site_transforms = load_canonical_site_transforms(fs_model.canonical_site_trasnforms)
+        canonical_site_transforms = _load_canonical_site_transforms(fs_model.canonical_site_trasnforms)
 
         # Get xtalform sites
-        xtalform_sites = load_xtalform_sites(fs_model.xtalform_sites)
+        xtalform_sites = _load_xtalform_sites(fs_model.xtalform_sites)
 
         # Run the update
         _update(
@@ -632,9 +771,6 @@ class CLI:
             canonical_site_transforms,
             xtalform_sites,
         )
-
-
-
 
     def process_all(self, option_json: str):
         options = Options.parse_file(option_json)
@@ -775,33 +911,33 @@ class CLI:
                     continue
 
                 chain_output.aligned_ligands[residue].aligned_structures[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_STRUCTURE_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=site_id
-                    )
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_STRUCTURE_TEMPLATE.format(
+                    dtag=dtag, chain=chain, residue=residue, site=site_id
+                )
                 )
 
                 chain_output.aligned_ligands[residue].aligned_artefacts[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=site_id
-                    )
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                    dtag=dtag, chain=chain, residue=residue, site=site_id
+                )
                 )
 
                 chain_output.aligned_ligands[residue].aligned_xmaps[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
                 )
 
                 chain_output.aligned_ligands[residue].aligned_event_maps[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=site_id
-                    )
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
+                    dtag=dtag, chain=chain, residue=residue, site=site_id
+                )
                 )
 
         # Save the output file
@@ -919,33 +1055,33 @@ class CLI:
                     continue
 
                 chain_output.aligned_ligands[residue].aligned_structures[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_STRUCTURE_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=site_id
-                    )
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_STRUCTURE_TEMPLATE.format(
+                    dtag=dtag, chain=chain, residue=residue, site=site_id
+                )
                 )
 
                 chain_output.aligned_ligands[residue].aligned_artefacts[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=site_id
-                    )
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                    dtag=dtag, chain=chain, residue=residue, site=site_id
+                )
                 )
 
                 chain_output.aligned_ligands[residue].aligned_xmaps[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain, residue=residue, site=site_id)
                 )
 
                 chain_output.aligned_ligands[residue].aligned_event_maps[site_id] = (
-                    output.aligned_dir
-                    + "/"
-                    + constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=site_id
-                    )
+                        output.aligned_dir
+                        + "/"
+                        + constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
+                    dtag=dtag, chain=chain, residue=residue, site=site_id
+                )
                 )
 
         # Save the output file
@@ -1015,10 +1151,10 @@ class CLI:
         return system_data
 
     def add_data_source(
-        self,
-        source_dir: str,
-        data_source_dir: str,
-        source_type: str = "model_building",
+            self,
+            source_dir: str,
+            data_source_dir: str,
+            source_type: str = "model_building",
     ):
         _source_dir = Path(source_dir)
         _data_source_dir = Path(data_source_dir)
@@ -1044,9 +1180,9 @@ class CLI:
         _parse_data_sources(_source_dir)
 
     def open_site(
-        self,
-        option_json: str,
-        site_id: int,
+            self,
+            option_json: str,
+            site_id: int,
     ):
         options = Options.parse_file(option_json)
         output = Output.read(Path(options.source_dir) / constants.OUTPUT_JSON_PATH)
@@ -1102,9 +1238,9 @@ class CLI:
         print(system_data)
 
     def align(
-        self,
-        system_data_dir: str,
-        source_dir: str,
+            self,
+            system_data_dir: str,
+            source_dir: str,
     ):
         self.build_system_data(system_data_dir, source_dir)
         self.build_graph(source_dir)
@@ -1123,8 +1259,8 @@ class CLI:
         self.align_xmaps(source_dir)
 
     def build_graph(
-        self,
-        source_dir: str,
+            self,
+            source_dir: str,
     ):
         _source_dir: Path = Path(source_dir)
 
@@ -1148,13 +1284,13 @@ class CLI:
         _change_site_reference(_source_dir, site_id, subsite_id)
 
     def change_subsite_reference(
-        self,
-        source_dir: str,
-        site_id: int,
-        subsite_id: int,
-        dtag: int,
-        chain: str,
-        residue: int,
+            self,
+            source_dir: str,
+            site_id: int,
+            subsite_id: int,
+            dtag: int,
+            chain: str,
+            residue: int,
     ):
         _source_dir: Path = Path(source_dir)
 

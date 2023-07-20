@@ -193,7 +193,7 @@ class SourceDataModel:
         new_datasets = {}
 
         # Get the pandda tables
-        pandda_event_tables = {pandda.path: pd.read_csv(pandda.event_table_path) for pandda in system_data.panddas}
+        pandda_event_tables = {pandda.path: pd.read_csv(pandda.event_table_path) for pandda in self.panddas}
 
         # Get all the datasets attested in the data sources
         for datasource in self.datasources:
@@ -287,7 +287,26 @@ class SourceDataModel:
         ...
 
 
+class Generator:
+    def __init__(
+            self,
+            reference_chain: str,
+            chain: str,
+            triplet: str
+    ):
+        self.reference_chain: str = reference_chain
+        self.chain: str = chain
+        self.triplet: str = triplet
+
+
 class Assembly:
+    def __init__(self,
+                 reference: str,
+                 generators: list[Generator]
+                 ):
+        self.reference = reference
+        self.generators = generators
+
     @staticmethod
     def from_dict(dic):
         reference = dic['reference']
@@ -295,41 +314,231 @@ class Assembly:
         chains = dic['chains']
 
         # Split biomol on commas and strip whitespace
-        matches = re.findall(
+        biomol_matches = re.findall(
             '([A-Z]+)',
             biomol
         )
 
         # Split chains on commas that do not follow a number, x,y or z and strip whitespace
-        matches = re.findall(
+        chain_matches = re.findall(
             '([A-Z]+([(]+[^()]+[)]+)*)',
             chains
         )
 
+        # Make generators
+        generators = []
+        for biomol_match, chain_match in zip(biomol_matches, chain_matches):
+            if len(chain_match[1]) == 0:
+                xyz = 'x,y,z'
+            else:
+                xyz = chain_match[1]
+            generators.append(
+                Generator(
+                    biomol_match,
+                    chain_match[0],
+                    xyz
+                )
+            )
+
+        return Assembly(
+            reference,
+            generators
+        )
+
+
+class XtalFormAssembly:
+    def __init__(
+            self,
+            assembly: str,
+            chains: list[str],
+    ):
+        self.assembly = assembly
+        self.chains = chains
+
 
 class XtalForm:
-    ...
+    def __init__(self,
+                 reference: str,
+                 assemblies: dict[str, XtalFormAssembly]
+                 ):
+        self.reference = reference
+        self.assemblies = assemblies
+
+    @staticmethod
+    def from_dict(dic):
+        reference = dic['reference']
+        assemblies = dic['assemblies']
+
+        _assemblies = {}
+        for xtalform_assembly_id, xtalform_assembly_info in assemblies.items():
+            assemblies[xtalform_assembly_id] = {}
+            assembly = xtalform_assembly_info['assembly']
+            chains = xtalform_assembly_info['chains']
+            chains_matches = re.findall(
+                '([A-Z]+)',
+                chains
+            )
+            _assemblies[xtalform_assembly_id] = XtalFormAssembly(
+                assembly,
+                [x for x in chains_matches]
+            )
+        return XtalForm(reference, _assemblies)
+
+
+class Transform:
+    def __init__(self,
+                 vec,
+                 mat):
+        self.vec: list[float] = vec
+        self.mat: list[list[float]] = mat
+
+    @staticmethod
+    def from_dict(dic):
+        return Transform(
+            dic['vec'],
+            dic['mat']
+        )
+
+
+class Atom:
+    def __init__(
+            self,
+            element: str,
+            x: float,
+            y: float,
+            z: float,
+            image: Transform,
+    ):
+        self.element: str = element
+        self.x: float = x
+        self.y: float = y
+        self.z: float = z
+        self.image: Transform = image
+
+    @staticmethod
+    def from_dict(dic):
+        return Atom(
+            dic["element"],
+            dic["x"],
+            dic["y"],
+            dic["z"],
+            Transform.from_dict(dic["image"])
+        )
 
 
 class Neighbourhood:
-    ...
+    def __init__(self,
+                 atoms,
+                 artefact_atoms
+                 ):
+        self.atoms = atoms
+        self.artefact_atoms = artefact_atoms
+
+    @staticmethod
+    def from_dict(dic):
+        atoms = {}
+        artefact_atoms = {}
+
+        _atoms = dic['atoms']
+        _artefact_atoms = dic['artefact_atoms']
+        for atom_id, atom_info in _atoms.items():
+            chain, residue, atom = atom_id.split("/")
+            atoms[(chain, residue, atom)] = Atom.from_dict(atom_info)
+            ...
+
+        for atom_id, atom_info in _artefact_atoms.items():
+            chain, residue, atom = atom_id.split("/")
+            artefact_atoms[(chain, residue, atom)] = Atom.from_dict(atom_info)
+
+        return Neighbourhood(
+            atoms,
+            artefact_atoms
+        )
 
 
 class AlignabilityGraph:
     ...
 
 
-class Transform:
-    ...
-
-
 class ConformerSite:
-    ...
+    def __init__(
+            self,
+            residues: list[tuple[str, str]],
+            members: list[tuple[str, str, str]],
+            reference_ligand_id: tuple[str, str, str]
+    ):
+        self.residues: list[tuple[str, str]] = residues
+        self.members: list[tuple[str, str, str]] = members
+        self.reference_ligand_id: tuple[str, str, str] = reference_ligand_id
+
+    @staticmethod
+    def from_dict(dic):
+        residues = []
+        for res in dic['residues']:
+            chain, residue = res.split("/")
+            residues.append((chain, residue))
+        members = []
+        for member in dic['members']:
+            dtag, chain, residue = member.split("/")
+            members.append((dtag, chain, residue))
+        ref_dtag, ref_chain, ref_residue = dic["reference_ligand_id"].split("/")
+        return ConformerSite(
+            residues,
+            members,
+            (ref_dtag, ref_chain, ref_residue)
+        )
 
 
 class CanonicalSite:
-    ...
+    def __init__(
+            self,
+            conformer_site_ids: list[str],
+            residues: list[tuple[str, str]],
+            reference_conformer_site_id: str,
+            global_reference_dtag: str
+    ):
+        self.conformer_site_ids: list[str] = conformer_site_ids
+        self.residues: list[tuple[str, str]] = residues
+        self.reference_conformer_site_id: str = reference_conformer_site_id
+        self.global_reference_dtag: str = global_reference_dtag
+
+    @staticmethod
+    def from_dict(dic):
+        residues = []
+        for res in dic['residues']:
+            chain, residue = res.split("/")
+            residues.append((chain, residue))
+
+        return CanonicalSite(
+            dic['conformer_site_ids'],
+            residues,
+            dic['reference_conformer_site_id'],
+            dic['global_reference_dtag']
+
+        )
 
 
 class XtalFormSite:
-    ...
+    def __init__(self,
+                 xtalform_id: str,
+                 crystallographic_chain: str,
+                 canonical_site_id: str,
+                 members: list[tuple[str, str, str]]
+                 ):
+        self.xtalform_id: str = xtalform_id
+        self.crystallographic_chain: str = crystallographic_chain
+        self.canonical_site_id: str = canonical_site_id
+        self.members: list[tuple[str, str, str]] = members
+
+    @staticmethod
+    def from_dict(dic):
+        members = []
+        for member in dic['members']:
+            dtag, chain, residue = member.split("/")
+            members.append((dtag, chain, residue))
+        return XtalFormSite(
+            dic['xtalform_id'],
+            dic['crystallographic_chain'],
+            dic['canonical_site_id'],
+            members
+        )
