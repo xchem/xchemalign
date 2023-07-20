@@ -1,3 +1,4 @@
+import json
 import os
 
 # import os
@@ -9,6 +10,7 @@ from pathlib import Path
 import fire
 import numpy as np
 import pandas as pd
+import yaml
 from loguru import logger
 from rich import print
 
@@ -406,6 +408,148 @@ def _assign_xtalforms(
     return assigned_xtalforms
 
 
+from ligand_neighbourhood_alignment import dt
+
+
+def _update(
+            fs_model: dt.FSModel,
+            datasets: dict[str, dt.Dataset],
+            reference_datasets: dict[str, dt.Dataset],
+            new_datasets: dict[str, dt.Dataset],
+            assemblies: dict[str, dt.Assembly],
+            xtalforms: dict[str, dt.XtalForm],
+            dataset_assignments: dict[str, str],
+            ligand_neighbourhoods: dict[tuple[str, str, int], dt.Neighbourhood],
+            alignability_graph: dt.AlignabilityGraph,
+            ligand_neighbourhood_transforms: dict[tuple[tuple[str,str,int], tuple[str,str,int]], dt.Transform],
+            conformer_sites: dict[str, dt.ConformerSite],
+            conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+            canonical_sites: dict[str, dt.CanonicalSite],
+            canonical_site_transforms: dict[str, dt.Transform],
+            xtalform_sites: dict[str, dt.XtalFormSite],
+        ):
+
+    # Get the structures
+    structures = _get_structures(datasets)
+
+    # Assign datasets
+    for dtag, dataset in new_datasets.items():
+        dataset_assignments[dtag] = _assign_dataset(dataset, assemblies, xtalforms, )
+    _save_assignments()
+
+    # Get neighbourhoods
+    for dtag, dataset in new_datasets.items():
+        neighborhoods = _get_neighbourhoods(dataset)
+        for lid, neighbourhood in neighborhoods.items():
+            ligand_neighbourhoods[lid] = neighbourhood
+    _save_neighbourhood()
+
+    # Update graph
+    for dtag, dataset in new_datasets.items():
+        for lid, neighbourhood in ligand_neighbourhoods.items():
+            if lid[0] in datasets:
+                continue
+            alignments, transforms = _get_alignments(neighbourhood, structures)
+            for target_lid, transform in transforms.items():
+                ligand_neighbourhood_transforms[(lid, target_lid)] = transform
+            _update_graph(alignability_graph, alignments)
+    _save_graph()
+
+    # Update conformer sites
+    connected_components = _get_connected_components(alignability_graph)
+    for connected_component in connected_components:
+        # Match new component to old ones by membership, and expand old ones if available otherwise create new one
+        _update_conformer_sites(conformer_sites, connected_component)
+    _save_conformer_sites(conformer_sites)
+
+    # Update canonical sites
+    for conformer_site_id, conformer_site in conformer_sites.items():
+        # If conformer site in a canonical site, replace with new data, otherwise
+        # Check if residues match as usual, otherwise create a new canon site for it
+        _update_canonical_sites(conformer_site)
+    _save_canonical_sites(canonical_sites)
+
+    # Update crystalform sites
+    for xtalform_site_id, xtalform_site in xtalform_sites.items():
+        # If canonical site in a xtalform site, replace with new data, otherwise
+        # Check if residues match as usual, otherwise create a new canon site for it
+        _update_xtalform_sites(canonical_site, dataset_assignments)
+    _save_xtalform_sites(xtalform_sites)
+
+    # Get conformer site transforms
+    for canonical_site_id, canonical_site in canonical_sites.items():
+        for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
+            _update_conformer_site_transform(
+                conformer_site_transforms,
+                canonical_site,
+                conformer_site,
+            )
+    _save_conformer_site_transforms(conformer_site_transforms)
+
+    # Get canonical site tranforms
+    for canonical_site_id, canonical_site in canonical_sites.items():
+        _update_canonical_site_transforms(
+            canonical_site_transforms,
+            canonical_site,
+            canonical_sites,
+        )
+    _save_canonical_site_transforms(canonical_site_transforms)
+
+    # Update output: check if aligned data for each lid in canon site is already there and if not add it
+    _update_fs_model(
+        fs_model,
+        canonical_sites,
+    )
+    _save_fs_model(fs_model)
+
+    # Generate new aligned structures
+    for canonical_site_id, canonical_site in canonical_sites.items():
+        for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
+            for lid in conformer_site.ligand_ids:
+                _update_aligned_structures()
+
+    # Generate alignments of references to each canonical site
+    for canonical_site_id, canonical_site in canonical_sites.items():
+        for dtag, reference_dataset in reference_datasets.items():
+            _update_reference_alignments(
+
+            )
+
+    # Generate new aligned maps
+    for canonical_site_id, canonical_site in canonical_sites.items():
+        for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
+            for lid in conformer_site.ligand_ids:
+                _update_aligned_xmaps()
+
+def _load_assemblies(assemblies_file, new_assemblies_yaml):
+    assemblies = {}
+
+    if assemblies_file.exists():
+
+        with open(assemblies_file, 'r') as f:
+            dic = json.load(assemblies_file)
+
+        for assembly_id, assembly_info in dic.items():
+           assemblies[assembly_id] = dt.Assembly.from_dict(assembly_info)
+
+
+    # Load new info and update
+    if new_assemblies_yaml.exists():
+        with open(new_assemblies_yaml, 'r') as f:
+            new_assemblies_dict = yaml.safe_load(new_assemblies_yaml)
+    else:
+        new_assemblies_dict = {}
+
+    for assembly_id, assembly_info in new_assemblies_dict.items():
+        if assembly_id in assemblies:
+            continue
+        assemblies[assembly_id] = dt.Assembly.from_dict(assembly_info)
+
+    return assemblies
+
+
+
+
 class CLI:
     def schema(self, output_dir: str):
         _output_dir = Path(output_dir)
@@ -421,6 +565,76 @@ class CLI:
         save_schema(SystemData, _output_dir)
         save_schema(SystemData, _output_dir)
         save_schema(SystemData, _output_dir)
+
+    def update(self, options_json: str):
+
+        options = Options.parse_file(options_json)
+
+        fs_model = dt.FSModel.from_dir(options.source_dir)
+
+        source_data_model = dt.SourceDataModel.from_fs_model(
+            fs_model,
+            options.datasources,
+            options.datasource_types,
+            options.panddas
+        )
+
+        datasets, reference_datasets, new_datasets = source_data_model.get_datasets()
+
+        # Get assemblies
+        assemblies = load_assemblies(fs_model.assemblies, options.assemblies_json)
+
+        # Get xtalforms
+        xtalforms = load_xtalforms(fs_model.xtalforms, options.xtalforms_json)
+
+        # Get the dataset assignments
+        dataset_assignments = load_dataset_assignments(fs_model.dataset_assignments)
+
+        # Get Ligand neighbourhoods
+        ligand_neighbourhoods = load_ligand_neighbourhoods(fs_model.ligand_neighbourhoods)
+
+        # Get alignability graph
+        alignability_graph = load_alignability_graph(fs_model.alignability_graph)
+
+        #
+        ligand_neighbourhood_transforms = load_ligand_neighbourhood_transforms(fs_model.ligand_neighbourhood_transforms)
+
+        # Get conformer sites
+        conformer_sites = load_conformer_sites(fs_model.conformer_sites)
+
+        #
+        conformer_site_transforms= load_conformer_site_transforms(fs_model.conformer_site_transforms)
+
+        # Get canonical sites
+        canonical_sites = load_canonical_sites(fs_model.canonical_sites)
+
+        #
+        canonical_site_transforms = load_canonical_site_transforms(fs_model.canonical_site_trasnforms)
+
+        # Get xtalform sites
+        xtalform_sites = load_xtalform_sites(fs_model.xtalform_sites)
+
+        # Run the update
+        _update(
+            fs_model,
+            datasets,
+            reference_datasets,
+            new_datasets,
+            assemblies,
+            xtalforms,
+            dataset_assignments,
+            ligand_neighbourhoods,
+            alignability_graph,
+            ligand_neighbourhood_transforms,
+            conformer_sites,
+            conformer_site_transforms,
+            canonical_sites,
+            canonical_site_transforms,
+            xtalform_sites,
+        )
+
+
+
 
     def process_all(self, option_json: str):
         options = Options.parse_file(option_json)
