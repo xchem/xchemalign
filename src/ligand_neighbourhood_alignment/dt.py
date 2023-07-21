@@ -155,15 +155,33 @@ class PanDDA:
     event_table_path: str
 
 
+class LigandBindingEvent:
+    def __init__(self,
+                id,
+                dtag,
+                chain,
+                residue,
+                xmap,
+            ):
+        self.id: str = id
+        self.dtag: str = dtag
+        self.chain: str = chain
+        self.residue: str = residue
+        self.xmap : str = xmap
+
 class Dataset:
     def __init__(self,
                  dtag,
                  pdb,
                  xmap,
                  mtz,
-                 ligand_binding_events,
+                 ligand_binding_events: dict[tuple[str,str,str], LigandBindingEvent],
                  ):
-        ...
+        self.dtag = dtag
+        self.pdb = pdb
+        self.xmap = xmap
+        self.mtz = mtz
+        self.ligand_binding_events = ligand_binding_events
 
 
 class SourceDataModel:
@@ -399,6 +417,12 @@ class Transform:
             dic['mat']
         )
 
+    def to_dict(self):
+        return {
+            'vec': self.vec,
+            'mat':self.mat
+        }
+
 
 class Atom:
     def __init__(
@@ -425,6 +449,15 @@ class Atom:
             Transform.from_dict(dic["image"])
         )
 
+    def to_dict(self):
+        dic = {}
+        return {
+            "element": self.element,
+            'x': self.x,
+            'y': self.y,
+            'z': self.z,
+            'image': self.image.to_dict()
+        }
 
 class Neighbourhood:
     def __init__(self,
@@ -454,6 +487,17 @@ class Neighbourhood:
             atoms,
             artefact_atoms
         )
+
+    def to_dict(self):
+        dic = {}
+        dic['atoms'] = {}
+        for atom_id, atom in self.atoms.items():
+            dic['atoms']["/".join(atom_id)] = atom.to_dict()
+        dic['artefact_atoms'] = {}
+        for atom_id, atom in self.artefact_atoms.items():
+            dic['artefact_atoms']["/".join(atom_id)] = atom.to_dict()
+
+        return dic
 
 
 class AlignabilityGraph:

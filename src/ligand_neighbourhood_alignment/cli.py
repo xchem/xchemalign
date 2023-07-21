@@ -365,7 +365,7 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
 
 
 from ligand_neighbourhood_alignment import dt
-
+import gemmi
 
 def _get_assigned_xtalforms(system_data, xtalforms):
     structures = read_structures(system_data)
@@ -409,6 +409,185 @@ def _assign_xtalforms(
     return assigned_xtalforms
 
 
+def _get_structures(datasets):
+    structures = {}
+    for dataset in datasets:
+        structure: gemmi.Structure = gemmi.read_structure(dataset.pdb)
+        structures[dataset.dtag] = structure
+
+    return structures
+
+
+def _get_closest_xtalform(xtalforms: dict[str, dt.XtalForm], structure, structures):
+    structure_spacegroup = structure.spacegroup_hm
+    structure_cell = structure.cell
+
+    xtalform_deltas = {}
+
+    for xtalform_id, xtalform in xtalforms.items():
+        ref_structure = structures[xtalform.reference]
+        ref_spacegroup = ref_structure.spacegroup_hm
+        ref_structure_cell = ref_structure.cell
+
+        if ref_spacegroup != structure_spacegroup:
+            continue
+
+        deltas = np.array(
+            [
+                structure_cell.a / ref_structure_cell.a,
+                structure_cell.b / ref_structure_cell.b,
+                structure_cell.c / ref_structure_cell.c,
+                structure_cell.alpha / ref_structure_cell.alpha,
+                structure_cell.beta / ref_structure_cell.beta,
+                structure_cell.gamma / ref_structure_cell.gamma,
+            ]
+        )
+        xtalform_deltas[xtalform_id] = deltas
+
+    if len(xtalform_deltas) == 0:
+        return None, None
+
+    closest_xtalform = min(
+        xtalform_deltas,
+        key=lambda _xtalform_id: np.sum(np.abs(xtalform_deltas[_xtalform_id] - 1)),
+    )
+
+    return closest_xtalform, xtalform_deltas[closest_xtalform]
+
+
+def _assign_dataset(dataset, assemblies, xtalforms, structure, structures):
+    closest_xtalform_id, deltas = _get_closest_xtalform(
+        xtalforms,
+        structure,
+        structures,
+    )
+
+    if (closest_xtalform_id is None) & (deltas is None):
+        logger.info(f"No reference in same spacegroup for")
+        logger.info(f"Structure path is: {dataset.pdb}")
+        raise Exception()
+
+    if np.any(deltas > 1.1) | np.any(deltas < 0.9):
+        logger.info(f"No reference for dataset")
+        logger.info(f"Deltas to closest unit cell are: {deltas}")
+        logger.info(f"Structure path is: {dataset.pdb}")
+
+        raise Exception()
+
+    return closest_xtalform_id
+
+
+def _save_assignments(fs_model: dt.FSModel, dataset_assignments: dict[str, str]):
+    with open(fs_model.dataset_assignments, 'w') as f:
+        yaml.safe_dump(dataset_assignments, f)
+
+
+def _generate_assembly(xtalform: dt.XtalForm, structure, assemblies: dict[str, dt.Assembly]):
+    full_st = structure.clone()
+    chains_to_delete = []
+    for model in full_st:
+        for chain in model:
+            chains_to_delete.append((model.name, chain.name))
+
+    for model_name, chain_name in chains_to_delete:
+        del full_st[model_name][chain_name]
+
+    for xtalform_assembly_id, xtalform_assembly in xtalform.assemblies.items():
+        assembly = assemblies[xtalform_assembly.assembly]
+        chains = xtalform_assembly.chains
+        reference = assembly.reference
+
+        for generator in assembly.generators:
+            op = gemmi.Op(generator.triplet)
+            chain_clone = structure[0][generator.chain].clone()
+            for residue in chain_clone:
+                for atom in residue:
+                    atom_frac = structure.cell.fractionalize(atom.pos)
+                    new_pos_frac = op.apply_to_xyz([atom_frac.x, atom_frac.y, atom_frac.z])
+                    new_pos_orth = structure.cell.orthogonalize(gemmi.Fractional(*new_pos_frac))
+
+                    atom.pos = gemmi.Position(*new_pos_orth)
+            chain_clone.name = generator.reference_chain
+            full_st[0].add_chain(chain_clone)
+
+    num_chains = 0
+    for model in full_st:
+        for chain in model:
+            num_chains += 1
+    logger.debug(f"Generated {num_chains} assembly chains")
+
+    return full_st
+
+
+def _get_structure_fragments(dataset: dt.Dataset, structure):
+    fragments: dict[tuple[str, str, str], gemmi.Residue] = {}
+    # lig_number: int = 0
+    for model in structure:
+        for chain in model:
+            for residue in chain.get_ligands():
+                for lbe in dataset.ligand_binding_events.ligand_binding_events:
+                    # if (
+                    #     (residue.name == "LIG")
+                    #     & (lbe.chain == chain.name)
+                    #     & (lbe.residue == residue.seqid.num)
+                    # ):
+                    if (lbe.chain == chain.name) & (lbe.residue == residue.seqid.num):
+                        ligand_id = (dataset.dtag, chain.name, lbe.residue,)
+                        fragments[ligand_id] = residue
+                    # lig_number = lig_number + 1
+
+    return fragments
+
+
+from ligand_neighbourhood_alignment.get_ligand_neighbourhoods import _get_ligand_neighbourhood
+
+
+def _get_dataset_neighbourhoods(
+        dataset: dt.Dataset, xtalform: dt.XtalForm, assemblies: dict[str, dt.Assembly], max_radius: float = 7.0
+) -> dict[tuple[str, str, str], dt.Neighbourhood]:
+    # Load the structure
+    logger.debug(dataset.pdb)
+    structure = gemmi.read_structure(dataset.pdb)
+    logger.debug(f"{structure.cell}")
+
+    # Get the rest of the assembly
+    assembly = _generate_assembly(xtalform, structure, assemblies)
+
+    # Get the bound fragments
+    fragments: dict[tuple[str, str, str], gemmi.Residue] = _get_structure_fragments(dataset, assembly)
+    logger.debug(f"Get {len(fragments)} fragment neighbourhoods")
+    logger.debug(fragments)
+
+    # Construct the neighbourhood search
+    ns: gemmi.NeighborSearch = gemmi.NeighborSearch(assembly[0], assembly.cell, max_radius).populate()
+
+    # For each bound fragment, identify the neighbourhood atoms and
+    # partition them into model and artefact
+    fragment_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = {}
+    for ligand_id, fragment in fragments.items():
+        fragment_neighbourhoods[ligand_id] = _get_ligand_neighbourhood(assembly, ns, fragment, max_dist=max_radius)
+
+    return fragment_neighbourhoods
+
+
+def _get_neighbourhoods(dataset: dt.Dataset, xtalform: dt.XtalForm, assemblies: dict[str, dt.Assembly]):
+    dataset_ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _get_dataset_neighbourhoods(
+        dataset, xtalform, assemblies
+    )
+    return dataset_ligand_neighbourhoods
+
+
+def _save_neighbourhoods(
+        fs_model: dt.FSModel,
+        ligand_neighbourhoods: dict[tuple[str,str,str], dt.Neighbourhood],
+):
+    with open(fs_model.ligand_neighbourhoods, 'w') as f:
+        dic = {}
+        for ligand_id, neighbourhood in ligand_neighbourhoods.items():
+            dic["/".join(ligand_id)] = neighbourhood.to_dict()
+        yaml.safe_dump(dic, f)
+
+
 def _update(
         fs_model: dt.FSModel,
         datasets: dict[str, dt.Dataset],
@@ -417,9 +596,9 @@ def _update(
         assemblies: dict[str, dt.Assembly],
         xtalforms: dict[str, dt.XtalForm],
         dataset_assignments: dict[str, str],
-        ligand_neighbourhoods: dict[tuple[str, str, int], dt.Neighbourhood],
+        ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
         alignability_graph: dt.AlignabilityGraph,
-        ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, int], tuple[str, str, int]], dt.Transform],
+        ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
         conformer_sites: dict[str, dt.ConformerSite],
         conformer_site_transforms: dict[tuple[str, str], dt.Transform],
         canonical_sites: dict[str, dt.CanonicalSite],
@@ -427,19 +606,20 @@ def _update(
         xtalform_sites: dict[str, dt.XtalFormSite],
 ):
     # Get the structures
-    structures = _get_structures(datasets)
+    structures: dict = _get_structures(datasets)
 
     # Assign datasets
     for dtag, dataset in new_datasets.items():
-        dataset_assignments[dtag] = _assign_dataset(dataset, assemblies, xtalforms, )
-    _save_assignments()
+        dataset_assignments[dtag] = _assign_dataset(dataset, assemblies, xtalforms, structures[dtag], structures)
+    _save_assignments(fs_model, dataset_assignments)
 
     # Get neighbourhoods
     for dtag, dataset in new_datasets.items():
-        neighborhoods = _get_neighbourhoods(dataset)
+        xtalform = xtalforms[dataset_assignments[dtag]]
+        neighborhoods = _get_neighbourhoods(dataset, xtalform, assemblies)
         for lid, neighbourhood in neighborhoods.items():
             ligand_neighbourhoods[lid] = neighbourhood
-    _save_neighbourhood()
+    _save_neighbourhoods(fs_model, ligand_neighbourhoods)
 
     # Update graph
     for dtag, dataset in new_datasets.items():
@@ -450,28 +630,28 @@ def _update(
             for target_lid, transform in transforms.items():
                 ligand_neighbourhood_transforms[(lid, target_lid)] = transform
             _update_graph(alignability_graph, alignments)
-    _save_graph()
+    _save_graph(fs_model, alignability_graph)
 
     # Update conformer sites
     connected_components = _get_connected_components(alignability_graph)
     for connected_component in connected_components:
         # Match new component to old ones by membership, and expand old ones if available otherwise create new one
         _update_conformer_sites(conformer_sites, connected_component)
-    _save_conformer_sites(conformer_sites)
+    _save_conformer_sites(fs_model, conformer_sites)
 
     # Update canonical sites
     for conformer_site_id, conformer_site in conformer_sites.items():
         # If conformer site in a canonical site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
         _update_canonical_sites(conformer_site)
-    _save_canonical_sites(canonical_sites)
+    _save_canonical_sites(fs_model, canonical_sites)
 
     # Update crystalform sites
     for xtalform_site_id, xtalform_site in xtalform_sites.items():
         # If canonical site in a xtalform site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
         _update_xtalform_sites(canonical_site, dataset_assignments)
-    _save_xtalform_sites(xtalform_sites)
+    _save_xtalform_sites(fs_model, xtalform_sites)
 
     # Get conformer site transforms
     for canonical_site_id, canonical_site in canonical_sites.items():
@@ -481,7 +661,7 @@ def _update(
                 canonical_site,
                 conformer_site,
             )
-    _save_conformer_site_transforms(conformer_site_transforms)
+    _save_conformer_site_transforms(fs_model, conformer_site_transforms)
 
     # Get canonical site tranforms
     for canonical_site_id, canonical_site in canonical_sites.items():
@@ -490,7 +670,7 @@ def _update(
             canonical_site,
             canonical_sites,
         )
-    _save_canonical_site_transforms(canonical_site_transforms)
+    _save_canonical_site_transforms(fs_model, canonical_site_transforms)
 
     # Update output: check if aligned data for each lid in canon site is already there and if not add it
     _update_fs_model(
@@ -584,7 +764,7 @@ def _load_dataset_assignments(dataset_assignments_yaml):
 
 
 def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
-    ligand_neighbourhoods: dict[tuple[str, str, int], dt.Neighbourhood] = {}
+    ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = {}
 
     if ligand_neighbourhoods_yaml.exists():
 
@@ -637,7 +817,6 @@ def _load_conformer_sites(conformer_sites_yaml):
         for conformer_site_id, conformer_site_info in dic.items():
             conformer_sites[conformer_site_id] = dt.ConformerSite.from_dict(conformer_site_info)
 
-
     return conformer_sites
 
 
@@ -650,7 +829,8 @@ def _load_conformer_site_transforms(conformer_site_transforms_yaml):
         for conformer_site_transform_id, conformer_site_transform_info in dic.items():
             conformer_site_1, conformer_site_2 = conformer_site_transform_id.split("/")
 
-            conformer_site_transforms[(conformer_site_1, conformer_site_2)] = dt.Transform.from_dict(conformer_site_transform_info)
+            conformer_site_transforms[(conformer_site_1, conformer_site_2)] = dt.Transform.from_dict(
+                conformer_site_transform_info)
 
     return conformer_site_transforms
 
@@ -666,6 +846,7 @@ def _load_canonical_sites(canonical_sites_yaml):
 
     return canonical_sites
 
+
 def _load_canonical_site_transforms(canonical_site_transforms_yaml):
     canonical_site_transforms = {}
     if canonical_site_transforms_yaml.exists():
@@ -677,6 +858,7 @@ def _load_canonical_site_transforms(canonical_site_transforms_yaml):
 
     return canonical_site_transforms
 
+
 def _load_xtalform_sites(xtalform_sites_yaml):
     xtalform_sites = {}
     if xtalform_sites_yaml.exists():
@@ -687,6 +869,7 @@ def _load_xtalform_sites(xtalform_sites_yaml):
             xtalform_sites[xtalform_site_id] = dt.XtalFormSite.from_dict(xtalform_site_info)
 
     return xtalform_sites
+
 
 class CLI:
     def schema(self, output_dir: str):
@@ -720,38 +903,42 @@ class CLI:
         datasets, reference_datasets, new_datasets = source_data_model.get_datasets()
 
         # Get assemblies
-        assemblies = _load_assemblies(fs_model.assemblies, options.assemblies_json)
+        assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, options.assemblies_json)
 
         # Get xtalforms
-        xtalforms = _load_xtalforms(fs_model.xtalforms, options.xtalforms_json)
+        xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, options.xtalforms_json)
 
         # Get the dataset assignments
         dataset_assignments = _load_dataset_assignments(fs_model.dataset_assignments)
 
         # Get Ligand neighbourhoods
-        ligand_neighbourhoods = _load_ligand_neighbourhoods(fs_model.ligand_neighbourhoods)
+        ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _load_ligand_neighbourhoods(
+            fs_model.ligand_neighbourhoods)
 
         # Get alignability graph
         alignability_graph = _load_alignability_graph(fs_model.alignability_graph)
 
         #
-        ligand_neighbourhood_transforms = _load_ligand_neighbourhood_transforms(
+        ligand_neighbourhood_transforms: dict[
+            tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform] = _load_ligand_neighbourhood_transforms(
             fs_model.ligand_neighbourhood_transforms)
 
         # Get conformer sites
-        conformer_sites = _load_conformer_sites(fs_model.conformer_sites)
+        conformer_sites: dict[str, dt.ConformerSite] = _load_conformer_sites(fs_model.conformer_sites)
 
         #
-        conformer_site_transforms = _load_conformer_site_transforms(fs_model.conformer_site_transforms)
+        conformer_site_transforms: dict[tuple[str, str], dt.Transform] = _load_conformer_site_transforms(
+            fs_model.conformer_site_transforms)
 
         # Get canonical sites
-        canonical_sites = _load_canonical_sites(fs_model.canonical_sites)
+        canonical_sites: dict[str, dt.CanonicalSite] = _load_canonical_sites(fs_model.canonical_sites)
 
         #
-        canonical_site_transforms = _load_canonical_site_transforms(fs_model.canonical_site_trasnforms)
+        canonical_site_transforms: dict[str, dt.Transform] = _load_canonical_site_transforms(
+            fs_model.canonical_site_trasnforms)
 
         # Get xtalform sites
-        xtalform_sites = _load_xtalform_sites(fs_model.xtalform_sites)
+        xtalform_sites: dict[str, dt.XtalFormSite] = _load_xtalform_sites(fs_model.xtalform_sites)
 
         # Run the update
         _update(

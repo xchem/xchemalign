@@ -136,6 +136,63 @@ def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
 
     return LigandBindingEvents(ligand_ids=lids, ligand_binding_events=lbes)
 
+from ligand_neighbourhood_alignment import dt
+
+def _get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
+    structure = gemmi.read_structure(str(pdb_path))
+
+    ligand_binding_events = {}
+    # Iterate the events, and if a match add a ligand binding event
+    for pandda_path, event_table in pandda_event_csvs.items():
+        processed_datasets_dir = (
+            Path(pandda_path) / constants.PANDDA_PROCESSED_DATASETS_DIR
+        )
+
+        for idx, row in event_table.iterrows():
+            _dtag = row["dtag"]
+            event_id = row["event_idx"]
+            x = row["x"]
+            y = row["y"]
+            z = row["z"]
+            bdc = row["1-BDC"]
+            ligand_confidence = row["Ligand Confidence"]
+
+            # logger.debug(f"Processing {dtag} {event_id}")
+
+            if ligand_confidence not in ["High", "Medium"]:
+                # logger.debug("No high confidence ligand!")
+                continue
+
+            if dtag != _dtag:
+                continue
+
+            # Get the structure
+            processed_dataset_dir = processed_datasets_dir / dtag
+
+            # Identify the closest ligand to the event
+            chain, residue_num = get_closest_lig(structure, (x, y, z))
+
+            if not residue_num:
+                continue
+
+            # Get the event map
+            xmap_path = (
+                processed_dataset_dir
+                / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                    dtag=dtag, event_id=event_id, bdc=bdc
+                )
+            )
+            lbe = dt.LigandBindingEvent(
+                id=str(event_id),
+                dtag=str(dtag),
+                chain=str(chain),
+                residue=str(residue_num),
+                xmap=str(xmap_path),
+            )
+            ligand_binding_events[(str(dtag), str(chain), str(residue_num))] = lbe
+
+    return ligand_binding_events
+
 
 def make_data_json_from_pandda_dir(pandda_dir: Path, output_dir: Path):
 
