@@ -367,6 +367,7 @@ def get_closest_xtalform(xtalforms: XtalForms, structures, dataset_id):
 from ligand_neighbourhood_alignment import dt
 import gemmi
 
+
 def _get_assigned_xtalforms(system_data, xtalforms):
     structures = read_structures(system_data)
 
@@ -579,7 +580,7 @@ def _get_neighbourhoods(dataset: dt.Dataset, xtalform: dt.XtalForm, assemblies: 
 
 def _save_neighbourhoods(
         fs_model: dt.FSModel,
-        ligand_neighbourhoods: dict[tuple[str,str,str], dt.Neighbourhood],
+        ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
 ):
     with open(fs_model.ligand_neighbourhoods, 'w') as f:
         dic = {}
