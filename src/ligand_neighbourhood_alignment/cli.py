@@ -914,20 +914,23 @@ class CLI:
 
         # Get assemblies
         assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, Path(options.assemblies_json))
-        for key, assembly in assemblies.items():
-            print(assembly)
-            for gen in assembly.generators:
-                print([gen.chain, gen.reference_chain, gen.triplet])
+        # for key, assembly in assemblies.items():
+        #     print(assembly)
+        #     for gen in assembly.generators:
+        #         print([gen.chain, gen.reference_chain, gen.triplet])
+        print(assemblies)
         # Get xtalforms
         xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, Path(options.xtalforms_json))
-        for key, xtalform in xtalforms.items():
-            print(xtalform)
-            for ass, xtalform_ass in xtalform.assemblies.items():
-                for chn, trns in zip(xtalform_ass.chains, xtalform_ass.transforms):
-                    print([chn, trns])
+        # for key, xtalform in xtalforms.items():
+        #     print(xtalform)
+        #     for ass, xtalform_ass in xtalform.assemblies.items():
+        #         for chn, trns in zip(xtalform_ass.chains, xtalform_ass.transforms):
+        #             print([chn, trns])
+        print(xtalforms)
 
         # Get the dataset assignments
         dataset_assignments = _load_dataset_assignments(Path(fs_model.dataset_assignments))
+        print(dataset_assignments)
 
         # Get Ligand neighbourhoods
         ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _load_ligand_neighbourhoods(
