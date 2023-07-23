@@ -929,6 +929,7 @@ class CLI:
         # Get Ligand neighbourhoods
         ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _load_ligand_neighbourhoods(
             fs_model.ligand_neighbourhoods)
+        print(ligand_neighbourhoods)
 
         # Get alignability graph
         alignability_graph = _load_alignability_graph(fs_model.alignability_graph)
