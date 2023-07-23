@@ -896,6 +896,9 @@ class CLI:
 
         fs_model = dt.FSModel.from_dir(options.source_dir)
 
+        if not Path(options.source_dir).exists():
+            os.mkdir(options.source_dir)
+
         source_data_model = dt.SourceDataModel.from_fs_model(
             fs_model,
             options.datasources,
