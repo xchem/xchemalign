@@ -9,7 +9,7 @@ from ligand_neighbourhood_alignment.data import (
     Transform,
     Transforms,
 )
-from ligand_neighbourhood_alignment.matching import match_atom
+from ligand_neighbourhood_alignment.matching import match_atom, _match_atom
 
 
 def match_cas(
@@ -120,7 +120,7 @@ def _match_cas(
     for ligand_1_atom_id, ligand_1_atom in ligand_1_neighbourhood.atoms.items():
         for ligand_2_atom_id, ligand_2_atom in ligand_2_neighbourhood.atoms.items():
             if ligand_1_atom_id[2] == "CA":
-                if match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
+                if _match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
                     alignable_cas.append(
                         (
                             gemmi.Position(
