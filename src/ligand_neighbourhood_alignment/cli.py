@@ -910,11 +910,12 @@ class CLI:
 
         # Get assemblies
         assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, Path(options.assemblies_json))
-        print(assemblies)
-
+        for key, assembly in assemblies.items():
+            print(assembly)
         # Get xtalforms
         xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, Path(options.xtalforms_json))
-        print(xtalforms)
+        for key, xtalform in xtalforms.items():
+            print(xtalform)
 
         # Get the dataset assignments
         dataset_assignments = _load_dataset_assignments(Path(fs_model.dataset_assignments))
