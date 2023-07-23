@@ -588,6 +588,7 @@ def _save_neighbourhoods(
             dic["/".join(ligand_id)] = neighbourhood.to_dict()
         yaml.safe_dump(dic, f)
 
+
 def _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transforms):
     with open(fs_model.ligand_neighbourhood_transforms, 'w') as f:
         dic = {}
@@ -613,6 +614,7 @@ def _update_graph(alignability_graph, ligand_neighbourhood_transforms):
         if (to_ligand_id, from_ligand_id) not in edges:
             alignability_graph.add_edge(to_ligand_id, from_ligand_id)
 
+
 import networkx as nx
 
 
@@ -621,7 +623,44 @@ def _save_graph(fs_model, alignability_graph):
         alignability_graph,
         str(fs_model.alignability_graph),
         stringizer=lambda x: "/".join(x))
-    ...
+
+
+def _get_connected_components(alignability_graph):
+    cliques = list(nx.connected_components(alignability_graph))
+    return cliques
+
+
+def _update_conformer_sites(
+        conformer_sites: dict[str, dt.ConformerSite],
+        connected_component: list[tuple[str, str, str]],
+        neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood]
+):
+    matched = False
+    # Check each old conformer site for overlap in membership, and if so update its members
+    for conformer_site_id, conformer_site in conformer_sites.items():
+        num_overlaps = set(connected_component).intersection(set(conformer_site.members))
+        if len(num_overlaps) > 0:
+            matched = True
+            # Match, add each new ligand id to the conformer site's members
+            for lid in connected_component:
+                if lid not in conformer_site.members:
+                    conformer_site.members.append(lid)
+
+    # Otherwise create a new conformer site
+
+    if not matched:
+        residues = []
+        for lid in connected_component:
+            for atom_id in neighbourhoods[lid].atoms:
+                residues.append((atom_id[0], atom_id[1]))
+        conformer_site = dt.ConformerSite(
+            [x for x in set(residues)],
+            connected_component,
+            connected_component[0]
+        )
+        conformer_site_id = "/".join(connected_component[0])
+        conformer_sites[conformer_site_id] = conformer_site
+
 
 def _update(
         fs_model: dt.FSModel,
@@ -694,7 +733,9 @@ def _update(
     _save_graph(fs_model, alignability_graph)
 
     # Update conformer sites
+    logger.info(f"Updating conformer sites...")
     connected_components = _get_connected_components(alignability_graph)
+    logger.info(f"Got {len(connected_components)} connected components")
     for connected_component in connected_components:
         # Match new component to old ones by membership, and expand old ones if available otherwise create new one
         _update_conformer_sites(conformer_sites, connected_component)
@@ -841,8 +882,6 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
     return ligand_neighbourhoods
 
 
-
-
 def _load_alignability_graph(alignability_graph):
     if alignability_graph.exists():
         return nx.read_gml(
@@ -852,7 +891,6 @@ def _load_alignability_graph(alignability_graph):
 
     else:
         return nx.Graph()
-
 
 
 def _load_ligand_neighbourhood_transforms(ligand_neighbourhood_transforms_yaml):
