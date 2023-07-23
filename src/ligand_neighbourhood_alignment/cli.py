@@ -913,11 +913,14 @@ class CLI:
         for key, assembly in assemblies.items():
             print(assembly)
             for gen in assembly.generators:
-                print(gen.triplet)
+                print([gen.chain, gen.reference_chain, gen.triplet])
         # Get xtalforms
         xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, Path(options.xtalforms_json))
         for key, xtalform in xtalforms.items():
             print(xtalform)
+            for ass, xtalform_ass in xtalform.assemblies.items():
+                for chn, trns in xtalform_ass.chains:
+                    print([chn, trns])
 
         # Get the dataset assignments
         dataset_assignments = _load_dataset_assignments(Path(fs_model.dataset_assignments))
