@@ -651,6 +651,11 @@ def _update(
             ligand_neighbourhoods[lid] = neighbourhood
     _save_neighbourhoods(fs_model, ligand_neighbourhoods)
 
+    for nid, neighbourhood in ligand_neighbourhoods.items():
+        print(nid)
+        for atom_id in neighbourhood.atoms:
+            print(atom_id)
+
     # Update graph
     logger.info(f"Updating alignment graph...")
     logger.info(f"Previously had {len(ligand_neighbourhood_transforms)} alignments between neighbourhoods")
