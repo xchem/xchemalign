@@ -357,7 +357,7 @@ def _get_ligand_neighbourhood(
             str(cra.atom.name),
         )
         image_transform = atom_images[model_atom_id]
-        transform = Transform(
+        transform = dt.Transform(
             vec=image_transform.vec.tolist(),
             mat=image_transform.mat.tolist(),
         )
@@ -379,7 +379,7 @@ def _get_ligand_neighbourhood(
             str(cra.atom.name),
         )
         image_transform = atom_images[artefact_atom_id]
-        transform = Transform(
+        transform = dt.Transform(
             vec=image_transform.vec.tolist(),
             mat=image_transform.mat.tolist(),
         )
