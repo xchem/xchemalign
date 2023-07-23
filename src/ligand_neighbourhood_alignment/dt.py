@@ -364,7 +364,8 @@ class Assembly:
             '([A-Z]+([(]+[^()]+[)]+)*)',
             chains
         )
-
+        print(biomol_matches)
+        print(chain_matches)
         # Make generators
         generators = []
         for biomol_match, chain_match in zip(biomol_matches, chain_matches):
