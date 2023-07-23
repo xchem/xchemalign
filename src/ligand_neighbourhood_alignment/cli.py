@@ -847,7 +847,7 @@ def _load_alignability_graph(alignability_graph):
     if alignability_graph.exists():
         return nx.read_gml(
             str(alignability_graph),
-            destringizer=lambda x: x.split("/"),
+            destringizer=lambda x: tuple(x.split("/")),
         )
 
     else:
