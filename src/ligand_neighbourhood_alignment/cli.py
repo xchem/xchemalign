@@ -613,8 +613,11 @@ def _update_graph(alignability_graph, ligand_neighbourhood_transforms):
         if (to_ligand_id, from_ligand_id) not in edges:
             alignability_graph.add_edge(to_ligand_id, from_ligand_id)
 
+import networkx as nx
 
 
+def _save_graph(fs_model, alignability_graph):
+    nx.write_gml(g, str(fs_model.alignability_graph), stringizer=lambda x: x.to_string())
     ...
 
 def _update(
@@ -835,7 +838,6 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
     return ligand_neighbourhoods
 
 
-import networkx as nx
 
 
 def _load_alignability_graph(alignability_graph):
