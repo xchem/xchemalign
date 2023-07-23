@@ -772,10 +772,11 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
         with open(ligand_neighbourhoods_yaml, 'r') as f:
             dic = yaml.safe_load(f)
 
-        for ligand_id, neighbourhood_info in dic.items():
-            dtag, chain, residue = ligand_id.split("/")
-            neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
-            ligand_neighbourhoods[(dtag, chain, residue)] = neighbourhood
+        if dic:
+            for ligand_id, neighbourhood_info in dic.items():
+                dtag, chain, residue = ligand_id.split("/")
+                neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
+                ligand_neighbourhoods[(dtag, chain, residue)] = neighbourhood
 
     return ligand_neighbourhoods
 
