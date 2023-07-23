@@ -632,7 +632,7 @@ def _update(
         xtalforms: dict[str, dt.XtalForm],
         dataset_assignments: dict[str, str],
         ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
-        alignability_graph: dt.AlignabilityGraph,
+        alignability_graph,
         ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
         conformer_sites: dict[str, dt.ConformerSite],
         conformer_site_transforms: dict[tuple[str, str], dt.Transform],
