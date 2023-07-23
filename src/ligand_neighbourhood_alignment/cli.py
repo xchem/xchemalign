@@ -533,7 +533,7 @@ def _get_structure_fragments(dataset: dt.Dataset, structure):
                     #     & (lbe.residue == residue.seqid.num)
                     # ):
                     if (lbe.chain == chain.name) & (lbe.residue == residue.seqid.num):
-                        ligand_id = (dataset.dtag, chain.name, lbe.residue,)
+                        ligand_id = (dataset.dtag, str(chain.name), str(lbe.residue),)
                         fragments[ligand_id] = residue
                     # lig_number = lig_number + 1
 
