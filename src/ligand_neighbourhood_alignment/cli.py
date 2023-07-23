@@ -906,13 +906,13 @@ class CLI:
         datasets, reference_datasets, new_datasets = source_data_model.get_datasets()
 
         # Get assemblies
-        assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, options.assemblies_json)
+        assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, Path(options.assemblies_json))
 
         # Get xtalforms
-        xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, options.xtalforms_json)
+        xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, Path(options.xtalforms_json))
 
         # Get the dataset assignments
-        dataset_assignments = _load_dataset_assignments(fs_model.dataset_assignments)
+        dataset_assignments = _load_dataset_assignments(Path(fs_model.dataset_assignments))
 
         # Get Ligand neighbourhoods
         ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _load_ligand_neighbourhoods(
