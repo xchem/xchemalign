@@ -369,14 +369,14 @@ class Assembly:
         # Make generators
         generators = []
         for biomol_match, chain_match in zip(biomol_matches, chain_matches):
-            if len(chain_match[1]) == 0:
+            if len(chain_match[2]) == 0:
                 xyz = 'x,y,z'
             else:
-                xyz = chain_match[1][1:-1]
+                xyz = chain_match[2][1:-1]
             generators.append(
                 Generator(
                     biomol_match,
-                    chain_match[0],
+                    chain_match[1],
                     xyz
                 )
             )
@@ -418,18 +418,18 @@ class XtalForm:
             assembly = xtalform_assembly_info['assembly']
             chains = xtalform_assembly_info['chains']
             chains_matches = re.findall(
-                '([A-Z]+([(]+[^()]+[)]+)*)',
+                '(([A-Z]+)([(]+[^()]+[)]+)*)',
                 chains
             )
             _chains = []
             _transforms = []
             for chain_match in chains_matches:
-                _chains.append(chain_match[0])
+                _chains.append(chain_match[1])
 
-                if len(chain_match[1]) == 0:
+                if len(chain_match[2]) == 0:
                     xyz = 'x,y,z'
                 else:
-                    xyz = chain_match[1][1:-1]
+                    xyz = chain_match[2][1:-1]
                 _transforms.append(xyz)
 
             _assemblies[xtalform_assembly_id] = XtalFormAssembly(
