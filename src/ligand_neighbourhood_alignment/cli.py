@@ -938,7 +938,7 @@ class CLI:
 
         #
         canonical_site_transforms: dict[str, dt.Transform] = _load_canonical_site_transforms(
-            fs_model.canonical_site_trasnforms)
+            fs_model.conformer_site_transforms)
 
         # Get xtalform sites
         xtalform_sites: dict[str, dt.XtalFormSite] = _load_xtalform_sites(fs_model.xtalform_sites)
