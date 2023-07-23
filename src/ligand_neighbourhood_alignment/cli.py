@@ -908,6 +908,9 @@ class CLI:
         )
 
         datasets, reference_datasets, new_datasets = source_data_model.get_datasets()
+        print(datasets)
+        print(reference_datasets)
+        print(new_datasets)
 
         # Get assemblies
         assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, Path(options.assemblies_json))
