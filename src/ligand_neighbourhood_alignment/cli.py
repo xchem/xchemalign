@@ -676,7 +676,9 @@ def _update(
     logger.info(f"Previously had {len(alignability_graph.edges)} edges")
     _update_graph(alignability_graph, ligand_neighbourhood_transforms)
     logger.info(f"Now have {len(alignability_graph.nodes)} nodes")
+    print(alignability_graph.nodes)
     logger.info(f"Now have {len(alignability_graph.edges)} edges")
+    print(alignability_graph.edges)
     _save_graph(fs_model, alignability_graph)
 
     # Update conformer sites
