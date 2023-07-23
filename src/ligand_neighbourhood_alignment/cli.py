@@ -615,6 +615,7 @@ def _update(
     _save_assignments(fs_model, dataset_assignments)
 
     # Get neighbourhoods
+    logger.info(f"Updating neighbourhoods")
     for dtag, dataset in new_datasets.items():
         xtalform = xtalforms[dataset_assignments[dtag]]
         neighborhoods = _get_neighbourhoods(dataset, xtalform, assemblies)
@@ -623,6 +624,7 @@ def _update(
     _save_neighbourhoods(fs_model, ligand_neighbourhoods)
 
     # Update graph
+    logger.info(f"Updating alignment graph...")
     for dtag, dataset in new_datasets.items():
         for lid, neighbourhood in ligand_neighbourhoods.items():
             if lid[0] in datasets:
