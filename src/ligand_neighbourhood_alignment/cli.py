@@ -654,7 +654,8 @@ def _update(
     for nid, neighbourhood in ligand_neighbourhoods.items():
         print(nid)
         for atom_id in neighbourhood.atoms:
-            print(atom_id)
+            if atom_id[2] == "CA":
+                print(atom_id)
 
     # Update graph
     logger.info(f"Updating alignment graph...")
