@@ -919,7 +919,7 @@ class CLI:
         for key, xtalform in xtalforms.items():
             print(xtalform)
             for ass, xtalform_ass in xtalform.assemblies.items():
-                for chn, trns in xtalform_ass.chains:
+                for chn, trns in zip(xtalform_ass.chains, xtalform_ass.transforms):
                     print([chn, trns])
 
         # Get the dataset assignments
