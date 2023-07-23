@@ -761,7 +761,7 @@ def _load_dataset_assignments(dataset_assignments_yaml):
 
         for dtag, assignment in dic.items():
             dataset_assignments[dtag] = assignment
-    return dataset_assignments_yaml
+    return dataset_assignments
 
 
 def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
