@@ -736,9 +736,13 @@ def _update(
     logger.info(f"Updating conformer sites...")
     connected_components = _get_connected_components(alignability_graph)
     logger.info(f"Got {len(connected_components)} connected components")
+    logger.info(f"Previously had {len(conformer_sites)} conformer sites")
+
     for connected_component in connected_components:
         # Match new component to old ones by membership, and expand old ones if available otherwise create new one
         _update_conformer_sites(conformer_sites, connected_component, ligand_neighbourhoods)
+    logger.info(f"Now have {len(conformer_sites)} conformer sites")
+
     _save_conformer_sites(fs_model, conformer_sites)
 
     # Update canonical sites
