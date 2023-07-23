@@ -658,7 +658,7 @@ def _update_conformer_sites(
             connected_component,
             [x for x in connected_component][0]
         )
-        conformer_site_id = "/".join(connected_component[0])
+        conformer_site_id = "/".join(conformer_site.reference_ligand_id)
         conformer_sites[conformer_site_id] = conformer_site
 
 
