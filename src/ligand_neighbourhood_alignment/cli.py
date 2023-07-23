@@ -412,7 +412,7 @@ def _assign_xtalforms(
 
 def _get_structures(datasets):
     structures = {}
-    for dataset in datasets:
+    for dtag, dataset in datasets.items():
         structure: gemmi.Structure = gemmi.read_structure(dataset.pdb)
         structures[dataset.dtag] = structure
 
