@@ -910,9 +910,11 @@ class CLI:
 
         # Get assemblies
         assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, Path(options.assemblies_json))
+        print(assemblies)
 
         # Get xtalforms
         xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, Path(options.xtalforms_json))
+        print(xtalforms)
 
         # Get the dataset assignments
         dataset_assignments = _load_dataset_assignments(Path(fs_model.dataset_assignments))
