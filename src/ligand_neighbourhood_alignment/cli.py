@@ -64,7 +64,7 @@ from ligand_neighbourhood_alignment.generate_sites_from_components import (  # g
     get_structures,
     get_subsite_transforms,
 )
-from ligand_neighbourhood_alignment.get_alignability import get_alignability
+from ligand_neighbourhood_alignment.get_alignability import get_alignability, _update_ligand_neighbourhood_transforms
 from ligand_neighbourhood_alignment.get_graph import get_graph
 from ligand_neighbourhood_alignment.get_ligand_neighbourhoods import get_ligand_neighbourhoods
 from ligand_neighbourhood_alignment.make_data_json import (
@@ -588,6 +588,19 @@ def _save_neighbourhoods(
             dic["/".join(ligand_id)] = neighbourhood.to_dict()
         yaml.safe_dump(dic, f)
 
+def _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transforms):
+    with open(fs_model.ligand_neighbourhoods, 'w') as f:
+        dic = {}
+        for (to_ligand_id, from_ligand_id), transform in ligand_neighbourhood_transforms.items():
+            key = "~".join(
+                [
+                    "/".join(to_ligand_id),
+                    "/".join(from_ligand_id)
+                ]
+            )
+            dic[key] = transform.to_dict()
+        yaml.safe_dump(dic, f)
+
 
 def _update(
         fs_model: dt.FSModel,
@@ -625,12 +638,25 @@ def _update(
 
     # Update graph
     logger.info(f"Updating alignment graph...")
-    for dtag, dataset in new_datasets.items():
-        for lid, neighbourhood in ligand_neighbourhoods.items():
-            alignments, transforms = _get_alignments(neighbourhood, structures)
-            for target_lid, transform in transforms.items():
-                ligand_neighbourhood_transforms[(lid, target_lid)] = transform
-            _update_graph(alignability_graph, alignments)
+    logger.info(f"Currently have {len(ligand_neighbourhood_transforms)} alignments between neighbourhoods")
+
+    # for dtag, dataset in new_datasets.items():
+    for lid, neighbourhood in ligand_neighbourhoods.items():
+        if lid[0] in new_datasets:
+            _update_ligand_neighbourhood_transforms(
+                ligand_neighbourhood_transforms,
+                lid,
+                ligand_neighbourhoods,
+                structures,
+            )
+            # alignments, transforms = _get_alignments()
+            # for target_lid, transform in transforms.items():
+            #     ligand_neighbourhood_transforms[(lid, target_lid)] = transform
+    logger.info(f"Now have {len(ligand_neighbourhood_transforms)} alignments between neighbourhoods")
+    _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transforms)
+
+    # Update the alignment graph
+    _update_graph(alignability_graph, ligand_neighbourhood_transforms)
     _save_graph(fs_model, alignability_graph)
 
     # Update conformer sites

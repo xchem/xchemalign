@@ -498,8 +498,8 @@ class Atom:
 
 class Neighbourhood:
     def __init__(self,
-                 atoms,
-                 artefact_atoms
+                 atoms: dict[tuple[str,str,str], Atom],
+                 artefact_atoms: dict[tuple[str,str,str], Atom]
                  ):
         self.atoms = atoms
         self.artefact_atoms = artefact_atoms
