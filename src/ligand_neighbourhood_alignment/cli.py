@@ -827,6 +827,9 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
     return ligand_neighbourhoods
 
 
+import networkx as nx
+
+
 def _load_alignability_graph(alignability_graph):
     if alignability_graph.exists():
         return nx.read_gml(
