@@ -391,9 +391,11 @@ class XtalFormAssembly:
             self,
             assembly: str,
             chains: list[str],
+            transforms: list[str]
     ):
         self.assembly = assembly
         self.chains = chains
+        self.transforms = transforms
 
 
 class XtalForm:
@@ -415,12 +417,24 @@ class XtalForm:
             assembly = xtalform_assembly_info['assembly']
             chains = xtalform_assembly_info['chains']
             chains_matches = re.findall(
-                '([A-Z]+)',
+                '([A-Z]+([(]+[^()]+[)]+)*)',
                 chains
             )
+            _chains = []
+            _transforms = []
+            for chain_match in chains_matches:
+                _chains.append(chain_match[0])
+
+                if len(chain_match[1]) == 0:
+                    xyz = 'x,y,z'
+                else:
+                    xyz = chain_match[1]
+                _transforms.append(xyz)
+
             _assemblies[xtalform_assembly_id] = XtalFormAssembly(
                 assembly,
-                [x for x in chains_matches]
+                _chains,
+                _transforms
             )
         return XtalForm(reference, _assemblies)
 
