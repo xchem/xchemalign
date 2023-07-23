@@ -738,7 +738,7 @@ def _update(
     logger.info(f"Got {len(connected_components)} connected components")
     for connected_component in connected_components:
         # Match new component to old ones by membership, and expand old ones if available otherwise create new one
-        _update_conformer_sites(conformer_sites, connected_component)
+        _update_conformer_sites(conformer_sites, connected_component, ligand_neighbourhoods)
     _save_conformer_sites(fs_model, conformer_sites)
 
     # Update canonical sites
