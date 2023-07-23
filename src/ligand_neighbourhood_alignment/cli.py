@@ -656,7 +656,7 @@ def _update_conformer_sites(
         conformer_site = dt.ConformerSite(
             [x for x in set(residues)],
             connected_component,
-            connected_component[0]
+            [x for x in connected_component][0]
         )
         conformer_site_id = "/".join(connected_component[0])
         conformer_sites[conformer_site_id] = conformer_site
