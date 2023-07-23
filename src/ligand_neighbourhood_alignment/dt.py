@@ -371,7 +371,7 @@ class Assembly:
             if len(chain_match[1]) == 0:
                 xyz = 'x,y,z'
             else:
-                xyz = chain_match[1]
+                xyz = chain_match[1][1:-1]
             generators.append(
                 Generator(
                     biomol_match,
@@ -428,7 +428,7 @@ class XtalForm:
                 if len(chain_match[1]) == 0:
                     xyz = 'x,y,z'
                 else:
-                    xyz = chain_match[1]
+                    xyz = chain_match[1][1:-1]
                 _transforms.append(xyz)
 
             _assemblies[xtalform_assembly_id] = XtalFormAssembly(
