@@ -1436,15 +1436,15 @@ class CLI:
         self.align_structures(source_dir)
         self.align_xmaps(source_dir)
 
-    def update(self, system_data_dir: str, source_dir: str):
-
-        # _source_dir: Path = Path(source_dir)
-
-        self.build_system_data(system_data_dir, source_dir)
-        self.build_graph(source_dir)
-        # self.update_sites(source_dir)
-        self.align_structures(source_dir)
-        self.align_xmaps(source_dir)
+    # def update(self, system_data_dir: str, source_dir: str):
+    #
+    #     # _source_dir: Path = Path(source_dir)
+    #
+    #     self.build_system_data(system_data_dir, source_dir)
+    #     self.build_graph(source_dir)
+    #     # self.update_sites(source_dir)
+    #     self.align_structures(source_dir)
+    #     self.align_xmaps(source_dir)
 
     def build_graph(
             self,
