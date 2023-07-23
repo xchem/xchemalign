@@ -891,6 +891,8 @@ class CLI:
     def update(self, options_json: str):
 
         options = Options.parse_file(options_json)
+        # logger.info(f"Options json path is: {options}")
+        logger.info(f"Output dir is: {options.source_dir}")
 
         fs_model = dt.FSModel.from_dir(options.source_dir)
 

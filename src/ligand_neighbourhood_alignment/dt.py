@@ -146,13 +146,20 @@ class FSModel:
 
 
 class Datasource:
-    path: str
+    def __init__(self,
+    path: str,
     datasource_type: str
-
+    ):
+        self.path = path
+        self.datasource_type = datasource_type
 
 class PanDDA:
-    path: str
-    event_table_path: str
+    def __init__(self,
+    path: str,
+    # event_table_path: str
+    ):
+        self.path = Path(path)
+        self.event_table_path = self.path / constants.PANDDA_ANALYSES_DIR / constants.PANDDA_EVENTS_INSPECT_TABLE_PATH
 
 
 class LigandBindingEvent:
@@ -202,6 +209,21 @@ class SourceDataModel:
             datasource_types,
             panddas,
     ):
+        _datasources = []
+        for datasource_path, datasource_type in zip(datasources, datasource_types):
+            datasource = Datasource(datasource_path, datasource_type)
+            _datasources.append(datasource)
+
+        _panddas = []
+        for pandda_dir in panddas:
+            pandda = PanDDA(pandda_dir)
+            _panddas.append(pandda)
+
+        return SourceDataModel(
+            fs_model,
+            _datasources,
+            _panddas
+        )
         ...
 
     def get_datasets(self):
