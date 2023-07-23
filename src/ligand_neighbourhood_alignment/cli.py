@@ -627,8 +627,6 @@ def _update(
     logger.info(f"Updating alignment graph...")
     for dtag, dataset in new_datasets.items():
         for lid, neighbourhood in ligand_neighbourhoods.items():
-            if lid[0] in datasets:
-                continue
             alignments, transforms = _get_alignments(neighbourhood, structures)
             for target_lid, transform in transforms.items():
                 ligand_neighbourhood_transforms[(lid, target_lid)] = transform
