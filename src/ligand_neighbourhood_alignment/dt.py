@@ -361,7 +361,7 @@ class Assembly:
 
         # Split chains on commas that do not follow a number, x,y or z and strip whitespace
         chain_matches = re.findall(
-            '([A-Z]+([(]+[^()]+[)]+)*)',
+            '(([A-Z]+)([(]+[^()]+[)]+)*)',
             chains
         )
         print(biomol_matches)
