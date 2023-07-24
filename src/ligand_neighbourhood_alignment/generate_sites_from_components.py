@@ -266,7 +266,7 @@ def _update_conformer_site_transforms(
     #         transform = get_transform_from_residues(rs, srs, ssrs)
     #         transforms[(site_id, 0, ssid)] = Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
 
-    return transforms
+    # return transforms
 
 
 def get_site_transforms(sites: CanonicalSites, structures):
