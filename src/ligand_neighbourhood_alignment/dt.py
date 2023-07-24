@@ -126,7 +126,7 @@ class FSModel:
     @staticmethod
     def from_dict(dic):
         alignments = {}
-        for dtag, dataset_alignments in alignments["alignments"].items():
+        for dtag, dataset_alignments in dic["alignments"].items():
             alignments[dtag] = {}
             for chain, chain_alignments in dataset_alignments.items():
                 alignments[dtag][chain] = {}
@@ -144,7 +144,7 @@ class FSModel:
         #                 ligand_neighbourhood_alignments)
 
         reference_alignments = {}
-        for dtag, canonical_site_alignments in alignments["reference_alignments"].items():
+        for dtag, canonical_site_alignments in dic["reference_alignments"].items():
             reference_alignments[dtag] = {}
             for canonical_site_id, canonical_site_alignment_info in canonical_site_alignments.items():
                 reference_alignments[dtag][canonical_site_alignment_info] = {
