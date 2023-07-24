@@ -1046,7 +1046,7 @@ def _update(
                         canonical_site = canonical_sites[canonical_site_id]
                         # Check for the matching conformer site
                         for conformer_site_id in canonical_site.conformer_site_ids:
-                            if conformer_site_id in conformer_sites[conformer_site_id].members:
+                            if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
                         moving_ligand_id = (dtag, chain, residue)
