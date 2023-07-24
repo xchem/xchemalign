@@ -36,10 +36,10 @@ class LigandNeighbourhoodOutput:
 
     def to_dict(self):
         dic = {
-            'aligned_structures': self.aligned_structures,
-        'aligned_artefacts' : self.aligned_artefacts,
-        'aligned_xmaps' : self.aligned_xmaps,
-        'aligned_event_maps' : self.aligned_event_maps,
+            'aligned_structures': str(self.aligned_structures),
+        'aligned_artefacts' : str(self.aligned_artefacts),
+        'aligned_xmaps' : str(self.aligned_xmaps),
+        'aligned_event_maps' : str(self.aligned_event_maps),
         }
         return dic
 
@@ -180,25 +180,25 @@ class FSModel:
             reference_alignments[dtag] = {}
             for canonical_site_id, canonical_site_alignment_info in dtag_alignment_info.items():
                 reference_alignments[dtag][canonical_site_id] = {
-                    'aligned_structures': canonical_site_alignment_info['aligned_structures'],
-                    'aligned_artefacts': canonical_site_alignment_info['aligned_artefacts'],
-                    'aligned_xmaps': canonical_site_alignment_info['aligned_xmaps']
+                    'aligned_structures': str(canonical_site_alignment_info['aligned_structures']),
+                    'aligned_artefacts': str(canonical_site_alignment_info['aligned_artefacts']),
+                    'aligned_xmaps': str(canonical_site_alignment_info['aligned_xmaps'])
                 }
 
 
         return {
-            'source_dir':self.source_dir,
-        'assemblies' :self.assemblies,
-        'xtalforms' :self.xtalforms,
-        'dataset_assignments' : self.dataset_assignments,
-        'ligand_neighbourhoods' :self.ligand_neighbourhoods,
-        'alignability_graph' :self.alignability_graph,
-        'ligand_neighbourhood_transforms' : self.ligand_neighbourhood_transforms,
-        'conformer_sites' : self.conformer_sites,
-        'conformer_site_transforms' : self.conformer_site_transforms,
-        'canonical_sites' : self.canonical_sites,
-        'canonical_site_transforms' : self.canonical_site_transforms,
-        'xtalform_sites' : self.xtalform_sites,
+            'source_dir': str(self.source_dir),
+        'assemblies' : str(self.assemblies),
+        'xtalforms' : str(self.xtalforms),
+        'dataset_assignments' : str(self.dataset_assignments),
+        'ligand_neighbourhoods' : str(self.ligand_neighbourhoods),
+        'alignability_graph' : str(self.alignability_graph),
+        'ligand_neighbourhood_transforms' : set(*)self.ligand_neighbourhood_transforms),
+        'conformer_sites' : str(self.conformer_sites),
+        'conformer_site_transforms' : str(self.conformer_site_transforms),
+        'canonical_sites' : str(self.canonical_sites),
+        'canonical_site_transforms' : str(self.canonical_site_transforms),
+        'xtalform_sites' : str(self.xtalform_sites),
         'alignments' : alignments,
         'reference_alignments' : reference_alignments,
         }
