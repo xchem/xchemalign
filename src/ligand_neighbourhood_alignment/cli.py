@@ -766,13 +766,22 @@ def _save_xtalform_sites(fs_model, xtalform_sites: dict[str, dt.XtalFormSite]):
             dic[xtalform_site_id] = xtalform_site.to_dict()
         yaml.safe_dump(dic, f)
 
-def _update_conformer_site_transform(
-                conformer_site_transforms,
-                canonical_site,
-                conformer_site,
-            ):
+# def _update_conformer_site_transform(
+#                 conformer_site_transforms,
+#                 canonical_site,
+#                 conformer_site,
+#             ):
+#
+#
+#     ...
 
+def _save_conformer_site_transforms(fs_model: dt.FSModel, conformer_site_transforms: dict[tuple[str,str], dt.Transform]):
+    with open(fs_model.conformer_site_transforms, 'w') as f:
+        dic = {}
+        for conformer_site_transform_id, conformer_site_transform in conformer_site_transforms.items():
 
+            dic["~".join(conformer_site_transform_id)] = conformer_site_transform.to_dict()
+        yaml.safe_dump(dic, f)
     ...
 
 
@@ -1068,7 +1077,7 @@ def _load_conformer_site_transforms(conformer_site_transforms_yaml):
             dic = yaml.safe_load(f)
 
         for conformer_site_transform_id, conformer_site_transform_info in dic.items():
-            conformer_site_1, conformer_site_2 = conformer_site_transform_id.split("/")
+            conformer_site_1, conformer_site_2 = conformer_site_transform_id.split("~")
 
             conformer_site_transforms[(conformer_site_1, conformer_site_2)] = dt.Transform.from_dict(
                 conformer_site_transform_info)
