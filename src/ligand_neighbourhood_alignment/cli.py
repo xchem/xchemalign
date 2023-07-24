@@ -875,7 +875,7 @@ def _update_fs_model(
 
 
 def _save_fs_model(fs_model: dt.FSModel):
-    with open(fs_model.canonical_site_transforms, 'w') as f:
+    with open(fs_model.fs_model, 'w') as f:
         dic = fs_model.to_dict()
 
         yaml.safe_dump(dic, f)
