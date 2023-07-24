@@ -749,11 +749,21 @@ def _update_xtalform_sites(
                 if member not in xtalform_site.members:
                     xtalform_site.members.append(member)
             else:
-                xtalform_site = dt.XtalFormSite(assignment, ..., canonical_site_id,[member,])
+                xtalform_site_id = "/".join(member)
+                xtalform_site = dt.XtalFormSite(assignment, member[1], canonical_site_id,[member,])
+                xtalform_sites[xtalform_site_id] = xtalform_site
+                xtalforms_dict[(xtalform_site.canonical_site_id, xtalform_site.xtalform_id)]= xtalform_site_id
 
     # Otherwise if not matched create a new xtalform site
     ...
 
+def _save_xtalform_sites(fs_model, xtalform_sites: dict[str, dt.XtalFormSite]):
+    with open(fs_model.xtalform_sites, 'w') as f:
+        dic = {}
+        for xtalform_site_id, xtalform_site in xtalform_sites.items():
+
+            dic[xtalform_site_id] = xtalform_site.to_dict()
+        yaml.safe_dump(dic, f)
 
 def _update(
         fs_model: dt.FSModel,
@@ -852,10 +862,16 @@ def _update(
 
     # Update crystalform sites
     logger.info(f"Previously had {len(xtalform_sites)} xtalform sites")
-    for canonical_site_id, canonical_site in xtalform_sites.items():
+    for canonical_site_id, canonical_site in canonical_sites.items():
         # If canonical site in a xtalform site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
-        _update_xtalform_sites(xtalform_sites, canonical_site, dataset_assignments)
+        _update_xtalform_sites(
+            xtalform_sites,
+            canonical_site,
+            canonical_site_id,
+            dataset_assignments,
+            conformer_sites,
+        )
     logger.info(f"Now have {len(xtalform_sites)} xtalform sites")
     _save_xtalform_sites(fs_model, xtalform_sites)
 

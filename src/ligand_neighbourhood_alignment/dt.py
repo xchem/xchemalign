@@ -641,3 +641,14 @@ class XtalFormSite:
             dic['canonical_site_id'],
             members
         )
+
+    def to_dict(self):
+        dic = {}
+        dic['members'] = []
+        for member in self.members:
+            dic['members'].append("/".join(member))
+
+        dic['xtalform_id'] = self.xtalform_id
+        dic['crystallographic_chain'] = self.crystallographic_chain
+        dic['canonical_site_id'] = self.canonical_site_id
+        return dic
