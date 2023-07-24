@@ -65,6 +65,7 @@ from ligand_neighbourhood_alignment.generate_sites_from_components import (  # g
     get_subsite_transforms,
     _update_conformer_site_transforms,
     _update_canonical_site_transforms,
+
 )
 from ligand_neighbourhood_alignment.get_alignability import get_alignability, _update_ligand_neighbourhood_transforms
 from ligand_neighbourhood_alignment.get_graph import get_graph
@@ -74,6 +75,7 @@ from ligand_neighbourhood_alignment.make_data_json import (
     get_ligand_binding_events_from_structure,
     make_data_json_from_pandda_dir,
 )
+from ligand_neighbourhood_alignment.generate_aligned_structures import _align_structure
 
 
 def cas_ligands():
@@ -880,6 +882,7 @@ def _save_fs_model(fs_model: dt.FSModel):
 
         yaml.safe_dump(dic, f)
 
+
 def _update(
         fs_model: dt.FSModel,
         datasets: dict[str, dt.Dataset],
@@ -1030,10 +1033,36 @@ def _update(
     _save_fs_model(fs_model)
 
     # Generate new aligned structures
-    for canonical_site_id, canonical_site in canonical_sites.items():
-        for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
-            for lid in conformer_site.ligand_ids:
-                _update_aligned_structures()
+    # for canonical_site_id, canonical_site in canonical_sites.items():
+    #     for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
+    #         for lid in conformer_site.ligand_ids:
+    for dtag, dataset_alignment_info in fs_model.alignments.items():
+        for chain, chain_alignment_info in dataset_alignment_info.items():
+            for residue, ligand_neighbourhood_output in chain_alignment_info.items():
+                for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
+                    if not aligned_structure_path.exists():
+                        # _update_aligned_structures()
+                        _structure =structures[dtag]
+                        canonical_site = canonical_sites[canonical_site_id]
+                        # Check for the matching conformer site
+                        for conformer_site_id in canonical_site.conformer_site_ids:
+                            if conformer_site_id in conformer_sites[conformer_site_id].members:
+                                conformer_site = conformer_sites[conformer_site_id]
+                                break
+                        moving_ligand_id = (dtag, chain, residue)
+                        reference_ligand_id = conformer_site.reference_ligand_id
+                        _align_structure(
+                            _structure,
+                            moving_ligand_id,
+                            reference_ligand_id,
+                            alignability_graph,
+                            ligand_neighbourhood_transforms,
+                            conformer_site_transforms,
+                            canonical_site_transforms,
+                            canonical_site_id,
+                            conformer_site_id,
+                            aligned_structure_path,
+                        )
 
     # Generate alignments of references to each canonical site
     for canonical_site_id, canonical_site in canonical_sites.items():

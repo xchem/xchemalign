@@ -260,6 +260,53 @@ def align_structure(
     # Write the fully aligned structure
     _structure.write_pdb(str(out_path))
 
+from ligand_neighbourhood_alignment import dt
+
+def _align_structure(
+    _structure,
+    moving_ligand_id: tuple[str,str,str],
+    reference_ligand_id: tuple[str,str,str],
+    g,
+    neighbourhood_transforms: dict[tuple[tuple[str,str,str], tuple[str,str,str]], dt.Transform],
+    conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+    canonical_site_transforms: dict[str, dt.Transform],
+    canonical_site_id: str,
+    conformer_site_id: str,
+    out_path: Path,
+):
+    shortest_path: list[tuple[str,str,str]] = nx.shortest_path(g, moving_ligand_id, reference_ligand_id)
+    logger.debug(f"Shortest path: {shortest_path}")
+
+    previous_ligand_id = moving_ligand_id
+    running_transform = gemmi.Transform()
+    for next_ligand_id in shortest_path:
+        # Get the transform from previous frame to new one
+        # Transform is 2 onto 1
+        if next_ligand_id != previous_ligand_id:
+
+            transform = transform_to_gemmi(neighbourhood_transforms[(next_ligand_id,previous_ligand_id,)])
+            running_transform = transform.combine(running_transform)
+
+        # Apply the translation to the new frame
+        previous_ligand_id = next_ligand_id
+
+    # Subsite alignment transform
+    confomer_site_transform = transform_to_gemmi(
+        conformer_site_transforms[(canonical_site_id, conformer_site_id)]
+    )
+    confomer_site_transform.combine(running_transform)
+
+    # Site alignment transform
+    canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+    canonical_site_transform.combine(running_transform)
+
+    logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
+
+    _structure = superpose_structure(running_transform, _structure)
+
+    # Write the fully aligned structure
+    _structure.write_pdb(str(out_path))
+
 
 # def align_artefacts():
 #     # Transform the artefacts
