@@ -63,6 +63,7 @@ from ligand_neighbourhood_alignment.generate_sites_from_components import (  # g
     get_sites_from_conformer_sites,
     get_structures,
     get_subsite_transforms,
+    _update_conformer_site_transforms
 )
 from ligand_neighbourhood_alignment.get_alignability import get_alignability, _update_ligand_neighbourhood_transforms
 from ligand_neighbourhood_alignment.get_graph import get_graph
@@ -765,6 +766,16 @@ def _save_xtalform_sites(fs_model, xtalform_sites: dict[str, dt.XtalFormSite]):
             dic[xtalform_site_id] = xtalform_site.to_dict()
         yaml.safe_dump(dic, f)
 
+def _update_conformer_site_transform(
+                conformer_site_transforms,
+                canonical_site,
+                conformer_site,
+            ):
+
+
+    ...
+
+
 def _update(
         fs_model: dt.FSModel,
         datasets: dict[str, dt.Dataset],
@@ -876,13 +887,17 @@ def _update(
     _save_xtalform_sites(fs_model, xtalform_sites)
 
     # Get conformer site transforms
+    logger.info(f"Previously had {len(conformer_site_transforms)} conformer site transforms")
     for canonical_site_id, canonical_site in canonical_sites.items():
-        for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
-            _update_conformer_site_transform(
+        for conformer_site_id in canonical_site.conformer_site_ids:
+            conformer_site = conformer_sites[conformer_site_id]
+            _update_conformer_site_transforms(
                 conformer_site_transforms,
                 canonical_site,
                 conformer_site,
+                structures,
             )
+    logger.info(f"Now have {len(conformer_site_transforms)} conformer site transforms")
     _save_conformer_site_transforms(fs_model, conformer_site_transforms)
 
     # Get canonical site tranforms

@@ -61,6 +61,49 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
 
     return sup.transform
 
+def _get_transform_from_residues(rs: list[tuple[str,str]], srs, ssrs):
+    # Transform from ssrs to srs
+    acs = []
+    for resid in rs:
+        chain, num = resid
+        try:
+            srsr = srs[0][chain][f"{num}"][0]
+            ssrsr = ssrs[0][chain][f"{num}"][0]
+
+            srsca = srsr["CA"][0]
+            ssrsca = ssrsr["CA"][0]
+            acs.append((srsca, ssrsca))
+        except Exception as e:
+            # print(f"{chain} : {num}: : {srsr.name} {ssrsr.name} {e}")
+            print(f"{chain} : {num} : {e}")
+
+            continue
+
+    logger.debug(f"{len(acs)}")
+    if len(acs) < 3:
+        print("####### SRS")
+
+        for model in srs:
+            for c in model:
+                for r in c:
+                    print(f"{c.name}: {r.seqid.num}")
+
+        print("####### SSRS")
+        for model in ssrs:
+            for c in model:
+                for r in c:
+                    print(f"{c.name}: {r.seqid.num}")
+
+        print("####### RESIDS")
+        for rid in rs:
+            print(f"{rid[0]} {rid[1]}")
+
+        raise Exception()
+
+    sup = gemmi.superpose_positions([x[0].pos for x in acs], [x[1].pos for x in acs])
+
+    return sup.transform
+
 
 def get_transforms(
     reference_neighbourhood: LigandNeighbourhood,

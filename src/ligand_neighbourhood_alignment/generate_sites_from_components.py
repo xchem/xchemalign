@@ -27,7 +27,7 @@ from ligand_neighbourhood_alignment.data import (
 )
 
 # from ligand_neighbourhood_alignment.save_sites import save_sites
-from ligand_neighbourhood_alignment.structures import get_structures, get_transform_from_residues
+from ligand_neighbourhood_alignment.structures import get_structures, get_transform_from_residues, _get_transform_from_residues
 
 
 def get_components(g):
@@ -224,6 +224,47 @@ def get_subsite_transforms(sites: CanonicalSites, structures):
             ssrs = structures[ssr]
             transform = get_transform_from_residues(rs, srs, ssrs)
             transforms[(site_id, 0, ssid)] = Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
+
+    return transforms
+
+from ligand_neighbourhood_alignment import dt
+def _update_conformer_site_transforms(
+                conformer_site_transforms,
+                canonical_site: dt.CanonicalSite,
+                conformer_sites: dict[str, dt.ConformerSite],
+        structures,
+            ):
+
+    ref_conformer_site = conformer_sites[canonical_site.reference_conformer_site_id]
+    ref_conformer_site_residues = ref_conformer_site.residues
+
+    for conformer_site_id in canonical_site.conformer_site_ids:
+        key = (canonical_site.reference_conformer_site_id, conformer_site_id)
+        if key not in conformer_site_transforms:
+
+            conformer_site = conformer_sites[conformer_site_id]
+            # conformer_site_residues = conformer_site.residues
+
+            transform = _get_transform_from_residues(
+                canonical_site.residues,
+                structures[conformer_site.reference_ligand_id[0]],
+                structures[ref_conformer_site.reference_ligand_id[0]])
+
+            conformer_site_transforms[key] = dt.Transform(transform.vec.tolist(), transform.mat.tolist())
+
+
+
+    # transforms = {}
+    # for site_id, site in zip(sites.site_ids, sites.sites):
+    #     rss = site.reference_ligand_id.dtag
+    #     rs = site.residues
+    #     srs = structures[rss]
+    #
+    #     for ssid, ss in zip(site.subsite_ids, site.subsites):
+    #         ssr = ss.reference_ligand_id.dtag
+    #         ssrs = structures[ssr]
+    #         transform = get_transform_from_residues(rs, srs, ssrs)
+    #         transforms[(site_id, 0, ssid)] = Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
 
     return transforms
 
