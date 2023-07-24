@@ -48,6 +48,7 @@ class FSModel:
     def __init__(
             self,
             source_dir,
+            fs_model,
             assemblies,
             xtalforms,
             dataset_assignments,
@@ -63,6 +64,7 @@ class FSModel:
             reference_alignments
     ):
         self.source_dir = source_dir
+        self.fs_model = fs_model
         self.assemblies = assemblies
         self.xtalforms = xtalforms
         self.dataset_assignments = dataset_assignments
@@ -102,6 +104,7 @@ class FSModel:
 
             return FSModel(
                 source_dir,
+                fs_model,
                 assemblies,
                 xtalforms,
                 dataset_assignments,
@@ -149,6 +152,7 @@ class FSModel:
 
         return FSModel(
             source_dir=Path(dic["source_dir"]),
+            fs_model=Path(dic['fs_model']),
             assemblies=Path(dic['assemblies']),
             xtalforms=Path(dic['xtalforms']),
             dataset_assignments=Path(dic['dataset_assignments']),
@@ -187,6 +191,7 @@ class FSModel:
 
         return {
             'source_dir': str(self.source_dir),
+            'fs_model': str(self.fs_model),
             'assemblies': str(self.assemblies),
             'xtalforms': str(self.xtalforms),
             'dataset_assignments': str(self.dataset_assignments),
