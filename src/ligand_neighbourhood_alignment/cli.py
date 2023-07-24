@@ -889,14 +889,15 @@ def _update(
     # Get conformer site transforms
     logger.info(f"Previously had {len(conformer_site_transforms)} conformer site transforms")
     for canonical_site_id, canonical_site in canonical_sites.items():
-        for conformer_site_id in canonical_site.conformer_site_ids:
-            conformer_site = conformer_sites[conformer_site_id]
-            _update_conformer_site_transforms(
-                conformer_site_transforms,
-                canonical_site,
-                conformer_site,
-                structures,
-            )
+        # for conformer_site_id in canonical_site.conformer_site_ids:
+            # conformer_site = conformer_sites[conformer_site_id]
+        print(conformer_sites)
+        _update_conformer_site_transforms(
+            conformer_site_transforms,
+            canonical_site,
+            conformer_sites,
+            structures,
+        )
     logger.info(f"Now have {len(conformer_site_transforms)} conformer site transforms")
     _save_conformer_site_transforms(fs_model, conformer_site_transforms)
 
