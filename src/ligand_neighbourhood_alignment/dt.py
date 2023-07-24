@@ -180,7 +180,7 @@ class FSModel:
             for chain, chain_alignments in dataset_alignments.items():
                 alignments[dtag][chain] = {}
                 for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
-                    # print(ligand_neighbourhood)
+                    print(ligand_neighbourhood)
                     alignments[dtag][chain][ligand_neighbourhood[2]] = LigandNeighbourhoodOutput.to_dict(
                         ligand_neighbourhood_alignments)
 
