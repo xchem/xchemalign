@@ -148,7 +148,7 @@ class FSModel:
         for dtag, canonical_site_alignments in dic["reference_alignments"].items():
             reference_alignments[dtag] = {}
             for canonical_site_id, canonical_site_alignment_info in canonical_site_alignments.items():
-                reference_alignments[dtag][canonical_site_alignment_info] = {
+                reference_alignments[dtag][canonical_site_id] = {
                     'aligned_structures': canonical_site_alignment_info['aligned_structures'],
                     'aligned_artefacts': canonical_site_alignment_info['aligned_artefacts'],
                     'aligned_xmaps': canonical_site_alignment_info['aligned_xmaps']
