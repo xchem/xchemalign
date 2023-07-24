@@ -688,7 +688,7 @@ def _update_canonical_sites(
         canonical_site_residues = canonical_site.residues
         if conformer_site_id not in canonical_site.conformer_site_ids:
             v = set(canonical_site_residues).intersection(set(conformer_site_residues))
-            if len(v) > 5:
+            if len(v) >= 3:
                 # Matched!
                 matched = True
                 canonical_site.conformer_site_ids.append(conformer_site_id)
@@ -805,7 +805,7 @@ def _update(
         # If conformer site in a canonical site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
         _update_canonical_sites(canonical_sites, conformer_site, conformer_site_id)
-        logger.info(f"Now have {len(canonical_sites)} canonical sites")
+    logger.info(f"Now have {len(canonical_sites)} canonical sites")
     logger.info(f"Global reference dtag is: {list(canonical_sites.values())[0].global_reference_dtag}")
     _save_canonical_sites(fs_model, canonical_sites)
 
