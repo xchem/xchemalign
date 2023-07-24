@@ -1051,6 +1051,7 @@ def _update(
                                 break
                         moving_ligand_id = (dtag, chain, residue)
                         reference_ligand_id = conformer_site.reference_ligand_id
+                        print(aligned_structure_path)
                         _align_structure(
                             _structure,
                             moving_ligand_id,
