@@ -259,7 +259,7 @@ class SourceDataModel:
                         pdb,
                         dtag,
                     )
-                    if len(ligand_binding_events.ligand_ids) == 0:
+                    if len(ligand_binding_events) == 0:
                         logger.warning(f"Dataset {dtag} has no ligand binding events!")
                         continue
                     dataset = Dataset(
@@ -298,7 +298,7 @@ class SourceDataModel:
                         logger.warning("No mtz!")
 
                     ligand_binding_events = _get_ligand_binding_events_from_structure(pdb, xmap, dtag)
-                    if len(ligand_binding_events.ligand_ids) == 0:
+                    if len(ligand_binding_events) == 0:
                         logger.warning(f"Dataset {dtag} has no ligand binding events!")
                         continue
                     dataset = Dataset(
