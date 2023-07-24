@@ -661,6 +661,58 @@ def _update_conformer_sites(
         conformer_site_id = "/".join(conformer_site.reference_ligand_id)
         conformer_sites[conformer_site_id] = conformer_site
 
+def _save_conformer_sites(fs_model: dt.FSModel, conformer_sites: dict[str, dt.ConformerSite]):
+    with open(fs_model.conformer_sites, 'w') as f:
+        dic = {}
+        for conformer_site_id, conformer_site in conformer_sites.items():
+
+            dic[conformer_site_id] = conformer_site.to_dict()
+        yaml.safe_dump(dic, f)
+
+def _update_canonical_sites(
+        canonical_sites :dict[str, dt.CanonicalSite],
+        conformer_site: dt.ConformerSite,
+        conformer_site_id,
+
+):
+    if len(canonical_sites) != 0:
+        global_reference_dtag = [x for x in canonical_sites.values()][0].global_reference_dtag
+    else:
+        global_reference_dtag = conformer_site.reference_ligand_id[0]
+
+    # Check each canonical site to see if conformer site already in it and if not
+    # whether it shares enough residues to now be added
+    matched = False
+    conformer_site_residues = conformer_site.residues
+    for canonical_site_id, canonical_site in canonical_sites.items():
+        canonical_site_residues = canonical_site.residues
+        if conformer_site_id not in canonical_site.conformer_site_ids:
+            v = set(canonical_site_residues).intersection(set(conformer_site_residues))
+            if len(v) > 5:
+                # Matched!
+                matched = True
+                canonical_site.conformer_site_ids.append(conformer_site_id)
+
+    # If not matched to any existing canonical site create a new one
+    if not matched:
+        canonical_site = dt.CanonicalSite(
+            [conformer_site_id,],
+            conformer_site.residues,
+            conformer_site_id,
+            global_reference_dtag
+        )
+        canonical_site_id = conformer_site_id
+        canonical_sites[canonical_site_id] = canonical_site
+
+
+def _save_canonical_sites(fs_model, canonical_sites: dict[str, dt.CanonicalSite]):
+    with open(fs_model.canonical_sites, 'w') as f:
+        dic = {}
+        for canonical_site_id, canonical_site in canonical_sites.items():
+
+            dic[canonical_site_id] = canonical_site.to_dict()
+        yaml.safe_dump(dic, f)
+
 
 def _update(
         fs_model: dt.FSModel,
@@ -748,10 +800,13 @@ def _update(
     _save_conformer_sites(fs_model, conformer_sites)
 
     # Update canonical sites
+    logger.info(f"Previously had {len(canonical_sites)} canonical sites")
     for conformer_site_id, conformer_site in conformer_sites.items():
         # If conformer site in a canonical site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
-        _update_canonical_sites(conformer_site)
+        _update_canonical_sites(canonical_sites, conformer_site,)
+        logger.info(f"Now have {len(canonical_sites)} canonical sites")
+    logger.info(f"Global reference dtag is: {list(canonical_sites.values())[0].global_reference_dtag}")
     _save_canonical_sites(fs_model, canonical_sites)
 
     # Update crystalform sites

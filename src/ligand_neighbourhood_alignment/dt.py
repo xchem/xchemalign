@@ -569,6 +569,12 @@ class ConformerSite:
             (ref_dtag, ref_chain, ref_residue)
         )
 
+    def to_dict(self,):
+        return {
+            'residues': ["/".join(resid) for resid in self.residues],
+            'members': ["/".join(lid) for lid in self.members],
+            'reference_ligand_id': "/".join(self.reference_ligand_id)
+        }
 
 class CanonicalSite:
     def __init__(
