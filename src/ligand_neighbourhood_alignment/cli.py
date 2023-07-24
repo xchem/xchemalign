@@ -899,6 +899,8 @@ def _update(
             structures,
         )
     logger.info(f"Now have {len(conformer_site_transforms)} conformer site transforms")
+    for conformer_site_transform_id, conformer_site_transform in conformer_site_transforms.items():
+        print(conformer_site_transform_id)
     _save_conformer_site_transforms(fs_model, conformer_site_transforms)
 
     # Get canonical site tranforms
