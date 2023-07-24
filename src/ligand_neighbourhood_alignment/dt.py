@@ -130,9 +130,9 @@ class FSModel:
             alignments[dtag] = {}
             for chain, chain_alignments in dataset_alignments.items():
                 alignments[dtag][chain] = {}
-                for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
-                    _dtag, _chain, _residue = ligand_neighbourhood.split("/")
-                    alignments[dtag][chain][(_dtag, _chain, _residue)] = LigandNeighbourhoodOutput.from_dict(
+                for residue, ligand_neighbourhood_alignments in chain_alignments.items():
+                    # _dtag, _chain, _residue = ligand_neighbourhood.split("/")
+                    alignments[dtag][chain][residue] = LigandNeighbourhoodOutput.from_dict(
                         ligand_neighbourhood_alignments)
 
         # reference_alignments = {}
@@ -180,7 +180,7 @@ class FSModel:
             for chain, chain_alignments in dataset_alignments.items():
                 alignments[dtag][chain] = {}
                 for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
-                    alignments[dtag][chain]["/".join(ligand_neighbourhood)] = LigandNeighbourhoodOutput.to_dict(
+                    alignments[dtag][chain][ligand_neighbourhood[2]] = LigandNeighbourhoodOutput.to_dict(
                         ligand_neighbourhood_alignments)
 
         reference_alignments = {}
