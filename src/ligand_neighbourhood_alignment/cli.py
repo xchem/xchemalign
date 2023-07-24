@@ -1280,7 +1280,15 @@ class CLI:
         if not Path(options.source_dir).exists():
             os.mkdir(options.source_dir)
 
-        source_data_model = dt.SourceDataModel.from_fs_model(
+        aligned_structure_dir = Path(options.source_dir) / constants.ALIGNED_STRUCTURES_DIR
+        if not aligned_structure_dir.exists():
+            os.mkdir(aligned_structure_dir)
+
+        aligned_xmap_dir = Path(options.source_dir) / constants.ALIGNED_XMAPS_DIR
+        if not aligned_xmap_dir.exists():
+            os.mkdir(aligned_xmap_dir)
+
+    source_data_model = dt.SourceDataModel.from_fs_model(
             fs_model,
             options.datasources,
             options.datasource_types,
