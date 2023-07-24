@@ -298,7 +298,7 @@ def _update_canonical_site_transforms(
         ):
     rss = structures[canonical_site.global_reference_dtag]
     ref_site_all_ress = [
-        ResidueID(chain=chain.name, residue=res.seqid.num) for model in rss for chain in model for res in chain
+        (chain.name, res.seqid.num) for model in rss for chain in model for res in chain
     ]
 
     srs = conformer_sites[canonical_site.reference_conformer_site_id].reference_ligand_id[0]
