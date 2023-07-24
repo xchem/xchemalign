@@ -131,7 +131,8 @@ class FSModel:
             for chain, chain_alignments in dataset_alignments.items():
                 alignments[dtag][chain] = {}
                 for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
-                    alignments[dtag][chain][ligand_neighbourhood.split("/")] = LigandNeighbourhoodOutput.from_dict(
+                    dtag, chain, residue = ligand_neighbourhood.split("/")
+                    alignments[dtag][chain][(dtag, chain, residue)] = LigandNeighbourhoodOutput.from_dict(
                         ligand_neighbourhood_alignments)
 
         # reference_alignments = {}
