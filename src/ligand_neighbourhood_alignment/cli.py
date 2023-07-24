@@ -810,10 +810,12 @@ def _update(
     _save_canonical_sites(fs_model, canonical_sites)
 
     # Update crystalform sites
+    logger.info(f"Previously had {len(xtalform_sites)} xtalform sites")
     for xtalform_site_id, xtalform_site in xtalform_sites.items():
         # If canonical site in a xtalform site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
         _update_xtalform_sites(canonical_site, dataset_assignments)
+    logger.info(f"Now have {len(xtalform_sites)} xtalform sites")
     _save_xtalform_sites(fs_model, xtalform_sites)
 
     # Get conformer site transforms

@@ -147,34 +147,36 @@ class FSModel:
 
 class Datasource:
     def __init__(self,
-    path: str,
-    datasource_type: str
-    ):
+                 path: str,
+                 datasource_type: str
+                 ):
         self.path = path
         self.datasource_type = datasource_type
 
+
 class PanDDA:
     def __init__(self,
-    path: str,
-    # event_table_path: str
-    ):
+                 path: str,
+                 # event_table_path: str
+                 ):
         self.path = Path(path)
         self.event_table_path = self.path / constants.PANDDA_ANALYSES_DIR / constants.PANDDA_EVENTS_INSPECT_TABLE_PATH
 
 
 class LigandBindingEvent:
     def __init__(self,
-                id,
-                dtag,
-                chain,
-                residue,
-                xmap,
-            ):
+                 id,
+                 dtag,
+                 chain,
+                 residue,
+                 xmap,
+                 ):
         self.id: str = id
         self.dtag: str = dtag
         self.chain: str = chain
         self.residue: str = residue
-        self.xmap : str = xmap
+        self.xmap: str = xmap
+
 
 class Dataset:
     def __init__(self,
@@ -182,7 +184,7 @@ class Dataset:
                  pdb,
                  xmap,
                  mtz,
-                 ligand_binding_events: dict[tuple[str,str,str], LigandBindingEvent],
+                 ligand_binding_events: dict[tuple[str, str, str], LigandBindingEvent],
                  ):
         self.dtag = dtag
         self.pdb = pdb
@@ -457,7 +459,7 @@ class Transform:
     def to_dict(self):
         return {
             'vec': self.vec,
-            'mat':self.mat
+            'mat': self.mat
         }
 
 
@@ -496,10 +498,11 @@ class Atom:
             'image': self.image.to_dict()
         }
 
+
 class Neighbourhood:
     def __init__(self,
-                 atoms: dict[tuple[str,str,str], Atom],
-                 artefact_atoms: dict[tuple[str,str,str], Atom]
+                 atoms: dict[tuple[str, str, str], Atom],
+                 artefact_atoms: dict[tuple[str, str, str], Atom]
                  ):
         self.atoms = atoms
         self.artefact_atoms = artefact_atoms
@@ -569,12 +572,13 @@ class ConformerSite:
             (ref_dtag, ref_chain, ref_residue)
         )
 
-    def to_dict(self,):
+    def to_dict(self, ):
         return {
             'residues': ["/".join(resid) for resid in self.residues],
             'members': ["/".join(lid) for lid in self.members],
             'reference_ligand_id': "/".join(self.reference_ligand_id)
         }
+
 
 class CanonicalSite:
     def __init__(
@@ -603,6 +607,14 @@ class CanonicalSite:
             dic['global_reference_dtag']
 
         )
+
+    def to_dict(self):
+        return {
+            'conformer_site_ids': self.conformer_site_ids,
+            'residues': ["/".join(res) for res in self.residues],
+            'reference_conformer_site_id': self.reference_conformer_site_id,
+            'global_reference_dtag': self.global_reference_dtag
+        }
 
 
 class XtalFormSite:
