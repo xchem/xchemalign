@@ -913,12 +913,14 @@ def _update(
     _save_conformer_site_transforms(fs_model, conformer_site_transforms)
 
     # Get canonical site tranforms
+    logger.info(f"Previously had {len(canonical_site_transforms)} canonical site transforms...")
     for canonical_site_id, canonical_site in canonical_sites.items():
         _update_canonical_site_transforms(
             canonical_site_transforms,
             canonical_site,
             canonical_sites,
         )
+        logger.info(f"Now have {len(canonical_site_transforms)} canonical site transforms")
     _save_canonical_site_transforms(fs_model, canonical_site_transforms)
 
     # Update output: check if aligned data for each lid in canon site is already there and if not add it
