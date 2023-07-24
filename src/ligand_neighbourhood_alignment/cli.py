@@ -1007,8 +1007,9 @@ def _load_canonical_sites(canonical_sites_yaml):
         with open(canonical_sites_yaml, 'r') as f:
             dic = yaml.safe_load(f)
 
-        for canonical_site_id, canonical_site_info in dic.items():
-            canonical_sites[canonical_site_id] = dt.CanonicalSite.from_dict(canonical_site_info)
+        if dic is not None:
+            for canonical_site_id, canonical_site_info in dic.items():
+                canonical_sites[canonical_site_id] = dt.CanonicalSite.from_dict(canonical_site_info)
 
     return canonical_sites
 
