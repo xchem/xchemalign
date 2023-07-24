@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 import pandas as pd
+import yaml
 from loguru import logger
 
 from ligand_neighbourhood_alignment import constants
@@ -85,7 +86,9 @@ class FSModel:
 
         fs_model = source_dir / constants.FS_MODEL_YAML_FILE_NAME
         if fs_model.exists():
-            return FSModel.from_file(fs_model)
+            with open(fs_model, 'r') as f:
+                dic = yaml.safe_load(f)
+            return FSModel.from_dict(dic)
 
         else:
             assemblies = source_dir / constants.ASSEMBLIES_YAML_FILE_NAME

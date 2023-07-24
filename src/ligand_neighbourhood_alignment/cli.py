@@ -1042,7 +1042,7 @@ def _update(
                 for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
                     if not aligned_structure_path.exists():
                         # _update_aligned_structures()
-                        _structure =structures[dtag]
+                        _structure = structures[dtag]
                         canonical_site = canonical_sites[canonical_site_id]
                         # Check for the matching conformer site
                         for conformer_site_id in canonical_site.conformer_site_ids:
