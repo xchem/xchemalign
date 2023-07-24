@@ -63,7 +63,8 @@ from ligand_neighbourhood_alignment.generate_sites_from_components import (  # g
     get_sites_from_conformer_sites,
     get_structures,
     get_subsite_transforms,
-    _update_conformer_site_transforms
+    _update_conformer_site_transforms,
+    _update_canonical_site_transforms,
 )
 from ligand_neighbourhood_alignment.get_alignability import get_alignability, _update_ligand_neighbourhood_transforms
 from ligand_neighbourhood_alignment.get_graph import get_graph
@@ -665,16 +666,17 @@ def _update_conformer_sites(
         conformer_site_id = "/".join(conformer_site.reference_ligand_id)
         conformer_sites[conformer_site_id] = conformer_site
 
+
 def _save_conformer_sites(fs_model: dt.FSModel, conformer_sites: dict[str, dt.ConformerSite]):
     with open(fs_model.conformer_sites, 'w') as f:
         dic = {}
         for conformer_site_id, conformer_site in conformer_sites.items():
-
             dic[conformer_site_id] = conformer_site.to_dict()
         yaml.safe_dump(dic, f)
 
+
 def _update_canonical_sites(
-        canonical_sites :dict[str, dt.CanonicalSite],
+        canonical_sites: dict[str, dt.CanonicalSite],
         conformer_site: dt.ConformerSite,
         conformer_site_id,
 
@@ -700,7 +702,7 @@ def _update_canonical_sites(
     # If not matched to any existing canonical site create a new one
     if not matched:
         canonical_site = dt.CanonicalSite(
-            [conformer_site_id,],
+            [conformer_site_id, ],
             conformer_site.residues,
             conformer_site_id,
             global_reference_dtag
@@ -713,7 +715,6 @@ def _save_canonical_sites(fs_model, canonical_sites: dict[str, dt.CanonicalSite]
     with open(fs_model.canonical_sites, 'w') as f:
         dic = {}
         for canonical_site_id, canonical_site in canonical_sites.items():
-
             dic[canonical_site_id] = canonical_site.to_dict()
         yaml.safe_dump(dic, f)
 
@@ -722,7 +723,7 @@ def _update_xtalform_sites(
         xtalform_sites: dict[str, dt.XtalFormSite],
         canonical_site: dt.CanonicalSite,
         canonical_site_id: str,
-        dataset_assignments: dict[str,str],
+        dataset_assignments: dict[str, str],
         conformer_sites: dict[str, dt.ConformerSite]
 ):
     matched = False
@@ -751,20 +752,21 @@ def _update_xtalform_sites(
                     xtalform_site.members.append(member)
             else:
                 xtalform_site_id = "/".join(member)
-                xtalform_site = dt.XtalFormSite(assignment, member[1], canonical_site_id,[member,])
+                xtalform_site = dt.XtalFormSite(assignment, member[1], canonical_site_id, [member, ])
                 xtalform_sites[xtalform_site_id] = xtalform_site
-                xtalforms_dict[(xtalform_site.canonical_site_id, xtalform_site.xtalform_id)]= xtalform_site_id
+                xtalforms_dict[(xtalform_site.canonical_site_id, xtalform_site.xtalform_id)] = xtalform_site_id
 
     # Otherwise if not matched create a new xtalform site
     ...
+
 
 def _save_xtalform_sites(fs_model, xtalform_sites: dict[str, dt.XtalFormSite]):
     with open(fs_model.xtalform_sites, 'w') as f:
         dic = {}
         for xtalform_site_id, xtalform_site in xtalform_sites.items():
-
             dic[xtalform_site_id] = xtalform_site.to_dict()
         yaml.safe_dump(dic, f)
+
 
 # def _update_conformer_site_transform(
 #                 conformer_site_transforms,
@@ -775,15 +777,108 @@ def _save_xtalform_sites(fs_model, xtalform_sites: dict[str, dt.XtalFormSite]):
 #
 #     ...
 
-def _save_conformer_site_transforms(fs_model: dt.FSModel, conformer_site_transforms: dict[tuple[str,str], dt.Transform]):
+def _save_conformer_site_transforms(fs_model: dt.FSModel,
+                                    conformer_site_transforms: dict[tuple[str, str], dt.Transform]):
     with open(fs_model.conformer_site_transforms, 'w') as f:
         dic = {}
         for conformer_site_transform_id, conformer_site_transform in conformer_site_transforms.items():
-
             dic["~".join(conformer_site_transform_id)] = conformer_site_transform.to_dict()
         yaml.safe_dump(dic, f)
     ...
 
+
+# def _update_canonical_site_transforms(
+#             canonical_site_transforms: dict[tuple[str,str], dt.Transform],
+#             canonical_site: dt.CanonicalSite,
+#             canonical_sites: dict[str, dt.CanonicalSite],
+#         ):
+
+# ...
+
+def _save_canonical_site_transforms(fs_model: dt.FSModel, canonical_site_transforms: dict[str, dt.Transform]):
+    with open(fs_model.canonical_site_transforms, 'w') as f:
+        dic = {}
+        for canonical_site_transform_id, canonical_site_transform in canonical_site_transforms.items():
+            dic[canonical_site_transform_id] = canonical_site_transform.to_dict()
+        yaml.safe_dump(dic, f)
+
+
+def _update_fs_model(
+        fs_model: dt.FSModel,
+        canonical_sites: dict[str, dt.CanonicalSite],
+        conformer_sites: dict[str, dt.ConformerSite],
+        reference_datasets: dict[str, dt.Dataset]
+):
+    # Iterate over canonical sites and their members, checking if they already have an output record and
+    # if not creating one
+    alignments = fs_model.alignments
+    for canonical_site_id, canonical_site in canonical_sites.items():
+        for conformer_site_id in canonical_site.conformer_site_ids:
+            conformer_site = conformer_sites[conformer_site_id]
+            for member in conformer_site.members:
+                dtag, chain, residue = member
+                if dtag not in alignments:
+                    alignments[dtag] = {}
+                if chain not in alignments[dtag]:
+                    alignments[dtag][chain] = {}
+                if residue not in alignments[dtag][chain]:
+                    alignments[dtag][chain][residue] = dt.LigandNeighbourhoodOutput({}, {}, {}, {})
+
+                ligand_neighbourhood_output: dt.LigandNeighbourhoodOutput = alignments[dtag][chain][residue]
+                if canonical_site_id not in ligand_neighbourhood_output.aligned_structures:
+                    ligand_neighbourhood_output.aligned_structures[canonical_site_id] = (
+                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_STRUCTURE_TEMPLATE.format(
+                        dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
+                    )
+                    )
+
+                    ligand_neighbourhood_output.aligned_artefacts[canonical_site_id] = (
+                            fs_model.source_dir / constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                        dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
+                    )
+                    )
+
+                    ligand_neighbourhood_output.aligned_xmaps[canonical_site_id] = (
+                            fs_model.source_dir / constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain,
+                                                                                         residue=residue,
+                                                                                         site=canonical_site_id)
+                    )
+
+                    ligand_neighbourhood_output.aligned_event_maps[canonical_site_id] = (
+                            fs_model.source_dir / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
+                        dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
+                    )
+                    )
+
+    reference_alignments = fs_model.reference_alignments
+    for dtag, dataset in reference_datasets.items():
+        for canonical_site_id, canonical_site in canonical_sites.items():
+
+            if dtag not in reference_alignments:
+                reference_alignments[dtag] = {}
+
+            if canonical_site_id not in reference_alignments[dtag]:
+                reference_alignments[dtag][canonical_site_id] = {
+                    'aligned_structures': fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_REFERENCE_STRUCTURE_TEMPLATE.format(
+                        dtag=dtag, site=canonical_site_id
+                    ),
+                    'aligned_artefacts': fs_model.source_dir / constants.ALIGNED_REFERENCE_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                        dtag=dtag, site=canonical_site_id
+                    ),
+
+                    'aligned_xmaps': fs_model.source_dir / constants.ALIGNED_REFERENCE_XMAP_TEMPLATE.format(dtag=dtag,
+                                                                                                            site=canonical_site_id),
+                    # 'aligned_event_maps': fs_model.source_dir / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
+                    # dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
+                    # ),
+                }
+
+
+def _save_fs_model(fs_model: dt.FSModel):
+    with open(fs_model.canonical_site_transforms, 'w') as f:
+        dic = fs_model.to_dict()
+
+        yaml.safe_dump(dic, f)
 
 def _update(
         fs_model: dt.FSModel,
@@ -899,8 +994,8 @@ def _update(
     logger.info(f"Previously had {len(conformer_site_transforms)} conformer site transforms")
     for canonical_site_id, canonical_site in canonical_sites.items():
         # for conformer_site_id in canonical_site.conformer_site_ids:
-            # conformer_site = conformer_sites[conformer_site_id]
-        print(conformer_sites)
+        # conformer_site = conformer_sites[conformer_site_id]
+        # print(conformer_site)
         _update_conformer_site_transforms(
             conformer_site_transforms,
             canonical_site,
@@ -917,8 +1012,10 @@ def _update(
     for canonical_site_id, canonical_site in canonical_sites.items():
         _update_canonical_site_transforms(
             canonical_site_transforms,
+            canonical_site_id,
             canonical_site,
-            canonical_sites,
+            conformer_sites,
+            structures
         )
         logger.info(f"Now have {len(canonical_site_transforms)} canonical site transforms")
     _save_canonical_site_transforms(fs_model, canonical_site_transforms)
@@ -927,6 +1024,8 @@ def _update(
     _update_fs_model(
         fs_model,
         canonical_sites,
+        conformer_sites,
+        reference_datasets,
     )
     _save_fs_model(fs_model)
 

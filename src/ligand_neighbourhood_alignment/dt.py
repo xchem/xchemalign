@@ -14,16 +14,16 @@ from ligand_neighbourhood_alignment.make_data_json import (
 
 class LigandNeighbourhoodOutput:
     def __init__(self,
-                 aligned_structures: dict[int, str],
-                 aligned_artefacts: dict[int, str],
+                 aligned_structures: dict[str, str],
+                 aligned_artefacts: dict[str, str],
 
-                 aligned_xmaps: dict[int, str],
-                 aligned_event_maps: dict[int, str],
+                 aligned_xmaps: dict[str, str],
+                 aligned_event_maps: dict[str, str],
                  ):
         self.aligned_structures = aligned_structures
-        self.aligned_artefacts: dict[int, str] = aligned_artefacts
-        self.aligned_xmaps: dict[int, str] = aligned_xmaps
-        self.aligned_event_maps: dict[int, str] = aligned_event_maps
+        self.aligned_artefacts: dict[str, str] = aligned_artefacts
+        self.aligned_xmaps: dict[str, str] = aligned_xmaps
+        self.aligned_event_maps: dict[str, str] = aligned_event_maps
 
     @staticmethod
     def from_dict(dic):
@@ -34,10 +34,19 @@ class LigandNeighbourhoodOutput:
             aligned_event_maps=dic["aligned_event_maps"],
         )
 
+    def to_dict(self):
+        dic = {
+            'aligned_structures': self.aligned_structures,
+        'aligned_artefacts' : self.aligned_artefacts,
+        'aligned_xmaps' : self.aligned_xmaps,
+        'aligned_event_maps' : self.aligned_event_maps,
+        }
+        return dic
 
 class FSModel:
     def __init__(
             self,
+            source_dir,
             assemblies,
             xtalforms,
             dataset_assignments,
@@ -52,6 +61,7 @@ class FSModel:
             alignments,
             reference_alignments
     ):
+        self.source_dir = source_dir
         self.assemblies = assemblies
         self.xtalforms = xtalforms
         self.dataset_assignments = dataset_assignments
@@ -90,6 +100,7 @@ class FSModel:
             reference_alignments = {}
 
             return FSModel(
+                source_dir,
                 assemblies,
                 xtalforms,
                 dataset_assignments,
@@ -113,19 +124,30 @@ class FSModel:
             for chain, chain_alignments in dataset_alignments.items():
                 alignments[dtag][chain] = {}
                 for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
-                    alignments[dtag][chain][ligand_neighbourhood] = LigandNeighbourhoodOutput.from_dict(
+                    alignments[dtag][chain][ligand_neighbourhood.split("/")] = LigandNeighbourhoodOutput.from_dict(
                         ligand_neighbourhood_alignments)
+
+        # reference_alignments = {}
+        # for dtag, dataset_alignments in alignments["reference_alignments"].items():
+        #     alignments[dtag] = {}
+        #     for chain, chain_alignments in dataset_alignments.items():
+        #         alignments[dtag][chain] = {}
+        #         for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
+        #             alignments[dtag][chain][ligand_neighbourhood] = LigandNeighbourhoodOutput.from_dict(
+        #                 ligand_neighbourhood_alignments)
 
         reference_alignments = {}
-        for dtag, dataset_alignments in alignments["reference_alignments"].items():
-            alignments[dtag] = {}
-            for chain, chain_alignments in dataset_alignments.items():
-                alignments[dtag][chain] = {}
-                for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
-                    alignments[dtag][chain][ligand_neighbourhood] = LigandNeighbourhoodOutput.from_dict(
-                        ligand_neighbourhood_alignments)
+        for dtag, canonical_site_alignments in alignments["reference_alignments"].items():
+            reference_alignments[dtag] = {}
+            for canonical_site_id, canonical_site_alignment_info in canonical_site_alignments.items():
+                reference_alignments[dtag][canonical_site_alignment_info] = {
+                    'aligned_structures': canonical_site_alignment_info['aligned_structures'],
+                    'aligned_artefacts': canonical_site_alignment_info['aligned_artefacts'],
+                    'aligned_xmaps': canonical_site_alignment_info['aligned_xmaps']
+                }
 
         return FSModel(
+            source_dir=Path(dic["source_dir"]),
             assemblies=Path(dic['assemblies']),
             xtalforms=Path(dic['xtalforms']),
             dataset_assignments=Path(dic['dataset_assignments']),
@@ -142,7 +164,44 @@ class FSModel:
         )
 
     def to_dict(self, ):
-        ...
+        dic = {}
+        alignments = {}
+        for dtag, dataset_alignments in self.alignments.items():
+            alignments[dtag] = {}
+            for chain, chain_alignments in dataset_alignments.items():
+                alignments[dtag][chain] = {}
+                for ligand_neighbourhood, ligand_neighbourhood_alignments in chain_alignments.items():
+                    alignments[dtag][chain]["/".join(ligand_neighbourhood)] = LigandNeighbourhoodOutput.to_dict(
+                        ligand_neighbourhood_alignments)
+
+
+        reference_alignments = {}
+        for dtag, dtag_alignment_info in self.reference_alignments.items():
+            reference_alignments[dtag] = {}
+            for canonical_site_id, canonical_site_alignment_info in dtag_alignment_info.items():
+                reference_alignments[dtag][canonical_site_id] = {
+                    'aligned_structures': canonical_site_alignment_info['aligned_structures'],
+                    'aligned_artefacts': canonical_site_alignment_info['aligned_artefacts'],
+                    'aligned_xmaps': canonical_site_alignment_info['aligned_xmaps']
+                }
+
+
+        return {
+            'source_dir':dic["source_dir"],
+        'assemblies' :dic['assemblies'],
+        'xtalforms' :dic['xtalforms'],
+        'dataset_assignments' : dic['dataset_assignments'],
+        'ligand_neighbourhoods' :dic['ligand_neighbourhoods'],
+        'alignability_graph' :dic['alignability_graph'],
+        'ligand_neighbourhood_transforms' : dic['ligand_neighbourhood_transforms'],
+        'conformer_sites' : dic['conformer_sites'],
+        'conformer_site_transforms' : dic['conformer_site_transforms'],
+        'canonical_sites' : dic['canonical_sites'],
+        'canonical_site_transforms' : dic['canonical_site_transforms'],
+        'xtalform_sites' : dic['xtalform_sites'],
+        'alignments' : alignments,
+        'reference_alignments' : reference_alignments,
+        }
 
 
 class Datasource:
