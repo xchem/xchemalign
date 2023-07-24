@@ -88,40 +88,40 @@ class FSModel:
         if fs_model.exists():
             with open(fs_model, 'r') as f:
                 dic = yaml.safe_load(f)
-            return FSModel.from_dict(dic)
+            if dic is not None:
+                return FSModel.from_dict(dic)
 
-        else:
-            assemblies = source_dir / constants.ASSEMBLIES_YAML_FILE_NAME
-            xtalforms = source_dir / constants.XTALFORMS_YAML_FILE_NAME
-            dataset_assignments = source_dir / constants.ASSIGNED_XTALFORMS_YAML_FILE_NAME
-            ligand_neighbourhoods = source_dir / constants.NEIGHBOURHOODS_YAML_FILE_NAME
-            alignability_graph = source_dir / constants.ALIGNABILITY_GRAPH_FILE_NAME
-            ligand_neighbourhood_transforms = source_dir / constants.TRANSFORMS_YAML_FILE_NAME
-            conformer_sites = source_dir / constants.CONFORMER_SITE_YAML_FILE
-            conformer_site_transforms = source_dir / constants.CONFORMER_SITES_TRANSFORMS_YAML_FILE_NAME
-            canonical_sites = source_dir / constants.CANONICAL_SITE_YAML_FILE
-            canonical_site_trasnforms = source_dir / constants.CANONICAL_SITES_TRANSFORMS_YAML_FILE_NAME
-            xtalform_sites = source_dir / constants.XTALFORM_SITE_YAML_FILE
-            alignments = {}
-            reference_alignments = {}
+        assemblies = source_dir / constants.ASSEMBLIES_YAML_FILE_NAME
+        xtalforms = source_dir / constants.XTALFORMS_YAML_FILE_NAME
+        dataset_assignments = source_dir / constants.ASSIGNED_XTALFORMS_YAML_FILE_NAME
+        ligand_neighbourhoods = source_dir / constants.NEIGHBOURHOODS_YAML_FILE_NAME
+        alignability_graph = source_dir / constants.ALIGNABILITY_GRAPH_FILE_NAME
+        ligand_neighbourhood_transforms = source_dir / constants.TRANSFORMS_YAML_FILE_NAME
+        conformer_sites = source_dir / constants.CONFORMER_SITE_YAML_FILE
+        conformer_site_transforms = source_dir / constants.CONFORMER_SITES_TRANSFORMS_YAML_FILE_NAME
+        canonical_sites = source_dir / constants.CANONICAL_SITE_YAML_FILE
+        canonical_site_trasnforms = source_dir / constants.CANONICAL_SITES_TRANSFORMS_YAML_FILE_NAME
+        xtalform_sites = source_dir / constants.XTALFORM_SITE_YAML_FILE
+        alignments = {}
+        reference_alignments = {}
 
-            return FSModel(
-                source_dir,
-                fs_model,
-                assemblies,
-                xtalforms,
-                dataset_assignments,
-                ligand_neighbourhoods,
-                alignability_graph,
-                ligand_neighbourhood_transforms,
-                conformer_sites,
-                conformer_site_transforms,
-                canonical_sites,
-                canonical_site_trasnforms,
-                xtalform_sites,
-                alignments,
-                reference_alignments
-            )
+        return FSModel(
+            source_dir,
+            fs_model,
+            assemblies,
+            xtalforms,
+            dataset_assignments,
+            ligand_neighbourhoods,
+            alignability_graph,
+            ligand_neighbourhood_transforms,
+            conformer_sites,
+            conformer_site_transforms,
+            canonical_sites,
+            canonical_site_trasnforms,
+            xtalform_sites,
+            alignments,
+            reference_alignments
+        )
 
     @staticmethod
     def from_dict(dic):
