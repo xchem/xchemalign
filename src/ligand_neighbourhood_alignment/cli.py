@@ -1288,7 +1288,7 @@ class CLI:
         if not aligned_xmap_dir.exists():
             os.mkdir(aligned_xmap_dir)
 
-    source_data_model = dt.SourceDataModel.from_fs_model(
+        source_data_model = dt.SourceDataModel.from_fs_model(
             fs_model,
             options.datasources,
             options.datasource_types,
