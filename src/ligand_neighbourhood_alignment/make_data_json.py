@@ -43,6 +43,8 @@ def get_closest_lig(structure, coord):
 
     return min(distances, key=lambda x: distances[x])
 
+from ligand_neighbourhood_alignment import dt
+
 
 def get_ligand_binding_events_from_structure(
     pdb_path: Path,
@@ -76,6 +78,35 @@ def get_ligand_binding_events_from_structure(
             lbes.append(lbe)
 
     return LigandBindingEvents(ligand_ids=lids, ligand_binding_events=lbes)
+
+def _get_ligand_binding_events_from_structure(
+    pdb_path: Path,
+    xmap_path: Path,
+    dtag: str,
+):
+    structure = gemmi.read_structure(str(pdb_path))
+    event_id = 0
+
+    lbes = {}
+
+    for model in structure:
+        for chain in model:
+            for residue in chain.get_ligands():
+
+                if residue.name == "DMS":
+                    continue
+
+                lbe = dt.LigandBindingEvent(
+                    id=str(event_id),
+                    dtag=str(dtag),
+                    chain=str(chain.name),
+                    residue=str(residue.seqid.num),
+                    xmap=str(xmap_path),
+                )
+                event_id += 1
+                lbes[(str(dtag), str(chain.name), str(residue.seqid.num))] = lbe
+
+    return lbes
 
 
 def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
@@ -136,7 +167,6 @@ def get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
 
     return LigandBindingEvents(ligand_ids=lids, ligand_binding_events=lbes)
 
-from ligand_neighbourhood_alignment import dt
 
 def _get_ligand_binding_events_from_panddas(pandda_event_csvs, pdb_path, dtag):
     structure = gemmi.read_structure(str(pdb_path))

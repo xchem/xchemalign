@@ -7,8 +7,8 @@ from loguru import logger
 
 from ligand_neighbourhood_alignment import constants
 from ligand_neighbourhood_alignment.make_data_json import (
-    get_ligand_binding_events_from_panddas,
-    get_ligand_binding_events_from_structure,
+    _get_ligand_binding_events_from_panddas,
+    _get_ligand_binding_events_from_structure,
 )
 
 
@@ -254,7 +254,7 @@ class SourceDataModel:
                     if not pdb.exists():
                         continue
 
-                    ligand_binding_events = get_ligand_binding_events_from_panddas(
+                    ligand_binding_events = _get_ligand_binding_events_from_panddas(
                         pandda_event_tables,
                         pdb,
                         dtag,
@@ -297,7 +297,7 @@ class SourceDataModel:
                         mtz = None
                         logger.warning("No mtz!")
 
-                    ligand_binding_events = get_ligand_binding_events_from_structure(pdb, xmap, dtag)
+                    ligand_binding_events = _get_ligand_binding_events_from_structure(pdb, xmap, dtag)
                     if len(ligand_binding_events.ligand_ids) == 0:
                         logger.warning(f"Dataset {dtag} has no ligand binding events!")
                         continue

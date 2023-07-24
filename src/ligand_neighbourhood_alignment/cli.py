@@ -526,7 +526,7 @@ def _get_structure_fragments(dataset: dt.Dataset, structure):
     for model in structure:
         for chain in model:
             for residue in chain.get_ligands():
-                for lbe in dataset.ligand_binding_events.ligand_binding_events:
+                for lbe in dataset.ligand_binding_events:
                     # if (
                     #     (residue.name == "LIG")
                     #     & (lbe.chain == chain.name)
@@ -714,6 +714,44 @@ def _save_canonical_sites(fs_model, canonical_sites: dict[str, dt.CanonicalSite]
         yaml.safe_dump(dic, f)
 
 
+def _update_xtalform_sites(
+        xtalform_sites: dict[str, dt.XtalFormSite],
+        canonical_site: dt.CanonicalSite,
+        canonical_site_id: str,
+        dataset_assignments: dict[str,str],
+        conformer_sites: dict[str, dt.ConformerSite]
+):
+    matched = False
+    # for xtalform_site_id, xtalform_site in xtalform_sites.items():
+    #     if xtalform_site.canonical_site_id == canonical_site_id:
+    #         for conformer_site_id in canonical_site.conformer_site_ids:
+    #             conformer_site = conformer_sites[conformer_site_id]
+    #             for member in conformer_site.members:
+    #                 if dataset_assignments[member[0]] == xtalform_site.xtalform_id:
+    #                     if member not in xtalform_site.members:
+    #                         xtalform_site.members.append(member)
+
+    xtalforms_dict = {
+        (xtalform_site.canonical_site_id, xtalform_site.xtalform_id): xtalform_site_id
+        for xtalform_site_id, xtalform_site
+        in xtalform_sites.items()
+    }
+
+    for conformer_site_id in canonical_site.conformer_site_ids:
+        conformer_site = conformer_sites[conformer_site_id]
+        for member in conformer_site.members:
+            assignment = dataset_assignments[member[0]]
+            if (canonical_site_id, assignment) in xtalforms_dict:
+                xtalform_site = xtalform_sites[xtalforms_dict[(canonical_site_id, assignment)]]
+                if member not in xtalform_site.members:
+                    xtalform_site.members.append(member)
+            else:
+                xtalform_site = dt.XtalFormSite(assignment, ..., canonical_site_id,[member,])
+
+    # Otherwise if not matched create a new xtalform site
+    ...
+
+
 def _update(
         fs_model: dt.FSModel,
         datasets: dict[str, dt.Dataset],
@@ -811,10 +849,10 @@ def _update(
 
     # Update crystalform sites
     logger.info(f"Previously had {len(xtalform_sites)} xtalform sites")
-    for xtalform_site_id, xtalform_site in xtalform_sites.items():
+    for canonical_site_id, canonical_site in xtalform_sites.items():
         # If canonical site in a xtalform site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
-        _update_xtalform_sites(canonical_site, dataset_assignments)
+        _update_xtalform_sites(xtalform_sites, canonical_site, dataset_assignments)
     logger.info(f"Now have {len(xtalform_sites)} xtalform sites")
     _save_xtalform_sites(fs_model, xtalform_sites)
 
