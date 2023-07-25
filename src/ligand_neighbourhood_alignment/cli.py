@@ -1141,6 +1141,9 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
                         xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
+                        logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
+                        logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
+                        logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
                         xmap = read_xmap(xmap_path)
                         moving_ligand_id = (dtag, chain, residue)
                         reference_ligand_id = conformer_site.reference_ligand_id
