@@ -1150,7 +1150,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                             reference_ligand_id = conformer_site.reference_ligand_id
                             print(ligand_neighbourhoods)
                             __align_xmap(
-                                ligand_neighbourhoods[(dtag, residue, chain)],
+                                ligand_neighbourhoods[(dtag, chain, residue)],
                                 alignability_graph,
                                 ligand_neighbourhood_transforms,
                                 reference_xmap,
