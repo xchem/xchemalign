@@ -1144,6 +1144,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
 
                         if conformer_site is None:
                             print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
+                            continue
                         xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
