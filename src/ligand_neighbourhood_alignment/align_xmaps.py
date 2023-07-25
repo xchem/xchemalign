@@ -413,8 +413,8 @@ def __align_xmap(
         previous_ligand_id = next_ligand_id
 
     # Get the subsite transform
-    print(conformer_site_transforms)
-    conformer_site_transform = transform_to_gemmi(conformer_site_transforms[conformer_site_id])
+    # print(conformer_site_transforms)
+    conformer_site_transform = transform_to_gemmi(conformer_site_transforms[(canonical_site_id, conformer_site_id)])
 
     # Get the site transform
     canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
