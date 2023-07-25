@@ -1109,7 +1109,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
     for dtag, dataset_alignment_info in fs_model.reference_alignments.items():
         for canonical_site_id, alignment_info in dataset_alignment_info.items():
             aligned_structure_path = alignment_info['aligned_structures']
-            if not Path*aligned_structure_path).exists():
+            if not Path(aligned_structure_path).exists():
                 _structure = structures[dtag].clone()
                 _align_reference_structure(
                     _structure,
