@@ -409,6 +409,7 @@ def _write_xmap(xmap, path: Path, neighbourhood: dt.Neighbourhood, transform):
     ccp4.setup(float("nan"))
     ccp4.update_ccp4_header()
 
+
     ccp4.write_ccp4_map(str(path))
 
 def __align_xmap(

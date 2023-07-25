@@ -1137,6 +1137,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
         for chain, chain_alignment_info in dataset_alignment_info.items():
             for residue, ligand_neighbourhood_output in chain_alignment_info.items():
                 for canonical_site_id, aligned_event_map_path in ligand_neighbourhood_output.aligned_event_maps.items():
+                    logger.info(f"Writing to: {aligned_event_map_path}")
                     if not Path(aligned_event_map_path).exists():
                         _structure = structures[dtag].clone()
                         canonical_site = canonical_sites[canonical_site_id]
@@ -1159,6 +1160,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                             moving_ligand_id = (dtag, chain, residue)
                             reference_ligand_id = conformer_site.reference_ligand_id
                             print(ligand_neighbourhoods)
+
                             __align_xmap(
                                 ligand_neighbourhoods[(dtag, chain, residue)],
                                 alignability_graph,
