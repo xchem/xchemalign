@@ -1075,7 +1075,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
         for chain, chain_alignment_info in dataset_alignment_info.items():
             for residue, ligand_neighbourhood_output in chain_alignment_info.items():
                 for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
-                    if not aligned_structure_path.exists():
+                    if not Path(aligned_structure_path).exists():
                         # _update_aligned_structures()
                         _structure = structures[dtag].clone()
                         canonical_site = canonical_sites[canonical_site_id]
@@ -1108,15 +1108,17 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
             # )
     for dtag, dataset_alignment_info in fs_model.reference_alignments.items():
         for canonical_site_id, alignment_info in dataset_alignment_info.items():
-            _structure = structures[dtag].clone()
-            _align_reference_structure(
-                _structure,
-                dtag,
-                reference_structure_transforms,
-                canonical_site_transforms,
-                canonical_site_id,
-                alignment_info['aligned_structures'],
-            )
+            aligned_structure_path = alignment_info['aligned_structures']
+            if not Path*aligned_structure_path).exists():
+                _structure = structures[dtag].clone()
+                _align_reference_structure(
+                    _structure,
+                    dtag,
+                    reference_structure_transforms,
+                    canonical_site_transforms,
+                    canonical_site_id,
+                    alignment_info['aligned_structures'],
+                )
 
     # Generate new aligned maps
     for canonical_site_id, canonical_site in canonical_sites.items():
