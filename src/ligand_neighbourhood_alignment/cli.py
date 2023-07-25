@@ -65,6 +65,7 @@ from ligand_neighbourhood_alignment.generate_sites_from_components import (  # g
     get_subsite_transforms,
     _update_conformer_site_transforms,
     _update_canonical_site_transforms,
+    _update_reference_structure_transforms
 
 )
 from ligand_neighbourhood_alignment.get_alignability import get_alignability, _update_ligand_neighbourhood_transforms
@@ -805,6 +806,8 @@ def _save_canonical_site_transforms(fs_model: dt.FSModel, canonical_site_transfo
         yaml.safe_dump(dic, f)
 
 
+
+
 def _update_fs_model(
         fs_model: dt.FSModel,
         canonical_sites: dict[str, dt.CanonicalSite],
@@ -882,6 +885,18 @@ def _save_fs_model(fs_model: dt.FSModel):
 
         yaml.safe_dump(dic, f)
 
+def save_reference_structure_transforms(
+        fs_model: dt.FSModel,
+        reference_structure_transforms: dict[tuple[str, str], dt.Transform],
+    ):
+
+    dic = {}
+    for reference_structure_transform_id, reference_structure_transform in reference_structure_transforms.items():
+        dic["~".join(reference_structure_transform_id)] = reference_structure_transform.to_dict()
+    with open(fs_model.reference_structure_transforms, 'w') as f:
+
+        yaml.safe_dump(dic, f)
+
 
 def _update(
         fs_model: dt.FSModel,
@@ -899,6 +914,7 @@ def _update(
         canonical_sites: dict[str, dt.CanonicalSite],
         canonical_site_transforms: dict[str, dt.Transform],
         xtalform_sites: dict[str, dt.XtalFormSite],
+reference_structure_transforms: dict[tuple[str,str], dt.Transform]
 ):
     # Get the structures
     structures: dict = _get_structures(datasets)
@@ -1023,6 +1039,23 @@ def _update(
         logger.info(f"Now have {len(canonical_site_transforms)} canonical site transforms")
     _save_canonical_site_transforms(fs_model, canonical_site_transforms)
 
+    # Update the reference structure transforms
+    for dtag, dataset in reference_datasets.items():
+        for canonical_site_id, canonical_site in canonical_sites.items():
+            key = (dtag, canonical_site_id)
+            if key not in reference_structure_transforms:
+               _update_reference_structure_transforms(
+                   reference_structure_transforms,
+                   key,
+                   structures,
+                   canonical_site,
+                   conformer_sites,
+               )
+    save_reference_structure_transforms(
+        fs_model,
+        reference_structure_transforms,
+    )
+
     # Update output: check if aligned data for each lid in canon site is already there and if not add it
     _update_fs_model(
         fs_model,
@@ -1066,10 +1099,24 @@ def _update(
                         )
 
     # Generate alignments of references to each canonical site
-    for canonical_site_id, canonical_site in canonical_sites.items():
-        for dtag, reference_dataset in reference_datasets.items():
-            _update_reference_alignments(
-
+    # for canonical_site_id, canonical_site in canonical_sites.items():
+    #     for dtag, reference_dataset in reference_datasets.items():
+            # _update_reference_alignments(
+            #
+            # )
+    for dtag, dataset_alignment_info in fs_model.reference_alignments.items():
+        for canonical_site_id, canonical_site in dataset_alignment_info.items():
+            _align_reference_structure(
+                _structure,
+                moving_ligand_id,
+                reference_ligand_id,
+                alignability_graph,
+                ligand_neighbourhood_transforms,
+                conformer_site_transforms,
+                canonical_site_transforms,
+                canonical_site_id,
+                conformer_site_id,
+                aligned_structure_path,
             )
 
     # Generate new aligned maps
@@ -1253,6 +1300,17 @@ def _load_xtalform_sites(xtalform_sites_yaml):
     return xtalform_sites
 
 
+def _load_reference_stucture_transforms(reference_structure_transforms_yaml):
+    reference_structure_transforms = {}
+    if reference_structure_transforms_yaml.exists():
+        with open(reference_structure_transforms_yaml, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for reference_structure_id, reference_structure_transform_info in dic.items():
+            reference_structure_transforms[reference_structure_id] = dt.Transform.from_dict(reference_structure_transform_info)
+
+    return reference_structure_transforms
+
 class CLI:
     def schema(self, output_dir: str):
         _output_dir = Path(output_dir)
@@ -1350,6 +1408,9 @@ class CLI:
         # Get xtalform sites
         xtalform_sites: dict[str, dt.XtalFormSite] = _load_xtalform_sites(fs_model.xtalform_sites)
 
+        # Get reference structure transforms
+        reference_structure_transforms: dict[tuple[str,str], dt.Transform] = _load_reference_stucture_transforms(fs_model.reference_structure_transforms)
+
         # Run the update
         _update(
             fs_model,
@@ -1367,6 +1428,7 @@ class CLI:
             canonical_sites,
             canonical_site_transforms,
             xtalform_sites,
+            reference_structure_transforms
         )
 
     def process_all(self, option_json: str):

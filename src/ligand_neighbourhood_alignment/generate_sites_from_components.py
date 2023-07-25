@@ -310,6 +310,22 @@ def _update_canonical_site_transforms(
         transform.mat.tolist(),
     )
 
+def _update_reference_structure_transforms(
+        reference_structure_transforms,
+        key,
+        structures,
+        canonical_site: dt.CanonicalSite,
+        conformer_sites: dict[str, dt.ConformerSite],
+):
+    ress = canonical_site.residues
+    to_structure = structures[conformer_sites[canonical_site.reference_conformer_site_id].reference_ligand_id[0]]
+    from_structure = structures[key[0]]
+    transform = _get_transform_from_residues(ress, to_structure, from_structure)
+    reference_structure_transforms[key] = dt.Transform(
+        transform.vec.tolist(),
+        transform.mat.tolist(),
+    )
+
 def _generate_sites_from_components(_source_dir: Path):
 
     logger.info(f"Source dir: {_source_dir}")
@@ -378,3 +394,4 @@ def _generate_sites_from_components(_source_dir: Path):
     save_site_transforms(site_transforms, _source_dir)
 
     return canonical_sites
+

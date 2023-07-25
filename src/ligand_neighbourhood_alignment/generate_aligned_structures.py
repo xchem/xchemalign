@@ -307,6 +307,33 @@ def _align_structure(
     # Write the fully aligned structure
     _structure.write_pdb(str(out_path))
 
+def _align_reference_structure(
+    _structure,
+        dtag: str,
+    # moving_ligand_id: tuple[str,str,str],
+    # reference_ligand_id: tuple[str,str,str],
+    # g,
+    # neighbourhood_transforms: dict[tuple[tuple[str,str,str], tuple[str,str,str]], dt.Transform],
+    # conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+    reference_structure_transforms: dict[tuple[str,str], dt.Transform],
+    canonical_site_transforms: dict[str, dt.Transform],
+    canonical_site_id: str,
+    # conformer_site_id: str,
+    out_path: Path,
+):
+    running_transform = transform_to_gemmi(reference_structure_transforms[(dtag, canonical_site_id)])
+
+    # Site alignment transform
+    canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+    canonical_site_transform.combine(running_transform)
+
+    logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
+
+    _structure = superpose_structure(running_transform, _structure)
+
+    # Write the fully aligned structure
+    _structure.write_pdb(str(out_path))
+
 
 # def align_artefacts():
 #     # Transform the artefacts

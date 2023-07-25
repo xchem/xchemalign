@@ -49,7 +49,7 @@ CONFORMER_SITES_TRANSFORMS_YAML_FILE_NAME = "conformer_site_transforms.yaml"
 CANONICAL_SITE_YAML_FILE = "canonical_sites.yaml"
 CANONICAL_SITES_TRANSFORMS_YAML_FILE_NAME = "canonical_site_transforms.yaml"
 XTALFORM_SITE_YAML_FILE = "xtalform_sites.yaml"
-
+REFERENCE_STRUCTURE_TRANSFORMS_YAML = "reference_structure_transforms.yaml"
 
 ALIGNED_REFERENCE_STRUCTURE_TEMPLATE = "{dtag}_{site}_ref.pdb"
 ALIGNED_REFERENCE_STRUCTURE_ARTEFACTS_TEMPLATE = "{dtag}_{site}_artefacts_ref.pdb"

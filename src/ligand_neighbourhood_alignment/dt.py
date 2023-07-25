@@ -61,6 +61,7 @@ class FSModel:
             canonical_sites,
             canonical_site_transforms,
             xtalform_sites,
+            reference_structure_transforms,
             alignments,
             reference_alignments
     ):
@@ -77,6 +78,7 @@ class FSModel:
         self.canonical_sites = canonical_sites
         self.canonical_site_transforms = canonical_site_transforms
         self.xtalform_sites = xtalform_sites
+        self.reference_structure_transforms = reference_structure_transforms
         self.alignments = alignments
         self.reference_alignments = reference_alignments
 
@@ -102,6 +104,7 @@ class FSModel:
         canonical_sites = source_dir / constants.CANONICAL_SITE_YAML_FILE
         canonical_site_trasnforms = source_dir / constants.CANONICAL_SITES_TRANSFORMS_YAML_FILE_NAME
         xtalform_sites = source_dir / constants.XTALFORM_SITE_YAML_FILE
+        reference_structure_transforms = source_dir / constants.REFERENCE_STRUCTURE_TRANSFORMS_YAML
         alignments = {}
         reference_alignments = {}
 
@@ -119,6 +122,7 @@ class FSModel:
             canonical_sites,
             canonical_site_trasnforms,
             xtalform_sites,
+            reference_structure_transforms,
             alignments,
             reference_alignments
         )
@@ -168,6 +172,7 @@ class FSModel:
             canonical_sites=Path(dic['canonical_sites']),
             canonical_site_transforms=Path(dic['canonical_site_transforms']),
             xtalform_sites=Path(dic['xtalform_sites']),
+            reference_structure_transforms=Path(dic['reference_structure_transforms']),
             alignments=alignments,
             reference_alignments=reference_alignments,
         )
