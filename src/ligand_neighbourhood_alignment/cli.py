@@ -1308,7 +1308,8 @@ def _load_reference_stucture_transforms(reference_structure_transforms_yaml):
             dic = yaml.safe_load(f)
 
         for reference_structure_transform_id, reference_structure_transform_info in dic.items():
-            reference_structure_transforms["~".split(reference_structure_transform_id)] = dt.Transform.from_dict(reference_structure_transform_info)
+            dtag, canonical_site_id = "~".split(reference_structure_transform_id)
+            reference_structure_transforms[(dtag, canonical_site_id)] = dt.Transform.from_dict(reference_structure_transform_info)
 
     return reference_structure_transforms
 
