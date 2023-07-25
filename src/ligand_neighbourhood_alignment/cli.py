@@ -839,19 +839,19 @@ def _update_fs_model(
                     )
 
                     ligand_neighbourhood_output.aligned_artefacts[canonical_site_id] = (
-                            fs_model.source_dir / constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
                         dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
                     )
                     )
 
                     ligand_neighbourhood_output.aligned_xmaps[canonical_site_id] = (
-                            fs_model.source_dir / constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain,
+                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_XMAP_TEMPLATE.format(dtag=dtag, chain=chain,
                                                                                          residue=residue,
                                                                                          site=canonical_site_id)
                     )
 
                     ligand_neighbourhood_output.aligned_event_maps[canonical_site_id] = (
-                            fs_model.source_dir / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
+                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
                         dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
                     )
                     )
