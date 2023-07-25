@@ -438,7 +438,7 @@ def __align_xmap(
     )
 
     # Output the xmap
-    write_xmap(
+    _write_xmap(
         new_xmap,
         output_path,
         neighbourhood,

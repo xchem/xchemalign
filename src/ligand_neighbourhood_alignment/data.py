@@ -7,6 +7,8 @@ from loguru import logger
 from pydantic import BaseModel, validator
 
 from ligand_neighbourhood_alignment import constants
+from ligand_neighbourhood_alignment import dt
+
 
 Structure = gemmi.Structure
 
@@ -524,6 +526,25 @@ def get_box(neighbourhood: LigandNeighbourhood, xmap, transform):
         )
     return box
 
+def _get_box(neighbourhood: dt.Neighbourhood, xmap, transform):
+
+    # transform_gemmi = transform_to_gemmi(transform)
+    transform_gemmi = transform
+
+    box = gemmi.FractionalBox()
+    for atom_id, atom in neighbourhood.atoms.items():
+        transformed_pos = transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
+        box.extend(
+            xmap.unit_cell.fractionalize(gemmi.Position(transformed_pos.x, transformed_pos.y, transformed_pos.z))
+        )
+
+    for atom_id, atom in neighbourhood.artefact_atoms.items():
+        transformed_pos = transform_gemmi.apply(gemmi.Position(atom.x, atom.y, atom.z))
+        box.extend(
+            xmap.unit_cell.fractionalize(gemmi.Position(transformed_pos.x, transformed_pos.y, transformed_pos.z))
+        )
+    return box
+
 
 def write_xmap(xmap, path: Path, neighbourhood: LigandNeighbourhood, transform):
 
@@ -533,6 +554,26 @@ def write_xmap(xmap, path: Path, neighbourhood: LigandNeighbourhood, transform):
     ccp4.update_ccp4_header()
 
     box = get_box(neighbourhood, xmap, transform)
+    box_min = box.minimum
+    box_max = box.maximum
+    box_min_str = f"{round(box_min.x, 2)} {round(box_min.y, 2)} {round(box_min.z, 2)}"
+    box_max_str = f"{round(box_max.x, 2)} {round(box_max.y, 2)} {round(box_max.z, 2)}"
+    logger.debug(f"Box Extent is: min {box_min_str} : max {box_max_str}")
+    ccp4.set_extent(box)
+    ccp4.setup(float("nan"))
+    ccp4.update_ccp4_header()
+
+    ccp4.write_ccp4_map(str(path))
+
+
+def _write_xmap(xmap, path: Path, neighbourhood: dt.Neighbourhood, transform):
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = xmap
+    ccp4.setup(float("nan"))
+    ccp4.update_ccp4_header()
+
+    box = _get_box(neighbourhood, xmap, transform)
     box_min = box.minimum
     box_max = box.maximum
     box_min_str = f"{round(box_min.x, 2)} {round(box_min.y, 2)} {round(box_min.z, 2)}"
