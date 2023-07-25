@@ -1141,26 +1141,27 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
                         xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
-                        logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
-                        logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
-                        logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
-                        xmap = read_xmap(xmap_path)
-                        moving_ligand_id = (dtag, chain, residue)
-                        reference_ligand_id = conformer_site.reference_ligand_id
-                        __align_xmap(
-                            ligand_neighbourhoods[(dtag, residue, chain)],
-                            alignability_graph,
-                            ligand_neighbourhood_transforms,
-                            reference_xmap,
-                            reference_ligand_id,
-                            moving_ligand_id,
-                            xmap,
-                            conformer_site_transforms,
-                            conformer_site_id,
-                            canonical_site_transforms,
-                            canonical_site_id,
-                            aligned_structure_path,
-                        )
+                        # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
+                        # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
+                        # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
+                        if xmap_path:
+                            xmap = read_xmap(xmap_path)
+                            moving_ligand_id = (dtag, chain, residue)
+                            reference_ligand_id = conformer_site.reference_ligand_id
+                            __align_xmap(
+                                ligand_neighbourhoods[(dtag, residue, chain)],
+                                alignability_graph,
+                                ligand_neighbourhood_transforms,
+                                reference_xmap,
+                                reference_ligand_id,
+                                moving_ligand_id,
+                                xmap,
+                                conformer_site_transforms,
+                                conformer_site_id,
+                                canonical_site_transforms,
+                                canonical_site_id,
+                                aligned_structure_path,
+                            )
 def _load_assemblies(assemblies_file, new_assemblies_yaml):
     assemblies = {}
 
