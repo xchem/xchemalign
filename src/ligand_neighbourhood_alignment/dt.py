@@ -213,6 +213,7 @@ class FSModel:
             'canonical_sites': str(self.canonical_sites),
             'canonical_site_transforms': str(self.canonical_site_transforms),
             'xtalform_sites': str(self.xtalform_sites),
+            'reference_structure_transforms': str(self.reference_structure_transforms),
             'alignments': alignments,
             'reference_alignments': reference_alignments,
         }
