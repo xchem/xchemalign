@@ -1127,7 +1127,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
     #         conformer_site = conformer_sites[conformer_site_id]
     #         for lid in conformer_site.members:
     #             _update_aligned_xmaps()
-    reference_xmap = read_xmap_from_mtz(datasets[[x for x in canonical_sites.values()][0].global_reference_dtag])
+    reference_xmap = read_xmap_from_mtz(datasets[[x for x in canonical_sites.values()][0].global_reference_dtag].mtz)
     for dtag, dataset_alignment_info in fs_model.alignments.items():
         for chain, chain_alignment_info in dataset_alignment_info.items():
             for residue, ligand_neighbourhood_output in chain_alignment_info.items():
