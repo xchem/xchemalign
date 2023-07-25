@@ -1136,10 +1136,14 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                         _structure = structures[dtag].clone()
                         canonical_site = canonical_sites[canonical_site_id]
                         # Check for the matching conformer site
+                        conformer_site = None
                         for conformer_site_id in canonical_site.conformer_site_ids:
                             if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
+
+                        if conformer_site is None:
+                            print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
                         xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
