@@ -7,7 +7,6 @@ from loguru import logger
 from pydantic import BaseModel, validator
 
 from ligand_neighbourhood_alignment import constants
-from ligand_neighbourhood_alignment import dt
 
 
 Structure = gemmi.Structure
