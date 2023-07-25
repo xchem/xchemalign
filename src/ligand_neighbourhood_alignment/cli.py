@@ -957,6 +957,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
             # for target_lid, transform in transforms.items():
             #     ligand_neighbourhood_transforms[(lid, target_lid)] = transform
     logger.info(f"Now have {len(ligand_neighbourhood_transforms)} alignments between neighbourhoods")
+    print(ligand_neighbourhood_transforms)
     _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transforms)
 
     # Update the alignment graph
