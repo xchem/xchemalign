@@ -77,6 +77,7 @@ from ligand_neighbourhood_alignment.make_data_json import (
     make_data_json_from_pandda_dir,
 )
 from ligand_neighbourhood_alignment.generate_aligned_structures import _align_structure, _align_reference_structure
+from ligand_neighbourhood_alignment.align_xmaps import read_xmap, read_xmap_from_mtz, __align_xmap
 
 
 def cas_ligands():
@@ -1121,12 +1122,42 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                 )
 
     # Generate new aligned maps
-    for canonical_site_id, canonical_site in canonical_sites.items():
-        for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
-            for lid in conformer_site.ligand_ids:
-                _update_aligned_xmaps()
-
-
+    # for canonical_site_id, canonical_site in canonical_sites.items():
+    #     for conformer_site_id in canonical_site.conformer_site_ids:
+    #         conformer_site = conformer_sites[conformer_site_id]
+    #         for lid in conformer_site.members:
+    #             _update_aligned_xmaps()
+    reference_xmap = read_xmap_from_mtz(datasets[[x for x in canonical_sites.values()][0].global_reference_dtag])
+    for dtag, dataset_alignment_info in fs_model.alignments.items():
+        for chain, chain_alignment_info in dataset_alignment_info.items():
+            for residue, ligand_neighbourhood_output in chain_alignment_info.items():
+                for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_event_maps.items():
+                    if not Path(aligned_structure_path).exists():
+                        _structure = structures[dtag].clone()
+                        canonical_site = canonical_sites[canonical_site_id]
+                        # Check for the matching conformer site
+                        for conformer_site_id in canonical_site.conformer_site_ids:
+                            if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
+                                conformer_site = conformer_sites[conformer_site_id]
+                                break
+                        xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
+                        xmap = read_xmap(xmap_path)
+                        moving_ligand_id = (dtag, chain, residue)
+                        reference_ligand_id = conformer_site.reference_ligand_id
+                        __align_xmap(
+                            ligand_neighbourhoods[(dtag, residue, chain)],
+                            alignability_graph,
+                            ligand_neighbourhood_transforms,
+                            reference_xmap,
+                            reference_ligand_id,
+                            moving_ligand_id,
+                            xmap,
+                            conformer_site_transforms,
+                            conformer_site_id,
+                            canonical_site_transforms,
+                            canonical_site_id,
+                            aligned_structure_path,
+                        )
 def _load_assemblies(assemblies_file, new_assemblies_yaml):
     assemblies = {}
 

@@ -28,12 +28,24 @@ from ligand_neighbourhood_alignment.data import (
     write_xmap,
 )
 
+from ligand_neighbourhood_alignment import dt
+
 
 def get_coord_array(neighbourhood: LigandNeighbourhood):
     coords = []
     for a in neighbourhood.atoms:
         coords.append([a.x, a.y, a.z])
     for a in neighbourhood.artefact_atoms:
+        coords.append([a.x, a.y, a.z])
+
+    return np.array(coords)
+
+
+def _get_coord_array(neighbourhood: dt.Neighbourhood):
+    coords = []
+    for aid, a in neighbourhood.atoms.items():
+        coords.append([a.x, a.y, a.z])
+    for aid, a in neighbourhood.artefact_atoms.items():
         coords.append([a.x, a.y, a.z])
 
     return np.array(coords)
@@ -54,7 +66,6 @@ def get_transformed_bounds(rlb, rub):
 
 
 def get_grid_bounds(tlb, tub, xmap):
-
     cell = xmap.unit_cell
 
     tlbf = cell.fractionalize(gemmi.Position(*tlb))
@@ -95,7 +106,6 @@ def get_subblocks(xrm, xr):
 
 
 def get_blocks(rglb, rgub, xmap):
-
     cell = xmap.unit_cell
 
     xr = np.arange(rglb[0], rgub[0] + 1)
@@ -159,7 +169,6 @@ def get_blocks(rglb, rgub, xmap):
 
 
 def get_interpolation_range(neighbourhood: LigandNeighbourhood, transform, reference_xmap):
-
     # Get the gemmi transform
     transform_gemmi = transform
 
@@ -199,11 +208,51 @@ def get_interpolation_range(neighbourhood: LigandNeighbourhood, transform, refer
     return blocks
 
 
+def _get_interpolation_range(neighbourhood: dt.Neighbourhood, transform, reference_xmap):
+    # Get the gemmi transform
+    transform_gemmi = transform
+
+    # Coord array
+    coord_arr = _get_coord_array(neighbourhood)
+
+    # Find the bounds
+    lb, ub = get_bounds(coord_arr)
+    logger.debug(f"Bounds of interpolation range in native frame are: {lb} : {ub}")
+
+    # Transform the bounds
+    corners = []
+    for xb, yb, zb in itertools.product([lb[0], ub[0]], [lb[1], ub[1]], [lb[2], ub[2]]):
+        # rlb, rub = transform_gemmi.apply(gemmi.Position(*lb)), transform_gemmi.apply(gemmi.Position(*ub))
+        corner = transform_gemmi.apply(gemmi.Position(xb, yb, zb))
+        corners.append([corner.x, corner.y, corner.z])
+    corner_array = np.array(corners)
+    logger.debug(f"Transformed Corner array: {corner_array}")
+
+    # Get the new bounds
+    # tlb, tub = get_transformed_bounds(rlb, rub)
+    tlb, tub = get_bounds(corner_array)
+    logger.debug(f"Bounds of interpolation range bounds in reference frame are: {tlb} : {tub}")
+
+    # Get grid bounds
+    rglb, rgub = get_grid_bounds(tlb, tub, reference_xmap)
+    logger.debug(f"Grid bounds are: {rglb} : {rgub}")
+
+    # Get the blocks
+    blocks: list[Block] = get_blocks(rglb, rgub, reference_xmap)
+    logger.debug(f"Num blocks: {blocks}")
+    for b in blocks:
+        s = f"Block: xi {b.xi} yi {b.yi} zi {b.zi} dx {b.dx} dy {b.dy} dz {b.dz}"
+        logger.debug(s)
+        logger.debug(b.transform)
+
+    return blocks
+
+
 def interpolate_range(
-    reference_xmap,
-    xmap,
-    interpolation_ranges: list[Block],
-    transform,
+        reference_xmap,
+        xmap,
+        interpolation_ranges: list[Block],
+        transform,
 ):
     # Make a xmap on reference template
     new_xmap = gemmi.FloatGrid(reference_xmap.nu, reference_xmap.nv, reference_xmap.nw)
@@ -245,26 +294,26 @@ def interpolate_range(
         logger.debug(f"Block Z Range in output xmap: {rzi} : {rzf}")
 
         grid_np[
-            rxi:rxf,
-            ryi:ryf,
-            rzi:rzf,
+        rxi:rxf,
+        ryi:ryf,
+        rzi:rzf,
         ] = arr
 
     return new_xmap
 
 
 def align_xmap(
-    neighbourhoods: LigandNeighbourhoods,
-    g,
-    transforms: Transforms,
-    site_transforms: SiteTransforms,
-    reference_xmap,
-    subsite_reference_id: LigandID,
-    site_id: int,
-    subsite_id: int,
-    lid: LigandID,
-    xmap,
-    output_path: Path,
+        neighbourhoods: LigandNeighbourhoods,
+        g,
+        transforms: Transforms,
+        site_transforms: SiteTransforms,
+        reference_xmap,
+        subsite_reference_id: LigandID,
+        site_id: int,
+        subsite_id: int,
+        lid: LigandID,
+        xmap,
+        output_path: Path,
 ):
     # Get the ligand neighbourhood
     neighbourhood: LigandNeighbourhood = neighbourhoods.get_neighbourhood(lid)
@@ -281,7 +330,6 @@ def align_xmap(
         # Get the transform from previous frame to new one
         # Transform is 2 onto 1
         if next_ligand_id != previous_ligand_id:
-
             transform = transforms.get_transform(
                 (
                     next_ligand_id,
@@ -325,6 +373,78 @@ def align_xmap(
     )
 
 
+def __align_xmap(
+        neighbourhood: dt.Neighbourhood,
+        g,
+        ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
+        reference_xmap,
+        subsite_reference_id: tuple[str,str,str],
+        lid: tuple[str, str, str],
+        xmap,
+        conformer_site_transforms,
+        conformer_site_id,
+        canonical_site_transforms,
+        canonical_site_id,
+        output_path: Path,
+):
+    # Get the ligand neighbourhood
+    # neighbourhood: LigandNeighbourhood = neighbourhoods.get_neighbourhood(lid)
+
+    # Get the xmap
+
+    # Get the Transform to reference
+    running_transform = gemmi.Transform()
+    shortest_path = nx.shortest_path(g, lid, subsite_reference_id)
+    logger.debug(f"Shortest path: {shortest_path}")
+
+    previous_ligand_id = lid
+    for next_ligand_id in shortest_path:
+        # Get the transform from previous frame to new one
+        # Transform is 2 onto 1
+        if next_ligand_id != previous_ligand_id:
+            transform = ligand_neighbourhood_transforms[
+                (
+                    next_ligand_id,
+                    previous_ligand_id,
+                )
+            ]
+            running_transform = transform_to_gemmi(transform).combine(running_transform)
+        # Apply the translation to the new frame
+        previous_ligand_id = next_ligand_id
+
+    # Get the subsite transform
+    conformer_site_transform = transform_to_gemmi(conformer_site_transforms[conformer_site_id])
+
+    # Get the site transform
+    canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+
+    # Running transform
+    running_transform = canonical_site_transform.combine(conformer_site_transform.combine(running_transform))
+
+    logger.debug(
+        f"Transform from native frame to subsite frame to site frame is: {gemmi_to_transform(running_transform)}"
+    )
+
+    # Define the interpolation range
+    interpolation_range = _get_interpolation_range(neighbourhood, running_transform, reference_xmap)
+
+    # Interpolate
+    new_xmap = interpolate_range(
+        reference_xmap,
+        xmap,
+        interpolation_range,
+        running_transform.inverse(),
+    )
+
+    # Output the xmap
+    write_xmap(
+        new_xmap,
+        output_path,
+        neighbourhood,
+        running_transform,
+    )
+
+
 def read_xmap_from_mtz(mtz_path: Path):
     mtz = gemmi.read_mtz_file(str(mtz_path))
     try:
@@ -342,17 +462,16 @@ def read_xmap_from_mtz(mtz_path: Path):
 
 
 def _align_xmaps(
-    system_data: SystemData,
-    structures,
-    canonical_sites: CanonicalSites,
-    conformer_sites: ConformerSites,
-    neighbourhoods: LigandNeighbourhoods,
-    g,
-    transforms: Transforms,
-    site_transforms: SiteTransforms,
-    output: Output,
+        system_data: SystemData,
+        structures,
+        canonical_sites: CanonicalSites,
+        conformer_sites: ConformerSites,
+        neighbourhoods: LigandNeighbourhoods,
+        g,
+        transforms: Transforms,
+        site_transforms: SiteTransforms,
+        output: Output,
 ):
-
     # Get the global reference
     # reference_lid: LigandID = canonical_sites.reference_site.reference_ligand_id
 
@@ -475,3 +594,131 @@ def _align_xmaps(
                         xmap,
                         output_path,
                     )
+
+
+def _align_xmap(
+        system_data: SystemData,
+        canonical_sites: CanonicalSites,
+        conformer_sites: ConformerSites,
+        neighbourhoods: LigandNeighbourhoods,
+        g,
+        transforms: Transforms,
+        site_transforms: SiteTransforms,
+        output: Output,
+):
+    # Get the global reference
+    # reference_lid: LigandID = canonical_sites.reference_site.reference_ligand_id
+
+    # Get that dataset
+    # referance_ds: Dataset = system_data.get_dataset(DatasetID(dtag=reference_lid.dtag))
+    # reference_binding_site = referance_ds.ligand_binding_events[
+    # reference_lid]
+    # logger.debug(f"PDB: {referance_ds.pdb}")
+
+    # Reference_xmap_path
+    # reference_xmap_path: Path = Path(reference_binding_site.xmap)
+    # reference_mtz_path = Path(referance_ds.mtz)
+
+    # Load the site reference xmap
+    # reference_xmap = read_xmap(reference_xmap_path)
+    # reference_xmap = read_xmap_from_mtz(reference_mtz_path)
+
+    #
+    # xmaps_dir = _output_dir / "aligned_xmaps"
+    # if not xmaps_dir.exists():
+    #     os.mkdir(xmaps_dir)
+
+    logger.debug(f"Aligning site: {canonical_site_id}")
+    # site_reference_id = site.members[0]
+
+    #
+    # site_xmaps_dir = xmaps_dir / f"{site_id}"
+    # if not site_xmaps_dir.exists():
+    #     os.mkdir(site_xmaps_dir)
+    reference_lid: LigandID = canonical_site.reference_ligand_id
+    referance_ds: Dataset = system_data.get_dataset(DatasetID(dtag=reference_lid.dtag))
+    logger.debug(f"PDB: {referance_ds.pdb}")
+    reference_mtz_path = Path(referance_ds.mtz)
+    reference_xmap = read_xmap_from_mtz(reference_mtz_path)
+
+    logger.debug(f"Aligning subsite: {conformer_site_id}")
+    # Get the site reference
+    # TODO: Make work
+    conformer_site_reference_id = conformer_site.reference_ligand_id
+
+    # subsite_xmaps_dir = site_xmaps_dir / f"{subsite_id}"
+    # if not subsite_xmaps_dir.exists():
+    #     os.mkdir(subsite_xmaps_dir)
+
+    # for lid, neighbourhood in zip(neighbourhoods.ligand_ids,
+    # neighbourhoods.ligand_neighbourhoods):
+    logger.debug(f"Aligning xmap: {lid}")
+
+    dtag, chain, residue = (
+        lid.dtag,
+        lid.chain,
+        lid.residue,
+    )
+    # if dtag != "Mpro-J0055":
+    #     continue
+
+    logger.debug(f"Reference pdb: {referance_ds.pdb}")
+    logger.debug(f"Moving pdb: {system_data.get_dataset(DatasetID(dtag=lid.dtag)).pdb}")
+
+    # Get the ligand binding event
+    dataset = system_data.get_dataset(DatasetID(dtag=lid.dtag))
+    lbe: LigandBindingEvent = dataset.ligand_binding_events[lid]
+
+    # Get the xmap path
+    #
+
+    if lbe.xmap != "None":
+        xmap_path: Path = Path(lbe.xmap)
+        logger.debug(f"Xmap path: {xmap_path}")
+
+        xmap = read_xmap(xmap_path)
+    else:
+        mtz_path: Path = Path(dataset.mtz)
+        logger.debug(f"Mtz path is: {mtz_path}")
+
+        xmap = read_xmap_from_mtz(mtz_path)
+
+    aop = Path(output.source_dir)
+
+    # Align the event map
+    output_path = aop / output.dataset_output[dtag][chain][residue].aligned_event_maps[canonical_site_id]
+    logger.debug("Aligning event map...")
+    align_xmap(
+        neighbourhoods,
+        g,
+        transforms,
+        site_transforms,
+        reference_xmap,
+        conformer_site_reference_id,
+        canonical_site_id,
+        conformer_site_id,
+        lid,
+        xmap,
+        output_path,
+    )
+    # Align the refined map
+    output_path = aop / output.dataset_output[dtag][chain][residue].aligned_xmaps[canonical_site_id]
+
+    if dataset.mtz:
+        logger.debug("Aligning 2Fo-Fc map...")
+
+        xmap = read_xmap_from_mtz(Path(dataset.mtz))
+
+        align_xmap(
+            neighbourhoods,
+            g,
+            transforms,
+            site_transforms,
+            reference_xmap,
+            conformer_site_reference_id,
+            canonical_site_id,
+            conformer_site_id,
+            lid,
+            xmap,
+            output_path,
+        )
