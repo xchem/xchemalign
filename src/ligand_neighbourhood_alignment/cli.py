@@ -1136,8 +1136,8 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
     for dtag, dataset_alignment_info in fs_model.alignments.items():
         for chain, chain_alignment_info in dataset_alignment_info.items():
             for residue, ligand_neighbourhood_output in chain_alignment_info.items():
-                for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_event_maps.items():
-                    if not Path(aligned_structure_path).exists():
+                for canonical_site_id, aligned_event_map_path in ligand_neighbourhood_output.aligned_event_maps.items():
+                    if not Path(aligned_event_map_path).exists():
                         _structure = structures[dtag].clone()
                         canonical_site = canonical_sites[canonical_site_id]
                         # Check for the matching conformer site
@@ -1171,7 +1171,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                                 conformer_site_id,
                                 canonical_site_transforms,
                                 canonical_site_id,
-                                aligned_structure_path,
+                                aligned_event_map_path,
                             )
 def _load_assemblies(assemblies_file, new_assemblies_yaml):
     assemblies = {}
