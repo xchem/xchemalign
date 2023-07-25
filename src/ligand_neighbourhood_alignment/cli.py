@@ -76,7 +76,7 @@ from ligand_neighbourhood_alignment.make_data_json import (
     get_ligand_binding_events_from_structure,
     make_data_json_from_pandda_dir,
 )
-from ligand_neighbourhood_alignment.generate_aligned_structures import _align_structure
+from ligand_neighbourhood_alignment.generate_aligned_structures import _align_structure, _align_reference_structure
 
 
 def cas_ligands():
@@ -1040,6 +1040,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
     _save_canonical_site_transforms(fs_model, canonical_site_transforms)
 
     # Update the reference structure transforms
+    logger.info(f"Previously had {len(reference_structure_transforms)} reference structure transforms")
     for dtag, dataset in reference_datasets.items():
         for canonical_site_id, canonical_site in canonical_sites.items():
             key = (dtag, canonical_site_id)
@@ -1051,6 +1052,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                    canonical_site,
                    conformer_sites,
                )
+    logger.info(f"Now have {len(reference_structure_transforms)} reference structure transforms")
     save_reference_structure_transforms(
         fs_model,
         reference_structure_transforms,
@@ -1075,7 +1077,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                 for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
                     if not aligned_structure_path.exists():
                         # _update_aligned_structures()
-                        _structure = structures[dtag]
+                        _structure = structures[dtag].clone()
                         canonical_site = canonical_sites[canonical_site_id]
                         # Check for the matching conformer site
                         for conformer_site_id in canonical_site.conformer_site_ids:
@@ -1105,18 +1107,15 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
             #
             # )
     for dtag, dataset_alignment_info in fs_model.reference_alignments.items():
-        for canonical_site_id, canonical_site in dataset_alignment_info.items():
+        for canonical_site_id, alignment_info in dataset_alignment_info.items():
+            _structure = structures[dtag].clone()
             _align_reference_structure(
                 _structure,
-                moving_ligand_id,
-                reference_ligand_id,
-                alignability_graph,
-                ligand_neighbourhood_transforms,
-                conformer_site_transforms,
+                dtag,
+                reference_structure_transforms,
                 canonical_site_transforms,
                 canonical_site_id,
-                conformer_site_id,
-                aligned_structure_path,
+                alignment_info['aligned_structures'],
             )
 
     # Generate new aligned maps
