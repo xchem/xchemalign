@@ -525,8 +525,8 @@ def _generate_assembly(
                     new_pos_frac = op.apply_to_xyz([atom_frac.x, atom_frac.y, atom_frac.z])
                     new_pos_orth = structure.cell.orthogonalize(gemmi.Fractional(*new_pos_frac))
                     atom.pos = gemmi.Position(*new_pos_orth)
-                chain_clone.name = f"{_chain}~{_biogen.biomol}~{_transform}"
-                full_st[0].add_chain(chain_clone)
+            chain_clone.name = f"{_chain}~{_biogen.biomol}~{_transform}"
+            full_st[0].add_chain(chain_clone)
 
     chains = []
     num_chains = 0
