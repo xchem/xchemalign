@@ -1424,20 +1424,23 @@ class CLI:
         print(new_datasets)
 
         # Get assemblies
+        logger.info(f"Getting assemblies...")
         if source_fs_model:
             assemblies: dict[str, dt.Assembly] = _load_assemblies(source_fs_model.assemblies, Path(options.assemblies_json))
         else:
-            assemblies = {}
+            assemblies = _load_assemblies(fs_model.assemblies, Path(options.assemblies_json))
         # for key, assembly in assemblies.items():
         #     print(assembly)
         #     for gen in assembly.generators:
         #         print([gen.chain, gen.reference_chain, gen.triplet])
         print(assemblies)
+
         # Get xtalforms
+        logger.info(f"Getting xtalforms...")
         if source_fs_model:
             xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(source_fs_model.xtalforms, Path(options.xtalforms_json))
         else:
-            xtalforms = {}
+            xtalforms = _load_xtalforms(fs_model.xtalforms, Path(options.xtalforms_json))
         # for key, xtalform in xtalforms.items():
         #     print(xtalform)
         #     for ass, xtalform_ass in xtalform.assemblies.items():
@@ -1446,71 +1449,85 @@ class CLI:
         print(xtalforms)
 
         # Get the dataset assignments
+        logger.info(f"Getting dataset assignments...")
         if source_fs_model:
             dataset_assignments = _load_dataset_assignments(Path(source_fs_model.dataset_assignments))
         else:
-            dataset_assignments = {}
+            dataset_assignments = _load_dataset_assignments(Path(fs_model.dataset_assignments))
         print(dataset_assignments)
 
         # Get Ligand neighbourhoods
+        logger.info(f"Getting ligand neighbourhoods...")
         if source_fs_model:
             ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _load_ligand_neighbourhoods(
             source_fs_model.ligand_neighbourhoods)
         else:
-            ligand_neighbourhoods = {}
+            ligand_neighbourhoods = _load_ligand_neighbourhoods(
+            fs_model.ligand_neighbourhoods)
         print(ligand_neighbourhoods)
 
         # Get alignability graph
+        logger.info(f"Getting alignability graph...")
         if source_fs_model:
             alignability_graph = _load_alignability_graph(source_fs_model.alignability_graph)
         else:
-            alignability_graph = nx.Graph()
+            alignability_graph = _load_alignability_graph(fs_model.alignability_graph)
 
         #
+        logger.info(f"Getting lighand neighbourhood transforms...")
         if source_fs_model:
             ligand_neighbourhood_transforms: dict[
                 tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform] = _load_ligand_neighbourhood_transforms(
                 source_fs_model.ligand_neighbourhood_transforms)
         else:
-            ligand_neighbourhood_transforms = {}
+            ligand_neighbourhood_transforms = _load_ligand_neighbourhood_transforms(
+                fs_model.ligand_neighbourhood_transforms)
 
         # Get conformer sites
+        logger.info(f"Getting conformer sites...")
         if source_fs_model:
             conformer_sites: dict[str, dt.ConformerSite] = _load_conformer_sites(source_fs_model.conformer_sites)
         else:
-            conformer_sites = {}
+            conformer_sites = _load_conformer_sites(fs_model.conformer_sites)
 
         #
+        logger.info(f"Getting conformer site transforms...")
         if source_fs_model:
             conformer_site_transforms: dict[tuple[str, str], dt.Transform] = _load_conformer_site_transforms(
             source_fs_model.conformer_site_transforms)
         else:
-            conformer_site_transforms = {}
+            conformer_site_transforms = _load_conformer_site_transforms(
+            fs_model.conformer_site_transforms)
 
         # Get canonical sites
+        logger.info(f"Getting canonical sites...")
         if source_fs_model:
             canonical_sites: dict[str, dt.CanonicalSite] = _load_canonical_sites(source_fs_model.canonical_sites)
         else:
-            canonical_sites = {}
+            canonical_sites = _load_canonical_sites(fs_model.canonical_sites)
 
         #
+        logger.info(f"Getting canonical site transforms...")
         if source_fs_model:
             canonical_site_transforms: dict[str, dt.Transform] = _load_canonical_site_transforms(
             source_fs_model.conformer_site_transforms)
         else:
-            canonical_site_transforms = {}
+            canonical_site_transforms = _load_canonical_site_transforms(
+            fs_model.conformer_site_transforms)
 
         # Get xtalform sites
+        logger.info(f"Getting xtalform sites...")
         if source_fs_model:
             xtalform_sites: dict[str, dt.XtalFormSite] = _load_xtalform_sites(source_fs_model.xtalform_sites)
         else:
-            reference_structure_transforms = {}
+            reference_structure_transforms = _load_xtalform_sites(fs_model.xtalform_sites)
 
         # Get reference structure transforms
+        logger.info(f"Getting reference structure transforms...")
         if source_fs_model:
             reference_structure_transforms: dict[tuple[str,str], dt.Transform] = _load_reference_stucture_transforms(source_fs_model.reference_structure_transforms)
         else:
-            reference_structure_transforms = {}
+            reference_structure_transforms = _load_reference_stucture_transforms(fs_model.reference_structure_transforms)
 
         # Run the update
         _update(
