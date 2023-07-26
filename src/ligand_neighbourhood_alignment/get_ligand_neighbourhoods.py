@@ -383,6 +383,11 @@ def _get_ligand_neighbourhood(
             str(cra.atom.name),
         )
         image_transform = atom_images[artefact_atom_id]
+        artefact_atom_id: tuple[str, str, str] = (
+            str(cra.chain.name).split("~")[0],
+            str(cra.residue.seqid.num),
+            str(cra.atom.name),
+        )
         transform = dt.Transform(
             vec=image_transform.vec.tolist(),
             mat=image_transform.mat.tolist(),
