@@ -915,7 +915,7 @@ def _update(
         canonical_sites: dict[str, dt.CanonicalSite],
         canonical_site_transforms: dict[str, dt.Transform],
         xtalform_sites: dict[str, dt.XtalFormSite],
-reference_structure_transforms: dict[tuple[str,str], dt.Transform]
+        reference_structure_transforms: dict[tuple[str,str], dt.Transform]
 ):
     # Get the structures
     structures: dict = _get_structures(datasets)
@@ -1105,6 +1105,8 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                             conformer_site_id,
                             aligned_structure_path,
                         )
+                    else:
+                        logger.info(f"Already output structure!")
 
     # Generate alignments of references to each canonical site
     # for canonical_site_id, canonical_site in canonical_sites.items():
@@ -1115,6 +1117,7 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
     for dtag, dataset_alignment_info in fs_model.reference_alignments.items():
         for canonical_site_id, alignment_info in dataset_alignment_info.items():
             aligned_structure_path = alignment_info['aligned_structures']
+            logger.info(f"Outputting reference structure: {aligned_structure_path}")
             if not Path(aligned_structure_path).exists():
                 _structure = structures[dtag].clone()
                 _align_reference_structure(
@@ -1125,6 +1128,8 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                     canonical_site_id,
                     alignment_info['aligned_structures'],
                 )
+            else:
+                logger.info(f"Already output reference structure!")
 
     # Generate new aligned maps
     # for canonical_site_id, canonical_site in canonical_sites.items():
@@ -1176,6 +1181,8 @@ reference_structure_transforms: dict[tuple[str,str], dt.Transform]
                                 canonical_site_id,
                                 aligned_event_map_path,
                             )
+                    else:
+                        logger.info(f"Already output xmap!")
 def _load_assemblies(assemblies_file, new_assemblies_yaml):
     assemblies = {}
 
@@ -1520,7 +1527,7 @@ class CLI:
         if source_fs_model:
             xtalform_sites: dict[str, dt.XtalFormSite] = _load_xtalform_sites(source_fs_model.xtalform_sites)
         else:
-            reference_structure_transforms = _load_xtalform_sites(fs_model.xtalform_sites)
+            xtalform_sites = _load_xtalform_sites(fs_model.xtalform_sites)
 
         # Get reference structure transforms
         logger.info(f"Getting reference structure transforms...")
