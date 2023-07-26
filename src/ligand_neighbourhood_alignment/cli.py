@@ -489,7 +489,11 @@ def _save_assignments(fs_model: dt.FSModel, dataset_assignments: dict[str, str])
         yaml.safe_dump(dataset_assignments, f)
 
 
-def _generate_assembly(xtalform: dt.XtalForm, structure, assemblies: dict[str, dt.Assembly]):
+def _generate_assembly(
+        xtalform: dt.XtalForm,
+        structure,
+        assemblies: dict[str, dt.Assembly],
+):
     full_st = structure.clone()
     chains_to_delete = []
     for model in full_st:
@@ -501,21 +505,28 @@ def _generate_assembly(xtalform: dt.XtalForm, structure, assemblies: dict[str, d
 
     for xtalform_assembly_id, xtalform_assembly in xtalform.assemblies.items():
         assembly = assemblies[xtalform_assembly.assembly]
-        chains = xtalform_assembly.chains
-        reference = assembly.reference
+        # chains = xtalform_assembly.chains
+        # reference = assembly.reference
+        for _biogen, _chain, _transform in zip(
+                assembly.generators,
+                xtalform_assembly.chains,
+                xtalform_assembly.transforms,
+        ):
 
-        for generator in assembly.generators:
-            op = gemmi.Op(generator.triplet)
-            chain_clone = structure[0][generator.chain].clone()
+        # for generator in assembly.generators:
+        #     op = gemmi.Op(generator.triplet)
+            op = gemmi.Op(_transform)
+            # chain_clone = structure[0][generator.chain].clone()
+            chain_clone = structure[0][_chain].clone()
+
             for residue in chain_clone:
                 for atom in residue:
                     atom_frac = structure.cell.fractionalize(atom.pos)
                     new_pos_frac = op.apply_to_xyz([atom_frac.x, atom_frac.y, atom_frac.z])
                     new_pos_orth = structure.cell.orthogonalize(gemmi.Fractional(*new_pos_frac))
-
                     atom.pos = gemmi.Position(*new_pos_orth)
-            chain_clone.name = generator.reference_chain
-            full_st[0].add_chain(chain_clone)
+                chain_clone.name = f"{_chain}~{_biogen.biomol}~{_transform}"
+                full_st[0].add_chain(chain_clone)
 
     chains = []
     num_chains = 0
@@ -534,6 +545,7 @@ def _get_structure_fragments(dataset: dt.Dataset, structure):
     # lig_number: int = 0
     for model in structure:
         for chain in model:
+            source_chain, biomol_chain, transform = chain.name.split("~")
             for residue in chain.get_ligands():
                 for lbe in dataset.ligand_binding_events:
                     # if (
@@ -545,8 +557,8 @@ def _get_structure_fragments(dataset: dt.Dataset, structure):
                     #     ligand_id = (dataset.dtag, str(chain.name), str(lbe.residue),)
                     #     fragments[ligand_id] = residue
                     # lig_number = lig_number + 1
-                    if (lbe[2] == str(residue.seqid.num)) & (lbe[1] == str(chain.name)):
-                        ligand_id = (dataset.dtag, str(chain.name), str(lbe[2]),)
+                    if (lbe[2] == str(residue.seqid.num)) & (lbe[1] == str(source_chain)) & (transform == "x,y,z"):
+                        ligand_id = (dataset.dtag, str(lbe[1]), str(lbe[2]),)
                         fragments[ligand_id] = residue
 
     return fragments
@@ -578,7 +590,12 @@ def _get_dataset_neighbourhoods(
     # partition them into model and artefact
     fragment_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = {}
     for ligand_id, fragment in fragments.items():
-        fragment_neighbourhoods[ligand_id] = _get_ligand_neighbourhood(assembly, ns, fragment, max_dist=max_radius)
+        fragment_neighbourhoods[ligand_id] = _get_ligand_neighbourhood(
+            assembly,
+            ns,
+            fragment,
+            max_dist=max_radius,
+        )
 
     return fragment_neighbourhoods
 
@@ -759,7 +776,12 @@ def _update_xtalform_sites(
                     xtalform_site.members.append(member)
             else:
                 xtalform_site_id = "/".join(member)
-                xtalform_site = dt.XtalFormSite(assignment, member[1], canonical_site_id, [member, ])
+                xtalform_site = dt.XtalFormSite(
+                    assignment,
+                    member[1],
+                    canonical_site_id,
+                    [member, ],
+                )
                 xtalform_sites[xtalform_site_id] = xtalform_site
                 xtalforms_dict[(xtalform_site.canonical_site_id, xtalform_site.xtalform_id)] = xtalform_site_id
 
@@ -923,7 +945,13 @@ def _update(
 
     # Assign datasets
     for dtag, dataset in new_datasets.items():
-        dataset_assignments[dtag] = _assign_dataset(dataset, assemblies, xtalforms, structures[dtag], structures)
+        dataset_assignments[dtag] = _assign_dataset(
+            dataset,
+            assemblies,
+            xtalforms,
+            structures[dtag],
+            structures,
+        )
     _save_assignments(fs_model, dataset_assignments)
 
     # Get neighbourhoods

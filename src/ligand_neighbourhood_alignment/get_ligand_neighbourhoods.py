@@ -301,7 +301,6 @@ def _get_ligand_neighbourhood(
     residue_neighbours: list[tuple[gemmi.Position, gemmi.CRA]] = []
 
     atom_images = {}
-
     for atom in fragment:
         # Get the atom neighbours (as arbitrary image marks)
         atom_neighbours: list[gemmi.NeighborSearch.Mark] = ns.find_neighbors(
@@ -352,7 +351,7 @@ def _get_ligand_neighbourhood(
     for pos, cra in _model_atoms:
         # cra = atom.to_cra(structure[0])
         model_atom_id: tuple[str, str, str] = (
-            str(cra.chain.name),
+            str(cra.chain.name).split("~")[0],
             str(cra.residue.seqid.num),
             str(cra.atom.name),
         )

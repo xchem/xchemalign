@@ -411,11 +411,11 @@ class SourceDataModel:
 class Generator:
     def __init__(
             self,
-            reference_chain: str,
+            biomol: str,
             chain: str,
             triplet: str
     ):
-        self.reference_chain: str = reference_chain
+        self.biomol: str = biomol
         self.chain: str = chain
         self.triplet: str = triplet
 
