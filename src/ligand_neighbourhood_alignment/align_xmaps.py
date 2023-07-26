@@ -483,7 +483,7 @@ def __align_xmap(
         new_xmap,
         output_path,
         neighbourhood,
-        running_transform.inverse(),
+        running_transform,
     )
 
 
