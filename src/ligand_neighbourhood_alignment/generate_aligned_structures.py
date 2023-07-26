@@ -294,11 +294,11 @@ def _align_structure(
     confomer_site_transform = transform_to_gemmi(
         conformer_site_transforms[(canonical_site_id, conformer_site_id)]
     )
-    confomer_site_transform.combine(running_transform)
+    running_transform = confomer_site_transform.combine(running_transform)
 
     # Site alignment transform
     canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
-    canonical_site_transform.combine(running_transform)
+    running_transform = canonical_site_transform.combine(running_transform)
 
     logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
 
