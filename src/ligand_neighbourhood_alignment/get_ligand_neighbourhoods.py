@@ -351,11 +351,16 @@ def _get_ligand_neighbourhood(
     for pos, cra in _model_atoms:
         # cra = atom.to_cra(structure[0])
         model_atom_id: tuple[str, str, str] = (
-            str(cra.chain.name).split("~")[0],
+            str(cra.chain.name),
             str(cra.residue.seqid.num),
             str(cra.atom.name),
         )
         image_transform = atom_images[model_atom_id]
+        model_atom_id: tuple[str, str, str] = (
+            str(cra.chain.name).split("~")[0],
+            str(cra.residue.seqid.num),
+            str(cra.atom.name),
+        )
         transform = dt.Transform(
             vec=image_transform.vec.tolist(),
             mat=image_transform.mat.tolist(),
