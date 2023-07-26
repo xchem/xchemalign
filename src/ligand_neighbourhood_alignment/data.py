@@ -639,6 +639,7 @@ def save_data(system_data: SystemData, output_dir: Path):
 
 class Options(BaseModel):
     source_dir: str
+    output_dir: str
     datasources: list[str]
     datasource_types: list[str]
     panddas: list[str]

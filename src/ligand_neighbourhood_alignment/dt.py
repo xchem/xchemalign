@@ -82,9 +82,14 @@ class FSModel:
         self.alignments = alignments
         self.reference_alignments = reference_alignments
 
+
     @staticmethod
-    def from_dir(source_dir: str):
+    def from_dir(
+            source_dir: str,
+    #        output_dir: str,
+    ):
         source_dir = Path(source_dir)
+        # output_dir = Path(output_dir)
 
         fs_model = source_dir / constants.FS_MODEL_YAML_FILE_NAME
         if fs_model.exists():

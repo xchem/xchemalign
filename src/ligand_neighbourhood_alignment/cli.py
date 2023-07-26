@@ -1382,18 +1382,32 @@ class CLI:
 
         options = Options.parse_file(options_json)
         # logger.info(f"Options json path is: {options}")
-        logger.info(f"Output dir is: {options.source_dir}")
+        logger.info(f"Input dir is: {options.source_dir}")
+        logger.info(f"Output dir is: {options.output_dir}")
 
-        fs_model = dt.FSModel.from_dir(options.source_dir)
+        if options.source_dir:
+            source_fs_model = dt.FSModel.from_dir(options.source_dir)
+        else:
+            source_fs_model = None
+        # else:
+            # source_fs_model = dt.FSModel.default()
 
-        if not Path(options.source_dir).exists():
-            os.mkdir(options.source_dir)
 
-        aligned_structure_dir = Path(options.source_dir) / constants.ALIGNED_STRUCTURES_DIR
+        fs_model = dt.FSModel.from_dir(options.output_dir,)
+        if source_fs_model:
+            fs_model.alignments = source_fs_model.alignments
+            fs_model.reference_alignments = source_fs_model.reference_alignments
+
+        # Update the output fs model, creating flat symlinks to old data
+
+        if not Path(options.output_dir).exists():
+            os.mkdir(options.output_dir)
+
+        aligned_structure_dir = Path(options.output_dir) / constants.ALIGNED_STRUCTURES_DIR
         if not aligned_structure_dir.exists():
             os.mkdir(aligned_structure_dir)
 
-        aligned_xmap_dir = Path(options.source_dir) / constants.ALIGNED_XMAPS_DIR
+        aligned_xmap_dir = Path(options.output_dir) / constants.ALIGNED_XMAPS_DIR
         if not aligned_xmap_dir.exists():
             os.mkdir(aligned_xmap_dir)
 
@@ -1410,14 +1424,20 @@ class CLI:
         print(new_datasets)
 
         # Get assemblies
-        assemblies: dict[str, dt.Assembly] = _load_assemblies(fs_model.assemblies, Path(options.assemblies_json))
+        if source_fs_model:
+            assemblies: dict[str, dt.Assembly] = _load_assemblies(source_fs_model.assemblies, Path(options.assemblies_json))
+        else:
+            assemblies = {}
         # for key, assembly in assemblies.items():
         #     print(assembly)
         #     for gen in assembly.generators:
         #         print([gen.chain, gen.reference_chain, gen.triplet])
         print(assemblies)
         # Get xtalforms
-        xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(fs_model.xtalforms, Path(options.xtalforms_json))
+        if source_fs_model:
+            xtalforms: dict[str, dt.XtalForm] = _load_xtalforms(source_fs_model.xtalforms, Path(options.xtalforms_json))
+        else:
+            xtalforms = {}
         # for key, xtalform in xtalforms.items():
         #     print(xtalform)
         #     for ass, xtalform_ass in xtalform.assemblies.items():
@@ -1426,41 +1446,71 @@ class CLI:
         print(xtalforms)
 
         # Get the dataset assignments
-        dataset_assignments = _load_dataset_assignments(Path(fs_model.dataset_assignments))
+        if source_fs_model:
+            dataset_assignments = _load_dataset_assignments(Path(source_fs_model.dataset_assignments))
+        else:
+            dataset_assignments = {}
         print(dataset_assignments)
 
         # Get Ligand neighbourhoods
-        ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _load_ligand_neighbourhoods(
-            fs_model.ligand_neighbourhoods)
+        if source_fs_model:
+            ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _load_ligand_neighbourhoods(
+            source_fs_model.ligand_neighbourhoods)
+        else:
+            ligand_neighbourhoods = {}
         print(ligand_neighbourhoods)
 
         # Get alignability graph
-        alignability_graph = _load_alignability_graph(fs_model.alignability_graph)
+        if source_fs_model:
+            alignability_graph = _load_alignability_graph(source_fs_model.alignability_graph)
+        else:
+            alignability_graph = nx.Graph()
 
         #
-        ligand_neighbourhood_transforms: dict[
-            tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform] = _load_ligand_neighbourhood_transforms(
-            fs_model.ligand_neighbourhood_transforms)
+        if source_fs_model:
+            ligand_neighbourhood_transforms: dict[
+                tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform] = _load_ligand_neighbourhood_transforms(
+                source_fs_model.ligand_neighbourhood_transforms)
+        else:
+            ligand_neighbourhood_transforms = {}
 
         # Get conformer sites
-        conformer_sites: dict[str, dt.ConformerSite] = _load_conformer_sites(fs_model.conformer_sites)
+        if source_fs_model:
+            conformer_sites: dict[str, dt.ConformerSite] = _load_conformer_sites(source_fs_model.conformer_sites)
+        else:
+            conformer_sites = {}
 
         #
-        conformer_site_transforms: dict[tuple[str, str], dt.Transform] = _load_conformer_site_transforms(
-            fs_model.conformer_site_transforms)
+        if source_fs_model:
+            conformer_site_transforms: dict[tuple[str, str], dt.Transform] = _load_conformer_site_transforms(
+            source_fs_model.conformer_site_transforms)
+        else:
+            conformer_site_transforms = {}
 
         # Get canonical sites
-        canonical_sites: dict[str, dt.CanonicalSite] = _load_canonical_sites(fs_model.canonical_sites)
+        if source_fs_model:
+            canonical_sites: dict[str, dt.CanonicalSite] = _load_canonical_sites(source_fs_model.canonical_sites)
+        else:
+            canonical_sites = {}
 
         #
-        canonical_site_transforms: dict[str, dt.Transform] = _load_canonical_site_transforms(
-            fs_model.conformer_site_transforms)
+        if source_fs_model:
+            canonical_site_transforms: dict[str, dt.Transform] = _load_canonical_site_transforms(
+            source_fs_model.conformer_site_transforms)
+        else:
+            canonical_site_transforms = {}
 
         # Get xtalform sites
-        xtalform_sites: dict[str, dt.XtalFormSite] = _load_xtalform_sites(fs_model.xtalform_sites)
+        if source_fs_model:
+            xtalform_sites: dict[str, dt.XtalFormSite] = _load_xtalform_sites(source_fs_model.xtalform_sites)
+        else:
+            reference_structure_transforms = {}
 
         # Get reference structure transforms
-        reference_structure_transforms: dict[tuple[str,str], dt.Transform] = _load_reference_stucture_transforms(fs_model.reference_structure_transforms)
+        if source_fs_model:
+            reference_structure_transforms: dict[tuple[str,str], dt.Transform] = _load_reference_stucture_transforms(source_fs_model.reference_structure_transforms)
+        else:
+            reference_structure_transforms = {}
 
         # Run the update
         _update(
