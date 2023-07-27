@@ -270,7 +270,7 @@ def _align_structure(
         g,
         neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
         conformer_site_transforms: dict[tuple[str, str], dt.Transform],
-        canonical_site_transforms: dict[str, dt.Transform],
+        # canonical_site_transforms: dict[str, dt.Transform],
         canonical_site_id: str,
         conformer_site_id: str,
         out_path: Path,
@@ -297,8 +297,8 @@ def _align_structure(
     running_transform = confomer_site_transform.combine(running_transform)
 
     # Site alignment transform
-    canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
-    running_transform = canonical_site_transform.combine(running_transform)
+    # canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+    # running_transform = canonical_site_transform.combine(running_transform)
 
     logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
 
@@ -317,7 +317,7 @@ def _align_reference_structure(
         # neighbourhood_transforms: dict[tuple[tuple[str,str,str], tuple[str,str,str]], dt.Transform],
         # conformer_site_transforms: dict[tuple[str, str], dt.Transform],
         reference_structure_transforms: dict[tuple[str, str], dt.Transform],
-        canonical_site_transforms: dict[str, dt.Transform],
+        # canonical_site_transforms: dict[str, dt.Transform],
         canonical_site_id: str,
         # conformer_site_id: str,
         out_path: Path,
@@ -325,8 +325,8 @@ def _align_reference_structure(
     running_transform = transform_to_gemmi(reference_structure_transforms[(dtag, canonical_site_id)])
 
     # Site alignment transform
-    canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
-    canonical_site_transform.combine(running_transform)
+    # canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+    # canonical_site_transform.combine(running_transform)
 
     logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
 

@@ -936,7 +936,7 @@ def _update(
         conformer_sites: dict[str, dt.ConformerSite],
         conformer_site_transforms: dict[tuple[str, str], dt.Transform],
         canonical_sites: dict[str, dt.CanonicalSite],
-        canonical_site_transforms: dict[str, dt.Transform],
+        # canonical_site_transforms: dict[str, dt.Transform],
         xtalform_sites: dict[str, dt.XtalFormSite],
         reference_structure_transforms: dict[tuple[str, str], dt.Transform]
 ):
@@ -1058,17 +1058,17 @@ def _update(
     _save_conformer_site_transforms(fs_model, conformer_site_transforms)
 
     # Get canonical site tranforms
-    logger.info(f"Previously had {len(canonical_site_transforms)} canonical site transforms...")
-    for canonical_site_id, canonical_site in canonical_sites.items():
-        _update_canonical_site_transforms(
-            canonical_site_transforms,
-            canonical_site_id,
-            canonical_site,
-            conformer_sites,
-            structures
-        )
-        logger.info(f"Now have {len(canonical_site_transforms)} canonical site transforms")
-    _save_canonical_site_transforms(fs_model, canonical_site_transforms)
+    # logger.info(f"Previously had {len(canonical_site_transforms)} canonical site transforms...")
+    # for canonical_site_id, canonical_site in canonical_sites.items():
+    #     _update_canonical_site_transforms(
+    #         canonical_site_transforms,
+    #         canonical_site_id,
+    #         canonical_site,
+    #         conformer_sites,
+    #         structures
+    #     )
+    #     logger.info(f"Now have {len(canonical_site_transforms)} canonical site transforms")
+    # _save_canonical_site_transforms(fs_model, canonical_site_transforms)
 
     # Update the reference structure transforms
     logger.info(f"Previously had {len(reference_structure_transforms)} reference structure transforms")
@@ -1129,7 +1129,7 @@ def _update(
                             alignability_graph,
                             ligand_neighbourhood_transforms,
                             conformer_site_transforms,
-                            canonical_site_transforms,
+                            # canonical_site_transforms,
                             canonical_site_id,
                             conformer_site_id,
                             aligned_structure_path,
@@ -1153,7 +1153,7 @@ def _update(
                     _structure,
                     dtag,
                     reference_structure_transforms,
-                    canonical_site_transforms,
+                    # canonical_site_transforms,
                     canonical_site_id,
                     alignment_info['aligned_structures'],
                 )
@@ -1206,12 +1206,13 @@ def _update(
                                 xmap,
                                 conformer_site_transforms,
                                 conformer_site_id,
-                                canonical_site_transforms,
+                                # canonical_site_transforms,
                                 canonical_site_id,
                                 aligned_event_map_path,
                             )
                     else:
                         logger.info(f"Already output xmap!")
+    return fs_model
 
 
 def _load_assemblies(assemblies_file, new_assemblies_yaml):
@@ -1548,13 +1549,13 @@ class CLI:
             canonical_sites = _load_canonical_sites(fs_model.canonical_sites)
 
         #
-        logger.info(f"Getting canonical site transforms...")
-        if source_fs_model:
-            canonical_site_transforms: dict[str, dt.Transform] = _load_canonical_site_transforms(
-                source_fs_model.conformer_site_transforms)
-        else:
-            canonical_site_transforms = _load_canonical_site_transforms(
-                fs_model.conformer_site_transforms)
+        # logger.info(f"Getting canonical site transforms...")
+        # if source_fs_model:
+        #     canonical_site_transforms: dict[str, dt.Transform] = _load_canonical_site_transforms(
+        #         source_fs_model.conformer_site_transforms)
+        # else:
+        #     canonical_site_transforms = _load_canonical_site_transforms(
+        #         fs_model.conformer_site_transforms)
 
         # Get xtalform sites
         logger.info(f"Getting xtalform sites...")
@@ -1587,7 +1588,7 @@ class CLI:
             conformer_sites,
             conformer_site_transforms,
             canonical_sites,
-            canonical_site_transforms,
+            # canonical_site_transforms,
             xtalform_sites,
             reference_structure_transforms
         )

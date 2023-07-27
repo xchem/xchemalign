@@ -59,7 +59,7 @@ class FSModel:
             conformer_sites,
             conformer_site_transforms,
             canonical_sites,
-            canonical_site_transforms,
+            # canonical_site_transforms,
             xtalform_sites,
             reference_structure_transforms,
             alignments,
@@ -76,7 +76,7 @@ class FSModel:
         self.conformer_sites = conformer_sites
         self.conformer_site_transforms = conformer_site_transforms
         self.canonical_sites = canonical_sites
-        self.canonical_site_transforms = canonical_site_transforms
+        # self.canonical_site_transforms = canonical_site_transforms
         self.xtalform_sites = xtalform_sites
         self.reference_structure_transforms = reference_structure_transforms
         self.alignments = alignments
@@ -107,7 +107,7 @@ class FSModel:
         conformer_sites = source_dir / constants.CONFORMER_SITE_YAML_FILE
         conformer_site_transforms = source_dir / constants.CONFORMER_SITES_TRANSFORMS_YAML_FILE_NAME
         canonical_sites = source_dir / constants.CANONICAL_SITE_YAML_FILE
-        canonical_site_trasnforms = source_dir / constants.CANONICAL_SITES_TRANSFORMS_YAML_FILE_NAME
+        # canonical_site_trasnforms = source_dir / constants.CANONICAL_SITES_TRANSFORMS_YAML_FILE_NAME
         xtalform_sites = source_dir / constants.XTALFORM_SITE_YAML_FILE
         reference_structure_transforms = source_dir / constants.REFERENCE_STRUCTURE_TRANSFORMS_YAML
         alignments = {}
@@ -125,7 +125,7 @@ class FSModel:
             conformer_sites,
             conformer_site_transforms,
             canonical_sites,
-            canonical_site_trasnforms,
+            # canonical_site_trasnforms,
             xtalform_sites,
             reference_structure_transforms,
             alignments,
@@ -175,7 +175,7 @@ class FSModel:
             conformer_sites=Path(dic['conformer_sites']),
             conformer_site_transforms=Path(dic['conformer_site_transforms']),
             canonical_sites=Path(dic['canonical_sites']),
-            canonical_site_transforms=Path(dic['canonical_site_transforms']),
+            # canonical_site_transforms=Path(dic['canonical_site_transforms']),
             xtalform_sites=Path(dic['xtalform_sites']),
             reference_structure_transforms=Path(dic['reference_structure_transforms']),
             alignments=alignments,
@@ -216,7 +216,7 @@ class FSModel:
             'conformer_sites': str(self.conformer_sites),
             'conformer_site_transforms': str(self.conformer_site_transforms),
             'canonical_sites': str(self.canonical_sites),
-            'canonical_site_transforms': str(self.canonical_site_transforms),
+            # 'canonical_site_transforms': str(self.canonical_site_transforms),
             'xtalform_sites': str(self.xtalform_sites),
             'reference_structure_transforms': str(self.reference_structure_transforms),
             'alignments': alignments,

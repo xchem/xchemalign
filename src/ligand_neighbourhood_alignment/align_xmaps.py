@@ -424,7 +424,7 @@ def __align_xmap(
         xmap,
         conformer_site_transforms,
         conformer_site_id,
-        canonical_site_transforms,
+        # canonical_site_transforms,
         canonical_site_id,
         output_path: Path,
 ):
@@ -456,12 +456,11 @@ def __align_xmap(
     # Get the subsite transform
     # print(conformer_site_transforms)
     conformer_site_transform = transform_to_gemmi(conformer_site_transforms[(canonical_site_id, conformer_site_id)])
+    running_transform = conformer_site_transform.combine(running_transform)
 
     # Get the site transform
-    canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
-
-    # Running transform
-    running_transform = canonical_site_transform.combine(conformer_site_transform.combine(running_transform))
+    # canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+    # running_transform = canonical_site_transform.combine()
 
     logger.debug(
         f"Transform from native frame to subsite frame to site frame is: {gemmi_to_transform(running_transform)}"
