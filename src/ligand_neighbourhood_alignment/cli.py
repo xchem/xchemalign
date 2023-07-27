@@ -1447,9 +1447,10 @@ class CLI:
         if not aligned_structure_dir.exists():
             os.mkdir(aligned_structure_dir)
 
-        aligned_xmap_dir = Path(options.output_dir) / constants.ALIGNED_XMAPS_DIR
-        if not aligned_xmap_dir.exists():
-            os.mkdir(aligned_xmap_dir)
+        # aligned_xmap_dir = Path(options.output_dir) / constants.ALIGNED_XMAPS_DIR
+        # if not aligned_xmap_dir.exists():
+        #     os.mkdir(aligned_xmap_dir)
+        fs_model.symlink()
 
         source_data_model = dt.SourceDataModel.from_fs_model(
             fs_model,

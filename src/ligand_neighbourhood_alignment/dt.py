@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from pathlib import Path
 
@@ -44,6 +45,8 @@ class LigandNeighbourhoodOutput:
         }
         return dic
 
+def symlink(old_path, new_path):
+    os.symlink(old_path.resolve(), new_path)
 
 class FSModel:
     def __init__(
@@ -81,6 +84,49 @@ class FSModel:
         self.reference_structure_transforms = reference_structure_transforms
         self.alignments = alignments
         self.reference_alignments = reference_alignments
+
+    def symlink_old_data(self):
+        for dtag, dataset_alignments in self.alignments.items():
+            for chain, chain_alignments in dataset_alignments.items():
+                for residue, ligand_neighbourhood_alignments in chain_alignments.items():
+                    for canonical_site_id in ligand_neighbourhood_alignments.aligned_structures:
+                        if canonical_site_id in ligand_neighbourhood_alignments.aligned_structures:
+                            old_path = ligand_neighbourhood_alignments.aligned_structures[canonical_site_id]
+                            new_path = self.source_dir / constants.ALIGNED_STRUCTURES_DIR / old_path.name
+                            if not new_path.exists():
+                                symlink(old_path, new_path)
+                        if canonical_site_id in ligand_neighbourhood_alignments.aligned_artefacts:
+                            old_path = ligand_neighbourhood_alignments.aligned_artefacts[canonical_site_id]
+                            new_path = self.source_dir / constants.ALIGNED_STRUCTURES_DIR / old_path.name
+                            if not new_path.exists():
+                                symlink(old_path, new_path)
+                        if canonical_site_id in ligand_neighbourhood_alignments.aligned_xmaps:
+                            old_path = ligand_neighbourhood_alignments.aligned_xmaps[canonical_site_id]
+                            new_path = self.source_dir / constants.ALIGNED_STRUCTURES_DIR / old_path.name
+                            if not new_path.exists():
+                                symlink(old_path, new_path)
+                        if canonical_site_id in ligand_neighbourhood_alignments.aligned_event_maps:
+                            old_path = ligand_neighbourhood_alignments.aligned_event_maps[canonical_site_id]
+                            new_path = self.source_dir / constants.ALIGNED_STRUCTURES_DIR / old_path.name
+                            if not new_path.exists():
+                                symlink(old_path, new_path)
+
+        for dtag, dtag_alignment_info in self.reference_alignments.items():
+            for canonical_site_id, canonical_site_alignment_info in dtag_alignment_info.items():
+                old_path= canonical_site_alignment_info['aligned_structures']
+                new_path = self.source_dir / constants.ALIGNED_STRUCTURES_DIR / old_path.name
+                if not new_path.exists():
+                    symlink(old_path, new_path)
+
+                old_path =  canonical_site_alignment_info['aligned_artefacts']
+                new_path = self.source_dir / constants.ALIGNED_STRUCTURES_DIR / old_path.name
+                if not new_path.exists():
+                    symlink(old_path, new_path)
+
+                old_path =  canonical_site_alignment_info['aligned_xmaps']
+                new_path = self.source_dir / constants.ALIGNED_STRUCTURES_DIR / old_path.name
+                if not new_path.exists():
+                    symlink(old_path, new_path)
 
 
     @staticmethod
