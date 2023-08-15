@@ -854,28 +854,32 @@ def _update_fs_model(
                     alignments[dtag][chain][residue] = dt.LigandNeighbourhoodOutput({}, {}, {}, {})
 
                 ligand_neighbourhood_output: dt.LigandNeighbourhoodOutput = alignments[dtag][chain][residue]
+
+                if not (fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag).exists():
+                    os.mkdir(fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag)
+
                 if canonical_site_id not in ligand_neighbourhood_output.aligned_structures:
                     ligand_neighbourhood_output.aligned_structures[canonical_site_id] = (
-                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_STRUCTURE_TEMPLATE.format(
+                            fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag / constants.ALIGNED_STRUCTURE_TEMPLATE.format(
                         dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
                     )
                     )
 
                     ligand_neighbourhood_output.aligned_artefacts[canonical_site_id] = (
-                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                            fs_model.source_dir / constants.ALIGNED_FILES_DIR /dtag / constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
                         dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
                     )
                     )
 
                     ligand_neighbourhood_output.aligned_xmaps[canonical_site_id] = (
-                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_XMAP_TEMPLATE.format(
+                            fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag /constants.ALIGNED_XMAP_TEMPLATE.format(
                         dtag=dtag, chain=chain,
                         residue=residue,
                         site=canonical_site_id)
                     )
 
                     ligand_neighbourhood_output.aligned_event_maps[canonical_site_id] = (
-                            fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
+                            fs_model.source_dir / constants.ALIGNED_FILES_DIR /dtag / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
                         dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
                     )
                     )
@@ -889,14 +893,14 @@ def _update_fs_model(
 
             if canonical_site_id not in reference_alignments[dtag]:
                 reference_alignments[dtag][canonical_site_id] = {
-                    'aligned_structures': fs_model.source_dir / constants.ALIGNED_STRUCTURES_DIR / constants.ALIGNED_REFERENCE_STRUCTURE_TEMPLATE.format(
+                    'aligned_structures': fs_model.source_dir / constants.ALIGNED_FILES_DIR /dtag / constants.ALIGNED_REFERENCE_STRUCTURE_TEMPLATE.format(
                         dtag=dtag, site=canonical_site_id
                     ),
-                    'aligned_artefacts': fs_model.source_dir / constants.ALIGNED_REFERENCE_STRUCTURE_ARTEFACTS_TEMPLATE.format(
+                    'aligned_artefacts': fs_model.source_dir / constants.ALIGNED_FILES_DIR /dtag / constants.ALIGNED_REFERENCE_STRUCTURE_ARTEFACTS_TEMPLATE.format(
                         dtag=dtag, site=canonical_site_id
                     ),
 
-                    'aligned_xmaps': fs_model.source_dir / constants.ALIGNED_REFERENCE_XMAP_TEMPLATE.format(dtag=dtag,
+                    'aligned_xmaps': fs_model.source_dir / constants.ALIGNED_FILES_DIR /dtag / constants.ALIGNED_REFERENCE_XMAP_TEMPLATE.format(dtag=dtag,
                                                                                                             site=canonical_site_id),
                     # 'aligned_event_maps': fs_model.source_dir / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
                     # dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
@@ -1443,9 +1447,9 @@ class CLI:
         if not Path(options.output_dir).exists():
             os.mkdir(options.output_dir)
 
-        aligned_structure_dir = Path(options.output_dir) / constants.ALIGNED_STRUCTURES_DIR
-        if not aligned_structure_dir.exists():
-            os.mkdir(aligned_structure_dir)
+        aligned_files_dir = Path(options.output_dir) / constants.ALIGNED_FILES_DIR
+        if not aligned_files_dir.exists():
+            os.mkdir(aligned_files_dir)
 
         # aligned_xmap_dir = Path(options.output_dir) / constants.ALIGNED_XMAPS_DIR
         # if not aligned_xmap_dir.exists():

@@ -25,7 +25,7 @@ PANDDA_PROCESSED_DATASETS_DIR: str = "processed_datasets"
 
 ALIGNED_STRUCTURES_DIR: str = "aligned_structures"
 ALIGNED_XMAPS_DIR: str = "aligned_xmaps"
-
+ALIGNED_FILES_DIR: str = "aligned_files"
 
 MODEL_DIR_PDB: str = "refine.pdb"
 MODEL_DIR_XMAP: str = "refine.ccp4"
