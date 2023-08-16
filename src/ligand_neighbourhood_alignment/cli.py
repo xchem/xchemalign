@@ -888,6 +888,9 @@ def _update_fs_model(
     for dtag, dataset in reference_datasets.items():
         for canonical_site_id, canonical_site in canonical_sites.items():
 
+            if not (fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag).exists():
+                os.mkdir(fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag)
+
             if dtag not in reference_alignments:
                 reference_alignments[dtag] = {}
 
