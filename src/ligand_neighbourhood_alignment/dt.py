@@ -113,22 +113,23 @@ class FSModel:
                             if not new_path.exists():
                                 symlink(old_path, new_path)
 
+        # Symlink old alignments
         for dtag, dtag_alignment_info in self.reference_alignments.items():
             if not (self.source_dir / constants.ALIGNED_FILES_DIR / dtag).exists():
                 os.mkdir(self.source_dir / constants.ALIGNED_FILES_DIR / dtag )
             for canonical_site_id, canonical_site_alignment_info in dtag_alignment_info.items():
                 old_path= Path(canonical_site_alignment_info['aligned_structures'])
-                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / old_path.name
+                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / dtag / old_path.name
                 if not new_path.exists():
                     symlink(old_path, new_path)
 
                 old_path =  Path(canonical_site_alignment_info['aligned_artefacts'])
-                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / old_path.name
+                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / dtag / old_path.name
                 if not new_path.exists():
                     symlink(old_path, new_path)
 
                 old_path =  Path(canonical_site_alignment_info['aligned_xmaps'])
-                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / old_path.name
+                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / dtag/  old_path.name
                 if not new_path.exists():
                     symlink(old_path, new_path)
 
