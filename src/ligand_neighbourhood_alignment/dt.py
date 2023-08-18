@@ -129,7 +129,7 @@ class FSModel:
                     symlink(old_path, new_path)
 
                 old_path =  Path(canonical_site_alignment_info['aligned_xmaps'])
-                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / dtag/  old_path.name
+                new_path = self.source_dir / constants.ALIGNED_FILES_DIR / dtag / old_path.name
                 if not new_path.exists():
                     symlink(old_path, new_path)
 
