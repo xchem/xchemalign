@@ -28,12 +28,12 @@ class LigandNeighbourhoodOutput:
         self.aligned_event_maps: dict[str, str] = aligned_event_maps
 
     @staticmethod
-    def from_dict(dic):
+    def from_dict(dic, source_dir):
         return LigandNeighbourhoodOutput(
-            aligned_structures=dic["aligned_structures"],
-            aligned_artefacts=dic["aligned_artefacts"],
-            aligned_xmaps=dic["aligned_xmaps"],
-            aligned_event_maps=dic["aligned_event_maps"],
+            aligned_structures=source_dir / dic["aligned_structures"],
+            aligned_artefacts=source_dir / dic["aligned_artefacts"],
+            aligned_xmaps=source_dir / dic["aligned_xmaps"],
+            aligned_event_maps=source_dir /  dic["aligned_event_maps"],
         )
 
     def to_dict(self):
@@ -185,6 +185,7 @@ class FSModel:
 
     @staticmethod
     def from_dict(dic):
+        source_dir = Path(dic["source_dir"])
         alignments = {}
         for dtag, dataset_alignments in dic["alignments"].items():
             alignments[dtag] = {}
@@ -193,7 +194,7 @@ class FSModel:
                 for residue, ligand_neighbourhood_alignments in chain_alignments.items():
                     # _dtag, _chain, _residue = ligand_neighbourhood.split("/")
                     alignments[dtag][chain][residue] = LigandNeighbourhoodOutput.from_dict(
-                        ligand_neighbourhood_alignments)
+                        ligand_neighbourhood_alignments, source_dir)
 
         # reference_alignments = {}
         # for dtag, dataset_alignments in alignments["reference_alignments"].items():
@@ -209,9 +210,9 @@ class FSModel:
             reference_alignments[dtag] = {}
             for canonical_site_id, canonical_site_alignment_info in canonical_site_alignments.items():
                 reference_alignments[dtag][canonical_site_id] = {
-                    'aligned_structures': canonical_site_alignment_info['aligned_structures'],
-                    'aligned_artefacts': canonical_site_alignment_info['aligned_artefacts'],
-                    'aligned_xmaps': canonical_site_alignment_info['aligned_xmaps']
+                    'aligned_structures': source_dir / canonical_site_alignment_info['aligned_structures'],
+                    'aligned_artefacts': source_dir / canonical_site_alignment_info['aligned_artefacts'],
+                    'aligned_xmaps': source_dir / canonical_site_alignment_info['aligned_xmaps']
                 }
 
         return FSModel(
