@@ -30,10 +30,10 @@ class LigandNeighbourhoodOutput:
     @staticmethod
     def from_dict(dic, source_dir):
         return LigandNeighbourhoodOutput(
-            aligned_structures={k: source_dir / v for k, v in dic["aligned_structures"].items()},
-            aligned_artefacts={k: source_dir / v for k, v in dic["aligned_artefacts"].items()},
-            aligned_xmaps={k: source_dir / v for k, v in dic["aligned_xmaps"].items()},
-            aligned_event_maps={k: source_dir / v for k, v in dic["aligned_event_maps"].items()},
+            aligned_structures={k:  v for k, v in dic["aligned_structures"].items()},
+            aligned_artefacts={k:  v for k, v in dic["aligned_artefacts"].items()},
+            aligned_xmaps={k:  v for k, v in dic["aligned_xmaps"].items()},
+            aligned_event_maps={k:  v for k, v in dic["aligned_event_maps"].items()},
         )
 
     def to_dict(self):
@@ -210,9 +210,9 @@ class FSModel:
             reference_alignments[dtag] = {}
             for canonical_site_id, canonical_site_alignment_info in canonical_site_alignments.items():
                 reference_alignments[dtag][canonical_site_id] = {
-                    'aligned_structures': source_dir / canonical_site_alignment_info['aligned_structures'],
-                    'aligned_artefacts': source_dir / canonical_site_alignment_info['aligned_artefacts'],
-                    'aligned_xmaps': source_dir / canonical_site_alignment_info['aligned_xmaps']
+                    'aligned_structures':  canonical_site_alignment_info['aligned_structures'],
+                    'aligned_artefacts':  canonical_site_alignment_info['aligned_artefacts'],
+                    'aligned_xmaps':  canonical_site_alignment_info['aligned_xmaps']
                 }
 
         return FSModel(
