@@ -31,9 +31,9 @@ class LigandNeighbourhoodOutput:
     def from_dict(dic, source_dir):
         return LigandNeighbourhoodOutput(
             aligned_structures={k: source_dir / v for k, v in dic["aligned_structures"].items()},
-            aligned_artefacts={k: source_dir / v for k, v in source_dir / dic["aligned_artefacts"].items()},
-            aligned_xmaps={k: source_dir / v for k, v in source_dir / dic["aligned_xmaps"].items()},
-            aligned_event_maps={k: source_dir / v for k, v in source_dir /  dic["aligned_event_maps"].items()},
+            aligned_artefacts={k: source_dir / v for k, v in dic["aligned_artefacts"].items()},
+            aligned_xmaps={k: source_dir / v for k, v in dic["aligned_xmaps"].items()},
+            aligned_event_maps={k: source_dir / v for k, v in dic["aligned_event_maps"].items()},
         )
 
     def to_dict(self):
