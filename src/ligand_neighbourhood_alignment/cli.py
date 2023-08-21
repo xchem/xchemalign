@@ -1322,6 +1322,7 @@ def _load_ligand_neighbourhood_transforms(ligand_neighbourhood_transforms_yaml):
             dic = yaml.safe_load(f)
 
         for ligand_transform_key, ligand_transform in dic.items():
+            print(ligand_transform_key)
             ligand_1_id, ligand_2_id = ligand_transform_key.split("~")
             dtag_1, chain_1, residue_1 = ligand_1_id.split("/")
             dtag_2, chain_2, residue_2 = ligand_1_id.split("/")
