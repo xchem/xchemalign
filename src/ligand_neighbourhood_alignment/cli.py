@@ -1220,6 +1220,8 @@ def _update(
                                 aligned_event_map_path,
                             )
                         mtz_path = datasets[dtag].mtz
+                        print(f"Mtz path: {mtz_path}")
+                        raise Exception
                         if mtz_path != "None":
                             xmap = read_xmap_from_mtz(mtz_path)
                             __align_xmap(
