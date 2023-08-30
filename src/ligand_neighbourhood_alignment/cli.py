@@ -677,12 +677,12 @@ def _update_conformer_sites(
                     conformer_site.members.append(lid)
 
     # Otherwise create a new conformer site
-
     if not matched:
         residues = []
         for lid in connected_component:
+            st = structures[lid[0]]
             for atom_id in neighbourhoods[lid].atoms:
-                residues.append((atom_id[0], atom_id[1]))
+                residues.append((atom_id[0], atom_id[1], st[0][lid[1]][lid[2]].name))
         conformer_site = dt.ConformerSite(
             [x for x in set(residues)],
             connected_component,
@@ -704,7 +704,6 @@ def _update_canonical_sites(
         canonical_sites: dict[str, dt.CanonicalSite],
         conformer_site: dt.ConformerSite,
         conformer_site_id,
-
 ):
     if len(canonical_sites) != 0:
         global_reference_dtag = [x for x in canonical_sites.values()][0].global_reference_dtag
@@ -714,9 +713,9 @@ def _update_canonical_sites(
     # Check each canonical site to see if conformer site already in it and if not
     # whether it shares enough residues to now be added
     matched = False
-    conformer_site_residues = conformer_site.residues
+    conformer_site_residues =[(residue[1], residue[2]) for residue in conformer_site.residues]
     for canonical_site_id, canonical_site in canonical_sites.items():
-        canonical_site_residues = canonical_site.residues
+        canonical_site_residues = [(residue[1], residue[2]) for residue in canonical_site.residues]
         if conformer_site_id not in canonical_site.conformer_site_ids:
             v = set(canonical_site_residues).intersection(set(conformer_site_residues))
             if len(v) >= 3:
@@ -1028,7 +1027,7 @@ def _update(
     for conformer_site_id, conformer_site in conformer_sites.items():
         # If conformer site in a canonical site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
-        _update_canonical_sites(canonical_sites, conformer_site, conformer_site_id)
+        _update_canonical_sites(canonical_sites, conformer_site, conformer_site_id,)
     logger.info(f"Now have {len(canonical_sites)} canonical sites")
     logger.info(f"Global reference dtag is: {list(canonical_sites.values())[0].global_reference_dtag}")
     _save_canonical_sites(fs_model, canonical_sites)

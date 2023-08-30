@@ -690,8 +690,8 @@ class ConformerSite:
     def from_dict(dic):
         residues = []
         for res in dic['residues']:
-            chain, residue = res.split("/")
-            residues.append((chain, residue))
+            chain, residue, name = res.split("/")
+            residues.append((chain, residue, name))
         members = []
         for member in dic['members']:
             dtag, chain, residue = member.split("/")
@@ -728,8 +728,8 @@ class CanonicalSite:
     def from_dict(dic):
         residues = []
         for res in dic['residues']:
-            chain, residue = res.split("/")
-            residues.append((chain, residue))
+            chain, residue, name = res.split("/")
+            residues.append((chain, residue, name))
 
         return CanonicalSite(
             dic['conformer_site_ids'],
