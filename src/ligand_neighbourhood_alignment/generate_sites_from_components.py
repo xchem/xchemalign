@@ -318,7 +318,7 @@ def _update_reference_structure_transforms(
         canonical_site: dt.CanonicalSite,
         conformer_sites: dict[str, dt.ConformerSite],
 ):
-    ress = canonical_site.residues
+    ress = [(x[0], x[1]) for x in canonical_site.residues]
     to_structure = structures[conformer_sites[canonical_site.reference_conformer_site_id].reference_ligand_id[0]]
     from_structure = structures[key[0]]
     transform = _get_transform_from_residues(ress, to_structure, from_structure)
