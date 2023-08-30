@@ -663,7 +663,8 @@ def _get_connected_components(alignability_graph):
 def _update_conformer_sites(
         conformer_sites: dict[str, dt.ConformerSite],
         connected_component: list[tuple[str, str, str]],
-        neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood]
+        neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
+        structures
 ):
     matched = False
     # Check each old conformer site for overlap in membership, and if so update its members
@@ -1015,7 +1016,7 @@ def _update(
 
     for connected_component in connected_components:
         # Match new component to old ones by membership, and expand old ones if available otherwise create new one
-        _update_conformer_sites(conformer_sites, connected_component, ligand_neighbourhoods)
+        _update_conformer_sites(conformer_sites, connected_component, ligand_neighbourhoods, structures)
     logger.info(f"Now have {len(conformer_sites)} conformer sites")
     for conformer_site_id, conformer_site in conformer_sites.items():
         print(conformer_site_id)
