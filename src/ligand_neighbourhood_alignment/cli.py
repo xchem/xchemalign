@@ -683,7 +683,7 @@ def _update_conformer_sites(
         for lid in connected_component:
             st = structures[lid[0]]
             for atom_id in neighbourhoods[lid].atoms:
-                residues.append((atom_id[0], atom_id[1], st[0][lid[1]][lid[2]][0].name))
+                residues.append((atom_id[0], atom_id[1], st[0][atom_id[1]][atom_id[2]][0].name))
         conformer_site = dt.ConformerSite(
             [x for x in set(residues)],
             connected_component,
