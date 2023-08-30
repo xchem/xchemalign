@@ -535,6 +535,7 @@ def _generate_assembly(
             num_chains += 1
             chains.append(chain.name)
     logger.debug(f"Generated {num_chains} assembly chains")
+    logger.debug(f"Chain names are: {[x.name for x in full_st[0]]}")
     print(chains)
 
     return full_st
