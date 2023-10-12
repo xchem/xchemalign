@@ -486,20 +486,37 @@ def __align_xmap(
     )
 
 
-def read_xmap_from_mtz(mtz_path: Path):
+def read_xmap_from_mtz(
+        mtz_path: Path,
+        map_type="2Fo-Fc",):
     mtz = gemmi.read_mtz_file(str(mtz_path))
-    try:
-        grid = mtz.transform_f_phi_to_map("2FOFCWT", "PH2FOFCWT", sample_rate=4)
-        return grid
-    except Exception:
-        logger.warning("Trying FWT PHWT")
-    try:
-        grid = mtz.transform_f_phi_to_map("FWT", "PHWT", sample_rate=4)
-        return grid
-    except Exception:
-        logger.warning("Failed to find structure factors!")
 
-    raise Exception(f"Couldn't open {mtz_path}!")
+    if map_type == "2Fo-Fc":
+        try:
+            grid = mtz.transform_f_phi_to_map("2FOFCWT", "PH2FOFCWT", sample_rate=4)
+            return grid
+        except Exception:
+            logger.warning("Trying FWT PHWT")
+        try:
+            grid = mtz.transform_f_phi_to_map("FWT", "PHWT", sample_rate=4)
+            return grid
+        except Exception:
+            logger.warning("Failed to find structure factors!")
+
+        raise Exception(f"Couldn't open {mtz_path}!")
+    if map_type == "Fo-Fc":
+        try:
+            grid = mtz.transform_f_phi_to_map("FOFCWT", "PHFOFCWT", sample_rate=4)
+            return grid
+        except Exception:
+            logger.warning("Trying DELFWT DELPHWT")
+        try:
+            grid = mtz.transform_f_phi_to_map("DELFWT", "DELPHWT", sample_rate=4)
+            return grid
+        except Exception:
+            logger.warning("Failed to find structure factors!")
+
+        raise Exception(f"Couldn't open {mtz_path}!")
 
 
 def _align_xmaps(

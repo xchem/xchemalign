@@ -879,6 +879,14 @@ def _update_fs_model(
                         site=canonical_site_id)
                     )
 
+                    ligand_neighbourhood_output.aligned_diff_maps[canonical_site_id] = (
+                            fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag / constants.ALIGNED_DIFF_TEMPLATE.format(
+                        dtag=dtag, chain=chain,
+                        residue=residue,
+                        site=canonical_site_id)
+                    )
+
+
                     ligand_neighbourhood_output.aligned_event_maps[canonical_site_id] = (
                             fs_model.source_dir / constants.ALIGNED_FILES_DIR /dtag / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
                         dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
@@ -1224,7 +1232,7 @@ def _update(
                         # print(f"Mtz path: {mtz_path}")
                         # raise Exception
                         if mtz_path != "None":
-                            xmap = read_xmap_from_mtz(mtz_path)
+                            xmap = read_xmap_from_mtz(mtz_path, "2Fo-Fc")
                             __align_xmap(
                                 ligand_neighbourhoods[(dtag, chain, residue)],
                                 alignability_graph,
@@ -1238,6 +1246,21 @@ def _update(
                                 # canonical_site_transforms,
                                 canonical_site_id,
                                 ligand_neighbourhood_output.aligned_xmaps[canonical_site_id],
+                            )
+                            xmap = read_xmap_from_mtz(mtz_path, "Fo-Fc")
+                            __align_xmap(
+                                ligand_neighbourhoods[(dtag, chain, residue)],
+                                alignability_graph,
+                                ligand_neighbourhood_transforms,
+                                reference_xmap,
+                                reference_ligand_id,
+                                moving_ligand_id,
+                                xmap,
+                                conformer_site_transforms,
+                                conformer_site_id,
+                                # canonical_site_transforms,
+                                canonical_site_id,
+                                ligand_neighbourhood_output.aligned_diff_maps[canonical_site_id],
                             )
 
                     else:

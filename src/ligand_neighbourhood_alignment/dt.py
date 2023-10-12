@@ -18,13 +18,14 @@ class LigandNeighbourhoodOutput:
     def __init__(self,
                  aligned_structures: dict[str, str],
                  aligned_artefacts: dict[str, str],
-
                  aligned_xmaps: dict[str, str],
-                 aligned_event_maps: dict[str, str],
+                 aligned_diff_maps: dict[str, str],
+        aligned_event_maps: dict[str, str],
                  ):
         self.aligned_structures = aligned_structures
         self.aligned_artefacts: dict[str, str] = aligned_artefacts
         self.aligned_xmaps: dict[str, str] = aligned_xmaps
+        self.aligned_diff_maps: dict[str, str] = aligned_diff_maps
         self.aligned_event_maps: dict[str, str] = aligned_event_maps
 
     @staticmethod
@@ -33,6 +34,7 @@ class LigandNeighbourhoodOutput:
             aligned_structures={k:  Path(v) for k, v in dic["aligned_structures"].items()},
             aligned_artefacts={k:  Path(v) for k, v in dic["aligned_artefacts"].items()},
             aligned_xmaps={k:  Path(v) for k, v in dic["aligned_xmaps"].items()},
+            aligned_diff_maps={k:  Path(v) for k, v in dic["aligned_diff_maps"].items()},
             aligned_event_maps={k:  Path(v) for k, v in dic["aligned_event_maps"].items()},
         )
 
@@ -41,6 +43,7 @@ class LigandNeighbourhoodOutput:
             'aligned_structures': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_structures.items()},
             'aligned_artefacts': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_artefacts.items()},
             'aligned_xmaps': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_xmaps.items()},
+            'aligned_diff_maps': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_diff_maps},
             'aligned_event_maps': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_event_maps.items()},
         }
         return dic
