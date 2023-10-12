@@ -43,7 +43,7 @@ class LigandNeighbourhoodOutput:
             'aligned_structures': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_structures.items()},
             'aligned_artefacts': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_artefacts.items()},
             'aligned_xmaps': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_xmaps.items()},
-            'aligned_diff_maps': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_diff_maps},
+            'aligned_diff_maps': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_diff_maps.items()},
             'aligned_event_maps': {canonical_site_id:str(path) for canonical_site_id, path in self.aligned_event_maps.items()},
         }
         return dic
