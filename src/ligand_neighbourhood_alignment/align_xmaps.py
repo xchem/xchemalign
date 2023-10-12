@@ -511,7 +511,7 @@ def read_xmap_from_mtz(
         except Exception:
             logger.warning("Trying DELFWT DELPHWT")
         try:
-            grid = mtz.transform_f_phi_to_map("DELFWT", "DELPHWT", sample_rate=4)
+            grid = mtz.transform_f_phi_to_map("DELFWT", "PHDELWT", sample_rate=4)
             return grid
         except Exception:
             logger.warning("Failed to find structure factors!")
