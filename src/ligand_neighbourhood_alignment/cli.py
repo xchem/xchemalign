@@ -1319,6 +1319,32 @@ def _load_xtalforms(xtalforms_file, new_xtalforms_yaml):
 
     return xtalforms
 
+def _load_xtalforms_and_assemblies(xtalforms_file, new_xtalforms_yaml):
+    assemblies = {}
+    xtalforms = {}
+
+    if xtalforms_file.exists():
+
+        with open(xtalforms_file, 'r') as f:
+            dic = yaml.safe_load(f)
+
+        for xtalform_id, xtalform_info in dic.items():
+            xtalforms[xtalform_id] = dt.XtalForm.from_dict(xtalform_info)
+
+    # Load new info and update
+    if new_xtalforms_yaml.exists():
+        with open(new_xtalforms_yaml, 'r') as f:
+            new_xtalforms_dict = yaml.safe_load(f)
+    else:
+        new_xtalforms_dict = {}
+
+    for xtalform_id, xtalform_info in new_xtalforms_dict.items():
+        if xtalform_id in xtalforms:
+            continue
+        xtalforms[xtalform_id] = dt.XtalForm.from_dict(xtalform_info)
+
+    return xtalforms
+
 
 def _load_dataset_assignments(dataset_assignments_yaml):
     dataset_assignments = {}
