@@ -649,8 +649,16 @@ import networkx as nx
 
 
 def _save_graph(fs_model, alignability_graph):
-    nx.write_gml(
+    graph_for_output = nx.relabel_nodes(
         alignability_graph,
+        {
+            x: "/".join(x)
+            for x
+            in alignability_graph
+        }
+    )
+    nx.write_gml(
+        graph_for_output,
         str(fs_model.alignability_graph),
         # stringizer=lambda x: "/".join(x),
     )
