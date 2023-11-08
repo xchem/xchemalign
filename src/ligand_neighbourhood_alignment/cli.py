@@ -1398,7 +1398,7 @@ def _load_alignability_graph(alignability_graph):
                 for x
                 in g_initial
             }
-            t
+
         )
 
         return g
