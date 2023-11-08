@@ -1378,10 +1378,11 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
 
 def _load_alignability_graph(alignability_graph):
     if alignability_graph.exists():
-        return nx.read_gml(
+        g = nx.read_gml(
             str(alignability_graph),
-            destringizer=lambda x: tuple(x.split("/")),
+            # destringizer=lambda x: tuple(x.split("/")),
         )
+        return g
 
     else:
         return nx.Graph()
