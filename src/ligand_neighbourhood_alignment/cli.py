@@ -1386,10 +1386,20 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
 
 def _load_alignability_graph(alignability_graph):
     if alignability_graph.exists():
-        g = nx.read_gml(
+        g_initial = nx.read_gml(
             str(alignability_graph),
             # destringizer=lambda x: tuple(x.split("/")),
         )
+
+        g = nx.relabel_nodes(
+            g_initial,
+            {
+                x: tuple("/".split(x))
+                for x
+                in g_initial
+            }
+        )
+
         return g
 
     else:
