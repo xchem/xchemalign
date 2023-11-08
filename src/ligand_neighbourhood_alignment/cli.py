@@ -1394,7 +1394,7 @@ def _load_alignability_graph(alignability_graph):
         g = nx.relabel_nodes(
             g_initial,
             {
-                x: tuple("/".split(x))
+                x: tuple(x.split("/"))
                 for x
                 in g_initial
             }
