@@ -652,7 +652,7 @@ def _save_graph(fs_model, alignability_graph):
     nx.write_gml(
         alignability_graph,
         str(fs_model.alignability_graph),
-        stringizer=lambda x: "/".join(x),
+        # stringizer=lambda x: "/".join(x),
     )
 
 
