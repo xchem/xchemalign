@@ -2,10 +2,13 @@ import json
 import os
 import re
 from pathlib import Path
+import sys
 
 import pandas as pd
 import yaml
 from loguru import logger
+logger.remove() # for someone not familiar with the lib, whats going on here?
+logger.add(sys.stdout, level="INFO")
 
 from ligand_neighbourhood_alignment import constants
 from ligand_neighbourhood_alignment.make_data_json import (

@@ -12,6 +12,8 @@ import numpy as np
 import pandas as pd
 import yaml
 from loguru import logger
+logger.remove() # for someone not familiar with the lib, whats going on here?
+logger.add(sys.stdout, level="INFO")
 from rich import print
 
 from ligand_neighbourhood_alignment import constants
