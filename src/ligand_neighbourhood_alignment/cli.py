@@ -621,7 +621,6 @@ def _save_neighbourhoods(
             dic["/".join(ligand_id)] = neighbourhood.to_dict()
         yaml.safe_dump(dic, f)
 
-
 def _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transforms):
     with open(fs_model.ligand_neighbourhood_transforms, 'w') as f:
         dic = {}
