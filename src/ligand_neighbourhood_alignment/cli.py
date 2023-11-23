@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 # import os
 import subprocess
@@ -12,6 +13,8 @@ import numpy as np
 import pandas as pd
 import yaml
 from loguru import logger
+logger.remove() # for someone not familiar with the lib, whats going on here?
+logger.add(sys.stdout, level="INFO")
 from rich import print
 
 from ligand_neighbourhood_alignment import constants
@@ -618,7 +621,6 @@ def _save_neighbourhoods(
             dic["/".join(ligand_id)] = neighbourhood.to_dict()
         yaml.safe_dump(dic, f)
 
-
 def _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transforms):
     with open(fs_model.ligand_neighbourhood_transforms, 'w') as f:
         dic = {}
@@ -1220,7 +1222,7 @@ def _update(
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
-                        if xmap_path != "None":
+                        if (xmap_path != "None") and (xmap_path is not None):
                             xmap = read_xmap(xmap_path)
 
                             __align_xmap(
