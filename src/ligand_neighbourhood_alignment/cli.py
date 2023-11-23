@@ -1223,7 +1223,7 @@ def _update(
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
-                        if xmap_path != "None":
+                        if (xmap_path != "None") and (xmap_path is not None):
                             xmap = read_xmap(xmap_path)
 
                             __align_xmap(
