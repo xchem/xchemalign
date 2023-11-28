@@ -59,7 +59,7 @@ class FSModel:
             self,
             source_dir,
             fs_model,
-            assemblies,
+            # assemblies,
             xtalforms,
             dataset_assignments,
             ligand_neighbourhoods,
@@ -76,7 +76,7 @@ class FSModel:
     ):
         self.source_dir = source_dir
         self.fs_model = fs_model
-        self.assemblies = assemblies
+        # self.assemblies = assemblies
         self.xtalforms = xtalforms
         self.dataset_assignments = dataset_assignments
         self.ligand_neighbourhoods = ligand_neighbourhoods
@@ -155,7 +155,7 @@ class FSModel:
             if dic is not None:
                 return FSModel.from_dict(dic)
 
-        assemblies = source_dir / constants.ASSEMBLIES_YAML_FILE_NAME
+        # assemblies = source_dir / constants.ASSEMBLIES_YAML_FILE_NAME
         xtalforms = source_dir / constants.XTALFORMS_YAML_FILE_NAME
         dataset_assignments = source_dir / constants.ASSIGNED_XTALFORMS_YAML_FILE_NAME
         ligand_neighbourhoods = source_dir / constants.NEIGHBOURHOODS_YAML_FILE_NAME
@@ -173,7 +173,7 @@ class FSModel:
         return FSModel(
             source_dir,
             fs_model,
-            assemblies,
+            # assemblies,
             xtalforms,
             dataset_assignments,
             ligand_neighbourhoods,

@@ -1287,13 +1287,13 @@ def _load_assemblies(assemblies_file, new_assemblies_yaml):
         with open(assemblies_file, 'r') as f:
             dic = yaml.safe_load(f)
 
-        for assembly_id, assembly_info in dic.items():
+        for assembly_id, assembly_info in dic['assemblies'].items():
             assemblies[assembly_id] = dt.Assembly.from_dict(assembly_info)
 
     # Load new info and update
     if new_assemblies_yaml.exists():
         with open(new_assemblies_yaml, 'r') as f:
-            new_assemblies_dict = yaml.safe_load(f)
+            new_assemblies_dict = yaml.safe_load(f)['assemblies']
     else:
         new_assemblies_dict = {}
 
@@ -1311,7 +1311,7 @@ def _load_xtalforms(xtalforms_file, new_xtalforms_yaml):
     if xtalforms_file.exists():
 
         with open(xtalforms_file, 'r') as f:
-            dic = yaml.safe_load(f)
+            dic = yaml.safe_load(f)['xtalforms']
 
         for xtalform_id, xtalform_info in dic.items():
             xtalforms[xtalform_id] = dt.XtalForm.from_dict(xtalform_info)
@@ -1319,7 +1319,7 @@ def _load_xtalforms(xtalforms_file, new_xtalforms_yaml):
     # Load new info and update
     if new_xtalforms_yaml.exists():
         with open(new_xtalforms_yaml, 'r') as f:
-            new_xtalforms_dict = yaml.safe_load(f)
+            new_xtalforms_dict = yaml.safe_load(f)['xtalforms']
     else:
         new_xtalforms_dict = {}
 
