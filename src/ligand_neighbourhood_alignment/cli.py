@@ -1219,6 +1219,11 @@ def _update(
                         print(ligand_neighbourhoods)
 
                         xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
+
+                        aligned_structure_path = ligand_neighbourhood_output.aligned_structures[conformer_site_id]
+                        aligned_structure = gemmi.read_structure(aligned_structure_path)
+                        aligned_res = aligned_structure[0][chain][str(res)][0]
+
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
                         # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
@@ -1238,6 +1243,7 @@ def _update(
                                 # canonical_site_transforms,
                                 canonical_site_id,
                                 aligned_event_map_path,
+                                aligned_res
                             )
                         mtz_path = datasets[dtag].mtz
                         # print(f"Mtz path: {mtz_path}")
@@ -1257,6 +1263,7 @@ def _update(
                                 # canonical_site_transforms,
                                 canonical_site_id,
                                 ligand_neighbourhood_output.aligned_xmaps[canonical_site_id],
+                                aligned_res
                             )
                             xmap = read_xmap_from_mtz(mtz_path, "Fo-Fc")
                             __align_xmap(
@@ -1272,6 +1279,7 @@ def _update(
                                 # canonical_site_transforms,
                                 canonical_site_id,
                                 ligand_neighbourhood_output.aligned_diff_maps[canonical_site_id],
+                                aligned_res
                             )
 
                     else:
