@@ -431,7 +431,7 @@ def get_ligand_bounds(lig, border):
     return min_pos, max_pos
 
 
-def get_bounds(ligand_lower_bound, ligand_upper_bound, border, step):
+def get_frame_bounds(ligand_lower_bound, ligand_upper_bound, border, step):
     min_border = ligand_lower_bound - border
     max_border = min_border + (np.ceil(((ligand_upper_bound + 5) - min_border) / step) * step)
     return min_border, max_border
@@ -504,7 +504,7 @@ def resample_xmap(
     # print(ligand_lower_bound)
     # print(ligand_upper_bound)
 
-    frame_lower_bound, frame_upper_bound = get_bounds(ligand_lower_bound, ligand_upper_bound, border, step)
+    frame_lower_bound, frame_upper_bound = get_frame_bounds(ligand_lower_bound, ligand_upper_bound, border, step)
     # print(frame_lower_bound)
     # print(frame_upper_bound)
     # print(frame_upper_bound - frame_lower_bound)
