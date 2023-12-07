@@ -516,7 +516,7 @@ def resample_xmap(
     # print(frame_transform.vec.tolist())
     # print(frame_transform.mat.tolist())
 
-    m.grid.interpolate_values(frame_array, frame_transform)
+    m.interpolate_values(frame_array, frame_transform)
     # print(frame_array.shape)
 
     cell = get_cell(frame_array, step)
