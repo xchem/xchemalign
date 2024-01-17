@@ -30,61 +30,61 @@ The prefferred and more reproducible way to use XChemAlign to create a new proje
 
 And then run the process option. This will produce aligned structures and xmaps in the source_dir::
 
-    $ python -m xchemalign.cli process /path/to/option/json
+    $ python -m ligand_neighbourhood_alignment.cli process /path/to/option/json
 
 However, XChemAlign can be manually used as follows. This begins with initializing a project::
 
-    $ python -m xchemalign.cli init /path/to/project/dir
+    $ python -m ligand_neighbourhood_alignment.cli init /path/to/project/dir
 
 After this datasources can be added::
 
-    $ python -m xchemalign.cli add_datasource /path/to/project/dir /path/to/datasource
+    $ python -m ligand_neighbourhood_alignment.cli add_datasource /path/to/project/dir /path/to/datasource
 
 In order to align PanDDA event maps, the PanDDA directory in which these maps were modelled with PanDDA inspect must be added::
 
-    $ python -m xchemalign.cli add_datasource /path/to/project/dir /path/to/pandda
+    $ python -m ligand_neighbourhood_alignment.cli add_datasource /path/to/project/dir /path/to/pandda
 
 Multiple datasources can be added to a single project, as can multiple PanDDAs. Be cautious if the fragment was modelled in multiple of these PanDDAs, as only the xmaps from the first added PanDDA will be included.
 
 After sources and PanDDAs have been added, they can be parsed to produced a combined dataset::
 
-    $ python -m xchemalign.cli parse_data_sources /path/to/project/dir 
+    $ python -m ligand_neighbourhood_alignment.cli parse_data_sources /path/to/project/dir
 
 Once the combined datasource has been produced, the alignment graph can be calculated. This graph encodes the transformations necessary to align any two fragments based on their local protein environment (assuming this is possible)::
 
-    $ python -m xchemalign.cli build_graph /path/to/project/dir 
+    $ python -m ligand_neighbourhood_alignment.cli build_graph /path/to/project/dir
 
 Once the local alignment graph has been determined, subsites can be calculated based on the connected components (ligands that can be directly or indirectly aligned to one another based on their local protein environment), and then sites can be determined from those subsites which share significant numbers of residues::
 
-    $ python -m xchemalign.cli generate_sites_from_components /path/to/project/dir 
+    $ python -m ligand_neighbourhood_alignment.cli generate_sites_from_components /path/to/project/dir
 
 Once the sites and subsites have been generated, all of the structures can be aligned to a common reference frame. This first aligns all structures to the reference ligand in their subsite, then all subsites in a site to their reference subsite, then all sites to the reference site:: 
 
-    $ python -m xchemalign.cli align_structures /path/to/project/dir 
+    $ python -m ligand_neighbourhood_alignment.cli align_structures /path/to/project/dir
 
 Finally, the refined 2Fo-Fc maps and any event maps from PanDDAs can be aligned to their respective aligned structures::
 
-    $ python -m xchemalign.cli align_xmaps /path/to/project/dir 
+    $ python -m ligand_neighbourhood_alignment.cli align_xmaps /path/to/project/dir
 
 In order to inspect all of the structures in a site, there is a convenience function to open them all at once in coot::
 
-    $ python -m xchemalign.cli open_site /path/to/project/dir site_number
+    $ python -m ligand_neighbourhood_alignment.cli open_site /path/to/project/dir site_number
 
 If new datasources or PanDDAs have been added, or manual changes have been made to the sites or subsites, then these changes can be conveniently propogated to a new set of final sites, subsites, structures and xmaps using the update command::
 
-    $ python -m xchemalign.cli update /path/to/project/dir 
+    $ python -m ligand_neighbourhood_alignment.cli update /path/to/project/dir
 
 
-.. |code_ci| image:: https://github.com/xchem/xchemalign/actions/workflows/code.yml/badge.svg?branch=main
-    :target: https://github.com/xchem/xchemalign/actions/workflows/code.yml
+.. |code_ci| image:: https://github.com/ConorFWild/ligand_neighbourhood_alignment/actions/workflows/code.yml/badge.svg?branch=main
+    :target: https://github.com/ConorFWild/ligand_neighbourhood_alignment/actions/workflows/code.yml
     :alt: Code CI
 
-.. |docs_ci| image:: https://github.com/xchem/xchemalign/actions/workflows/docs.yml/badge.svg?branch=main
-    :target: https://github.com/xchem/xchemalign/actions/workflows/docs.yml
+.. |docs_ci| image:: https://github.com/ConorFWild/ligand_neighbourhood_alignment/actions/workflows/docs.yml/badge.svg?branch=main
+    :target: https://github.com/ConorFWild/ligand_neighbourhood_alignment/actions/workflows/docs.yml
     :alt: Docs CI
 
 .. |coverage| image:: https://codecov.io/gh/xchem/xchemalign/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/xchem/xchemalign
+    :target: https://codecov.io/gh/ConorFWild/ligand_neighbourhood_alignment
     :alt: Test Coverage
 
 .. |pypi_version| image:: https://img.shields.io/pypi/v/xchemalign.svg

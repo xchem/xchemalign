@@ -1,12 +1,12 @@
 from loguru import logger
 
-from xchemalign.data import (
+from ligand_neighbourhood_alignment.data import (
     CanonicalSite,
     LigandID,
     LigandNeighbourhood,
     SystemSites,
 )
-from xchemalign.matching import (
+from ligand_neighbourhood_alignment.matching import (
     match_neighbourhood_to_site,
     match_neighbourhood_to_sites,
 )

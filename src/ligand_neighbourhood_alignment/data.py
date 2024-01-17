@@ -6,7 +6,8 @@ import networkx as nx
 from loguru import logger
 from pydantic import BaseModel, validator
 
-from xchemalign import constants
+from ligand_neighbourhood_alignment import constants
+
 
 Structure = gemmi.Structure
 
@@ -525,6 +526,8 @@ def get_box(neighbourhood: LigandNeighbourhood, xmap, transform):
     return box
 
 
+
+
 def write_xmap(xmap, path: Path, neighbourhood: LigandNeighbourhood, transform):
 
     ccp4 = gemmi.Ccp4Map()
@@ -543,6 +546,9 @@ def write_xmap(xmap, path: Path, neighbourhood: LigandNeighbourhood, transform):
     ccp4.update_ccp4_header()
 
     ccp4.write_ccp4_map(str(path))
+
+
+
 
 
 def read_graph(path: Path):
@@ -633,6 +639,7 @@ def save_data(system_data: SystemData, output_dir: Path):
 
 class Options(BaseModel):
     source_dir: str
+    output_dir: str
     datasources: list[str]
     datasource_types: list[str]
     panddas: list[str]

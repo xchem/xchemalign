@@ -5,7 +5,7 @@ import gemmi
 import networkx as nx
 from loguru import logger
 
-from xchemalign.data import (  # Transform,; AlignableSite,; XtalForms,
+from ligand_neighbourhood_alignment.data import (  # Transform,; AlignableSite,; XtalForms,
     AssignedXtalForms,
     CanonicalSites,
     ConformerSites,
@@ -212,15 +212,15 @@ def expand_structure(_structure, xtalforms: AssignedXtalForms, moving_ligand_id)
 
 
 def align_structure(
-    _structure,
-    moving_ligand_id,
-    reference_ligand_id,
-    g,
-    transforms,
-    site_transforms: SiteTransforms,
-    canonical_site_id,
-    conformer_site_id,
-    out_path,
+        _structure,
+        moving_ligand_id,
+        reference_ligand_id,
+        g,
+        transforms,
+        site_transforms: SiteTransforms,
+        canonical_site_id,
+        conformer_site_id,
+        out_path,
 ):
     shortest_path = nx.shortest_path(g, moving_ligand_id, reference_ligand_id)
     logger.debug(f"Shortest path: {shortest_path}")
@@ -231,7 +231,6 @@ def align_structure(
         # Get the transform from previous frame to new one
         # Transform is 2 onto 1
         if next_ligand_id != previous_ligand_id:
-
             transform = transforms.get_transform(
                 (
                     next_ligand_id,
@@ -252,6 +251,82 @@ def align_structure(
     # Site alignment transform
     site_transform = transform_to_gemmi(site_transforms.get_canonical_site_transform(canonical_site_id))
     site_transform.combine(running_transform)
+
+    logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
+
+    _structure = superpose_structure(running_transform, _structure)
+
+    # Write the fully aligned structure
+    _structure.write_pdb(str(out_path))
+
+
+from ligand_neighbourhood_alignment import dt
+
+
+def _align_structure(
+        _structure,
+        moving_ligand_id: tuple[str, str, str],
+        reference_ligand_id: tuple[str, str, str],
+        g,
+        neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
+        conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+        # canonical_site_transforms: dict[str, dt.Transform],
+        canonical_site_id: str,
+        conformer_site_id: str,
+        out_path: Path,
+):
+    shortest_path: list[tuple[str, str, str]] = nx.shortest_path(g, moving_ligand_id, reference_ligand_id)
+    logger.debug(f"Shortest path: {shortest_path}")
+
+    previous_ligand_id = moving_ligand_id
+    running_transform = gemmi.Transform()
+    for next_ligand_id in shortest_path:
+        # Get the transform from previous frame to new one
+        # Transform is 2 onto 1
+        if next_ligand_id != previous_ligand_id:
+            transform = transform_to_gemmi(neighbourhood_transforms[(next_ligand_id, previous_ligand_id,)])
+            running_transform = transform.combine(running_transform)
+
+        # Apply the translation to the new frame
+        previous_ligand_id = next_ligand_id
+
+    # Subsite alignment transform
+    confomer_site_transform = transform_to_gemmi(
+        conformer_site_transforms[(canonical_site_id, conformer_site_id)]
+    )
+    running_transform = confomer_site_transform.combine(running_transform)
+
+    # Site alignment transform
+    # canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+    # running_transform = canonical_site_transform.combine(running_transform)
+
+    logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
+
+    _structure = superpose_structure(running_transform, _structure)
+
+    # Write the fully aligned structure
+    _structure.write_pdb(str(out_path))
+
+
+def _align_reference_structure(
+        _structure,
+        dtag: str,
+        # moving_ligand_id: tuple[str,str,str],
+        # reference_ligand_id: tuple[str,str,str],
+        # g,
+        # neighbourhood_transforms: dict[tuple[tuple[str,str,str], tuple[str,str,str]], dt.Transform],
+        # conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+        reference_structure_transforms: dict[tuple[str, str], dt.Transform],
+        # canonical_site_transforms: dict[str, dt.Transform],
+        canonical_site_id: str,
+        # conformer_site_id: str,
+        out_path: Path,
+):
+    running_transform = transform_to_gemmi(reference_structure_transforms[(dtag, canonical_site_id)])
+
+    # Site alignment transform
+    # canonical_site_transform = transform_to_gemmi(canonical_site_transforms[canonical_site_id])
+    # canonical_site_transform.combine(running_transform)
 
     logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
 
@@ -283,17 +358,17 @@ def align_structure(
 
 
 def _align_structures_from_sites(
-    structures,
-    canonical_sites: CanonicalSites,
-    conformer_sites: ConformerSites,
-    transforms: Transforms,
-    neighbourhoods: LigandNeighbourhoods,
-    xtalforms: XtalForms,
-    assigned_xtalforms: AssignedXtalForms,
-    g,
-    site_transforms: SiteTransforms,
-    # _output_dir: Path,
-    output: Output,
+        structures,
+        canonical_sites: CanonicalSites,
+        conformer_sites: ConformerSites,
+        transforms: Transforms,
+        neighbourhoods: LigandNeighbourhoods,
+        xtalforms: XtalForms,
+        assigned_xtalforms: AssignedXtalForms,
+        g,
+        site_transforms: SiteTransforms,
+        # _output_dir: Path,
+        output: Output,
 ):
     # asd = _output_dir / "aligned"
     # if not asd.exists():
@@ -335,10 +410,10 @@ def _align_structures_from_sites(
                 # Get output path
                 aod = Path(output.source_dir)
                 output_path = (
-                    aod
-                    / output.dataset_output[moving_ligand_id.dtag][moving_ligand_id.chain][
-                        moving_ligand_id.residue
-                    ].aligned_structures[canonical_site_id]
+                        aod
+                        / output.dataset_output[moving_ligand_id.dtag][moving_ligand_id.chain][
+                            moving_ligand_id.residue
+                        ].aligned_structures[canonical_site_id]
                 )
                 # Align the ligand
                 align_structure(

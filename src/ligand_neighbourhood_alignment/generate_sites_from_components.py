@@ -4,8 +4,8 @@ import networkx as nx
 import numpy as np
 from loguru import logger
 
-from xchemalign import constants
-from xchemalign.data import (
+from ligand_neighbourhood_alignment import constants
+from ligand_neighbourhood_alignment.data import (
     AssignedXtalForms,
     AtomID,
     CanonicalSite,
@@ -26,8 +26,8 @@ from xchemalign.data import (
     save_site_transforms,
 )
 
-# from xchemalign.save_sites import save_sites
-from xchemalign.structures import get_structures, get_transform_from_residues
+# from ligand_neighbourhood_alignment.save_sites import save_sites
+from ligand_neighbourhood_alignment.structures import get_structures, get_transform_from_residues, _get_transform_from_residues
 
 
 def get_components(g):
@@ -227,6 +227,48 @@ def get_subsite_transforms(sites: CanonicalSites, structures):
 
     return transforms
 
+from ligand_neighbourhood_alignment import dt
+def _update_conformer_site_transforms(
+                conformer_site_transforms,
+                canonical_site: dt.CanonicalSite,
+                conformer_sites: dict[str, dt.ConformerSite],
+        structures,
+            ):
+
+    ref_conformer_site = conformer_sites[canonical_site.reference_conformer_site_id]
+    ref_conformer_site_residues = ref_conformer_site.residues
+
+    for conformer_site_id in canonical_site.conformer_site_ids:
+        key = (canonical_site.reference_conformer_site_id, conformer_site_id)
+        if key not in conformer_site_transforms:
+
+            conformer_site = conformer_sites[conformer_site_id]
+            # conformer_site_residues = conformer_site.residues
+
+            transform = _get_transform_from_residues(
+
+                [(x[0], x[1]) for x in canonical_site.residues],
+                structures[conformer_site.reference_ligand_id[0]],
+                structures[ref_conformer_site.reference_ligand_id[0]])
+
+            conformer_site_transforms[key] = dt.Transform(transform.vec.tolist(), transform.mat.tolist())
+
+
+
+    # transforms = {}
+    # for site_id, site in zip(sites.site_ids, sites.sites):
+    #     rss = site.reference_ligand_id.dtag
+    #     rs = site.residues
+    #     srs = structures[rss]
+    #
+    #     for ssid, ss in zip(site.subsite_ids, site.subsites):
+    #         ssr = ss.reference_ligand_id.dtag
+    #         ssrs = structures[ssr]
+    #         transform = get_transform_from_residues(rs, srs, ssrs)
+    #         transforms[(site_id, 0, ssid)] = Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist())
+
+    # return transforms
+
 
 def get_site_transforms(sites: CanonicalSites, structures):
     transforms = {}
@@ -247,6 +289,43 @@ def get_site_transforms(sites: CanonicalSites, structures):
 
     return transforms
 
+def _update_canonical_site_transforms(
+            canonical_site_transforms: dict[str, dt.Transform],
+        canonical_site_id,
+            canonical_site: dt.CanonicalSite,
+            # canonical_sites: dict[str, dt.CanonicalSite],
+        conformer_sites: dict[str, dt.ConformerSite],
+        structures,
+        ):
+    rss = structures[canonical_site.global_reference_dtag]
+    ref_site_all_ress = [
+        (chain.name, res.seqid.num) for model in rss for chain in model for res in chain
+    ]
+
+    srs = conformer_sites[canonical_site.reference_conformer_site_id].reference_ligand_id[0]
+    site_structure = structures[srs]
+
+    transform = _get_transform_from_residues(ref_site_all_ress, rss, site_structure)
+    canonical_site_transforms[canonical_site_id] = dt.Transform(
+        transform.vec.tolist(),
+        transform.mat.tolist(),
+    )
+
+def _update_reference_structure_transforms(
+        reference_structure_transforms,
+        key,
+        structures,
+        canonical_site: dt.CanonicalSite,
+        conformer_sites: dict[str, dt.ConformerSite],
+):
+    ress = [(x[0], x[1]) for x in canonical_site.residues]
+    to_structure = structures[conformer_sites[canonical_site.reference_conformer_site_id].reference_ligand_id[0]]
+    from_structure = structures[key[0]]
+    transform = _get_transform_from_residues(ress, to_structure, from_structure)
+    reference_structure_transforms[key] = dt.Transform(
+        transform.vec.tolist(),
+        transform.mat.tolist(),
+    )
 
 def _generate_sites_from_components(_source_dir: Path):
 
@@ -316,3 +395,4 @@ def _generate_sites_from_components(_source_dir: Path):
     save_site_transforms(site_transforms, _source_dir)
 
     return canonical_sites
+

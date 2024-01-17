@@ -2,7 +2,7 @@ from pathlib import Path
 
 import networkx as nx
 
-# from xchemalign.data import LigandID
+# from ligand_neighbourhood_alignment.data import LigandID
 
 
 def save_graph(g, path: Path):

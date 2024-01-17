@@ -10,15 +10,15 @@ from subprocess import check_output
 
 import requests
 
-import xchemalign
+import ligand_neighbourhood_alignment
 
 # -- General configuration ------------------------------------------------
 
 # General information about the project.
-project = "xchemalign"
+project = "ligand_neighbourhood_alignment"
 
 # The full version, including alpha/beta/rc tags.
-release = xchemalign.__version__
+release = ligand_neighbourhood_alignment.__version__
 
 # The short X.Y version.
 if "+" in release:

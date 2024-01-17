@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from xchemalign.data import Transforms
+from ligand_neighbourhood_alignment.data import Transforms
 
 
 def save_transforms(transforms: Transforms, path: Path):

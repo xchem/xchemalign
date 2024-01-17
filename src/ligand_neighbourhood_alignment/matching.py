@@ -1,4 +1,4 @@
-from xchemalign.data import Atom, AtomID, CanonicalSite, LigandNeighbourhood
+from ligand_neighbourhood_alignment.data import Atom, AtomID, CanonicalSite, LigandNeighbourhood
 
 
 def match_atom(
@@ -17,6 +17,28 @@ def match_atom(
         if id_1.atom == id_2.atom:
             if id_1.residue == id_2.residue:
                 if id_1.chain == id_2.chain:
+                    return True
+
+    return False
+
+from ligand_neighbourhood_alignment import dt
+
+def _match_atom(
+    canonical_site_atom_id: tuple[str, str,str],
+    ligand_neighbourhood_atom_id: tuple[str, str,str],
+    ignore_chain=False,
+) -> bool:
+    # id_1 = canonical_site_atom.atom_id
+    # id_2 = ligand_neighbourhood_atom.atom_id
+
+    if ignore_chain:
+        if canonical_site_atom_id[2] == ligand_neighbourhood_atom_id[2]:
+            if canonical_site_atom_id[1] == ligand_neighbourhood_atom_id[1]:
+                return True
+    else:
+        if canonical_site_atom_id[2] == ligand_neighbourhood_atom_id[2]:
+            if canonical_site_atom_id[1] == ligand_neighbourhood_atom_id[1]:
+                if canonical_site_atom_id[0] == ligand_neighbourhood_atom_id[0]:
                     return True
 
     return False

@@ -1,4 +1,4 @@
-from xchemalign.data import AlignableSite
+from ligand_neighbourhood_alignment.data import AlignableSite
 
 
 def match_site(containing_site, contained_site):

@@ -4,7 +4,7 @@
 # # import gemmi
 # from loguru import logger
 
-# from xchemalign.data import (
+# from ligand_neighbourhood_alignment.data import (
 #     CanonicalSite,
 #     LigandID,
 #     LigandNeighbourhoods,
@@ -13,24 +13,24 @@
 #     SystemSites,
 #     XtalFormSite,
 # )
-# from xchemalign.generate_aligned_structures import (
+# from ligand_neighbourhood_alignment.generate_aligned_structures import (
 #     generate_aligned_structures_connected_components,
 # )
-# from xchemalign.get_alignability import get_alignability
-# from xchemalign.get_alignable_sites import get_alignable_sites
-# from xchemalign.get_canonical_sites import get_canonical_sites
-# from xchemalign.get_connected_components import (
+# from ligand_neighbourhood_alignment.get_alignability import get_alignability
+# from ligand_neighbourhood_alignment.get_alignable_sites import get_alignable_sites
+# from ligand_neighbourhood_alignment.get_canonical_sites import get_canonical_sites
+# from ligand_neighbourhood_alignment.get_connected_components import (
 #     get_connected_components_connected,
 # )
-# from xchemalign.get_graph import get_graph
-# from xchemalign.get_ligand_neighbourhoods import get_ligand_neighbourhoods
-# from xchemalign.get_site_observations import get_site_observations
+# from ligand_neighbourhood_alignment.get_graph import get_graph
+# from ligand_neighbourhood_alignment.get_ligand_neighbourhoods import get_ligand_neighbourhoods
+# from ligand_neighbourhood_alignment.get_site_observations import get_site_observations
 
-# # from xchemalign.get_transforms import get_transforms
-# from xchemalign.get_xtal_form_sites import get_xtal_form_sites
-# from xchemalign.save_graph import save_graph
-# from xchemalign.save_neighbourhoods import save_neighbourhoods
-# from xchemalign.save_transforms import save_transforms
+# # from ligand_neighbourhood_alignment.get_transforms import get_transforms
+# from ligand_neighbourhood_alignment.get_xtal_form_sites import get_xtal_form_sites
+# from ligand_neighbourhood_alignment.save_graph import save_graph
+# from ligand_neighbourhood_alignment.save_neighbourhoods import save_neighbourhoods
+# from ligand_neighbourhood_alignment.save_transforms import save_transforms
 
 
 # def get_system_sites(
