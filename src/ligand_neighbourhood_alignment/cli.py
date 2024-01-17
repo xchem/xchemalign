@@ -1009,6 +1009,8 @@ def _update(
                 ligand_neighbourhoods,
                 structures,
             )
+        else:
+            logger.info(f'Skipping ligand: {lid}: Not in a new dataset!')
             # alignments, transforms = _get_alignments()
             # for target_lid, transform in transforms.items():
             #     ligand_neighbourhood_transforms[(lid, target_lid)] = transform
@@ -1020,9 +1022,12 @@ def _update(
     logger.info(f"Updating alignment graph...")
     logger.info(f"Previously had {len(alignability_graph.nodes)} nodes")
     logger.info(f"Previously had {len(alignability_graph.edges)} edges")
-    _update_graph(alignability_graph, ligand_neighbourhood_transforms)
+    _update_graph(
+        alignability_graph,
+        ligand_neighbourhood_transforms,
+    )
     logger.info(f"Now have {len(alignability_graph.nodes)} nodes")
-    print(alignability_graph.nodes)
+    print(sorted(alignability_graph.nodes, key=lambda x: x[0]))
     logger.info(f"Now have {len(alignability_graph.edges)} edges")
     print(alignability_graph.edges)
     _save_graph(fs_model, alignability_graph)
