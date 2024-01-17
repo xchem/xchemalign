@@ -572,7 +572,10 @@ from ligand_neighbourhood_alignment.get_ligand_neighbourhoods import _get_ligand
 
 
 def _get_dataset_neighbourhoods(
-        dataset: dt.Dataset, xtalform: dt.XtalForm, assemblies: dict[str, dt.Assembly], max_radius: float = 7.0
+        dataset: dt.Dataset,
+        xtalform: dt.XtalForm,
+        assemblies: dict[str, dt.Assembly],
+        max_radius: float = 9.0
 ) -> dict[tuple[str, str, str], dt.Neighbourhood]:
     # Load the structure
     logger.debug(dataset.pdb)
@@ -588,7 +591,11 @@ def _get_dataset_neighbourhoods(
     logger.debug(fragments)
 
     # Construct the neighbourhood search
-    ns: gemmi.NeighborSearch = gemmi.NeighborSearch(assembly[0], assembly.cell, max_radius).populate()
+    ns: gemmi.NeighborSearch = gemmi.NeighborSearch(
+        assembly[0],
+        assembly.cell,
+        max_radius,
+    ).populate()
 
     # For each bound fragment, identify the neighbourhood atoms and
     # partition them into model and artefact
