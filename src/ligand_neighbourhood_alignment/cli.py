@@ -1142,6 +1142,11 @@ def _update(
     #     for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
     #         for lid in conformer_site.ligand_ids:
     for dtag, dataset_alignment_info in fs_model.alignments.items():
+        if dtag not in new_datasets:
+            print(f"Already processed dataset: {dtag}")
+
+            continue
+
         for chain, chain_alignment_info in dataset_alignment_info.items():
             for residue, ligand_neighbourhood_output in chain_alignment_info.items():
                 for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
