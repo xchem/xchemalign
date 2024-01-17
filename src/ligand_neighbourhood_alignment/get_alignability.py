@@ -189,7 +189,7 @@ def _update_ligand_neighbourhood_transforms(
             matches.append(ligand_2_id)
 
     if len(matches) == 0:
-        logger.warning(f"No Matches For {ligand_1_id}!")
+        logger.warning(f"No Matches For {ligand_1_id}! No alignments will be generated!")
 
             # else:
             #     connectivities.append(0)
