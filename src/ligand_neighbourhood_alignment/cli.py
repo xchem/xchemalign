@@ -1227,7 +1227,7 @@ def _update(
 
                         moving_ligand_id = (dtag, chain, residue)
                         reference_ligand_id = conformer_site.reference_ligand_id
-                        print(ligand_neighbourhoods)
+                        # print(ligand_neighbourhoods)
 
                         xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
 
