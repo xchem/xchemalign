@@ -113,7 +113,7 @@ from ligand_neighbourhood_alignment import dt
 def _match_cas(
     ligand_1_neighbourhood: dt.Neighbourhood,
     ligand_2_neighbourhood: dt.Neighbourhood,
-    min_alignable_atoms: int = 5,
+    min_alignable_atoms: int = 7,
     max_alignable_rmsd: float = 2.0,
 ):
 

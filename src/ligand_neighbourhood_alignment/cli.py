@@ -643,6 +643,7 @@ def _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transfo
 
 
 def _update_graph(alignability_graph, ligand_neighbourhood_transforms):
+
     nodes = alignability_graph.nodes
     edges = alignability_graph.edges
     for to_ligand_id, from_ligand_id in ligand_neighbourhood_transforms:
@@ -1009,18 +1010,13 @@ def _update(
 
     # for dtag, dataset in new_datasets.items():
     for lid, neighbourhood in ligand_neighbourhoods.items():
-        if lid[0] in new_datasets:
-            _update_ligand_neighbourhood_transforms(
-                ligand_neighbourhood_transforms,
-                lid,
-                ligand_neighbourhoods,
-                structures,
-            )
-        else:
-            logger.info(f'Skipping ligand: {lid}: Not in a new dataset!')
-            # alignments, transforms = _get_alignments()
-            # for target_lid, transform in transforms.items():
-            #     ligand_neighbourhood_transforms[(lid, target_lid)] = transform
+        _update_ligand_neighbourhood_transforms(
+            ligand_neighbourhood_transforms,
+            lid,
+            ligand_neighbourhoods,
+            structures,
+        )
+
     logger.info(f"Now have {len(ligand_neighbourhood_transforms)} alignments between neighbourhoods")
     print(ligand_neighbourhood_transforms)
     _save_ligand_neighbourhood_transforms(fs_model, ligand_neighbourhood_transforms)
@@ -1046,6 +1042,9 @@ def _update(
     logger.info(f"Previously had {len(conformer_sites)} conformer sites")
 
     for connected_component in connected_components:
+        # Update new datasets to indicate everything sharing a connected component
+        #
+
         # Match new component to old ones by membership, and expand old ones if available otherwise create new one
         _update_conformer_sites(conformer_sites, connected_component, ligand_neighbourhoods, structures)
     logger.info(f"Now have {len(conformer_sites)} conformer sites")
@@ -1142,11 +1141,6 @@ def _update(
     #     for conformer_site_id, conformer_site in canonical_site.conformer_sites.items():
     #         for lid in conformer_site.ligand_ids:
     for dtag, dataset_alignment_info in fs_model.alignments.items():
-        if dtag not in new_datasets:
-            print(f"Already processed dataset: {dtag}")
-
-            continue
-
         for chain, chain_alignment_info in dataset_alignment_info.items():
             for residue, ligand_neighbourhood_output in chain_alignment_info.items():
                 for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
