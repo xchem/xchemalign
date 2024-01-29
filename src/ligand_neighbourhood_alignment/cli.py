@@ -1523,10 +1523,18 @@ def _load_alignability_graph(alignability_graph):
 
 def _load_connected_components(connected_components_yaml):
     connected_components = {}
+
     if connected_components_yaml.exists():
 
         with open(connected_components_yaml, 'r') as f:
-            connected_components = yaml.safe_load(f)
+            dic = yaml.safe_load(f)
+
+        if dic:
+            for ligand_id, neighbourhood_info in dic.items():
+                dtag, chain, residue = ligand_id.split("+")
+                neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
+                connected_components[(dtag, chain, residue)] = neighbourhood
+
 
     return connected_components
 
