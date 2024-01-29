@@ -1073,6 +1073,7 @@ def _update(
     for dtag, dataset in new_datasets.items():
         xtalform = xtalforms[dataset_assignments[dtag]]
         neighborhoods = _get_neighbourhoods(dataset, xtalform, assemblies)
+        logger.info(f"Dataset {dtag} has {len(neighborhoods)} ligand neighbourhoods")
         for lid, neighbourhood in neighborhoods.items():
             ligand_neighbourhoods[lid] = neighbourhood
     logger.info(f"Found {len(ligand_neighbourhoods)} ligand neighbourhoods!")
