@@ -1075,7 +1075,7 @@ def _update(
         neighborhoods = _get_neighbourhoods(dataset, xtalform, assemblies)
         for lid, neighbourhood in neighborhoods.items():
             ligand_neighbourhoods[lid] = neighbourhood
-    logger.info(f"Found {len(neighborhoods)} ligand neighbourhoods!")
+    logger.info(f"Found {len(ligand_neighbourhoods)} ligand neighbourhoods!")
     _save_neighbourhoods(fs_model, ligand_neighbourhoods)
 
     for nid, neighbourhood in ligand_neighbourhoods.items():
