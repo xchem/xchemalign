@@ -683,13 +683,74 @@ def _save_graph(fs_model, alignability_graph):
     )
 
 
-def _get_connected_components(alignability_graph):
-    cliques = list(nx.connected_components(alignability_graph))
-    return cliques
+# def _get_connected_components(alignability_graph):
+#     cliques = list(nx.connected_components(alignability_graph))
+#     return cliques
 
+def _get_connected_components(
+        alignability_graph,
+        clusters,
+        max_path_length=2
+):
+    """
+    Construct neighbourhoods around the most connected neighbourhoods by some max path length,
+
+
+    """
+
+    # Get the graph of short paths
+    path = dict(nx.all_pairs_shortest_path(alignability_graph))
+    path_lengths = {(source, target): len(path[source][target]) for source in path for target in path[source]}
+    H = nx.Graph()
+    for node in path:
+        H.add_node(node)
+    for source, target in path_lengths:
+        if path_lengths[(source, target)] <= max_path_length:
+            H.add_edge(
+                source,
+                target
+            )
+
+
+
+    #
+    degrees = dict(nx.degree(H))
+
+    # Replay cluster cores
+    used = sum([cluster for cluster in clusters.values()])
+    for x in clusters:
+        for target in H.nodes:
+            if target in used:
+                continue
+            if (x, target) not in path_lengths:
+                continue
+            if path_lengths[(x, target)] <= 2:
+                used.append(target)
+                clusters[x].append(target)
+
+    # Now go through any new ligands that are not yet connected, constructing clusters for them
+    for x in sorted(degrees, key=lambda _x: degrees[_x], reverse=True):
+        if x in used:
+            continue
+        clusters[x] = []
+        print(f'f{x} : {degrees[x]}')
+
+        # for n in G.neighbors(x):
+        # used.append(n)
+        for target in H.nodes:
+            if target in used:
+                continue
+            if (x, target) not in path_lengths:
+                continue
+            if path_lengths[(x, target)] <= 2:
+                used.append(target)
+                clusters[x].append(target)
+
+    return clusters
 
 def _update_conformer_sites(
         conformer_sites: dict[str, dt.ConformerSite],
+        connected_component_id: tuple[str, str, str],
         connected_component: list[tuple[str, str, str]],
         neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
         structures
@@ -715,10 +776,17 @@ def _update_conformer_sites(
         conformer_site = dt.ConformerSite(
             [x for x in set(residues)],
             connected_component,
-            [x for x in connected_component][0]
+            # [x for x in connected_component][0]
+            connected_component_id
         )
         conformer_site_id = "+".join(conformer_site.reference_ligand_id)
         conformer_sites[conformer_site_id] = conformer_site
+
+def     _save_connected_components(fs_model, connected_components):
+    with open(fs_model.connected_components, 'w') as f:
+        yaml.safe_dump(connected_components, f)
+
+
 
 
 def _save_conformer_sites(fs_model: dt.FSModel, conformer_sites: dict[str, dt.ConformerSite]):
@@ -976,6 +1044,7 @@ def _update(
         dataset_assignments: dict[str, str],
         ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
         alignability_graph,
+        connected_components,
         ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
         conformer_sites: dict[str, dt.ConformerSite],
         conformer_site_transforms: dict[tuple[str, str], dt.Transform],
@@ -1047,16 +1116,23 @@ def _update(
 
     # Update conformer sites
     logger.info(f"Updating conformer sites...")
-    connected_components = _get_connected_components(alignability_graph)
+    connected_components = _get_connected_components(alignability_graph, connected_components)
+    _save_connected_components(fs_model, connected_components)
     logger.info(f"Got {len(connected_components)} connected components")
     logger.info(f"Previously had {len(conformer_sites)} conformer sites")
 
-    for connected_component in connected_components:
+    for connected_component_id, connected_component in connected_components.items():
         # Update new datasets to indicate everything sharing a connected component
         #
 
         # Match new component to old ones by membership, and expand old ones if available otherwise create new one
-        _update_conformer_sites(conformer_sites, connected_component, ligand_neighbourhoods, structures)
+        _update_conformer_sites(
+            conformer_sites,
+            connected_component_id,
+            connected_component,
+            ligand_neighbourhoods,
+            structures,
+        )
     logger.info(f"Now have {len(conformer_sites)} conformer sites")
     for conformer_site_id, conformer_site in conformer_sites.items():
         print(conformer_site_id)
@@ -1437,6 +1513,15 @@ def _load_alignability_graph(alignability_graph):
     else:
         return nx.Graph()
 
+def _load_connected_components(connected_components_yaml):
+    connected_components = {}
+    if connected_components_yaml.exists():
+
+        with open(connected_components_yaml, 'r') as f:
+            connected_components = yaml.safe_load(f)
+
+    return connected_components
+
 
 def _load_ligand_neighbourhood_transforms(ligand_neighbourhood_transforms_yaml):
     ligand_neighbourhood_transforms = {}
@@ -1647,6 +1732,11 @@ class CLI:
         else:
             alignability_graph = _load_alignability_graph(fs_model.alignability_graph)
 
+        if source_fs_model:
+            connected_components = _load_connected_components(source_fs_model.connected_components)
+        else:
+            connected_components = _load_connected_components(fs_model.connected_components)
+
         #
         logger.info(f"Getting lighand neighbourhood transforms...")
         if source_fs_model:
@@ -1717,6 +1807,7 @@ class CLI:
             dataset_assignments,
             ligand_neighbourhoods,
             alignability_graph,
+            connected_components,
             ligand_neighbourhood_transforms,
             conformer_sites,
             conformer_site_transforms,

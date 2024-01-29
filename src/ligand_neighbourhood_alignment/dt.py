@@ -64,6 +64,7 @@ class FSModel:
             dataset_assignments,
             ligand_neighbourhoods,
             alignability_graph,
+            connected_components,
             ligand_neighbourhood_transforms,
             conformer_sites,
             conformer_site_transforms,
@@ -81,6 +82,7 @@ class FSModel:
         self.dataset_assignments = dataset_assignments
         self.ligand_neighbourhoods = ligand_neighbourhoods
         self.alignability_graph = alignability_graph
+        self.connected_components = connected_components
         self.ligand_neighbourhood_transforms = ligand_neighbourhood_transforms
         self.conformer_sites = conformer_sites
         self.conformer_site_transforms = conformer_site_transforms
@@ -160,6 +162,7 @@ class FSModel:
         dataset_assignments = source_dir / constants.ASSIGNED_XTALFORMS_YAML_FILE_NAME
         ligand_neighbourhoods = source_dir / constants.NEIGHBOURHOODS_YAML_FILE_NAME
         alignability_graph = source_dir / constants.ALIGNABILITY_GRAPH_FILE_NAME
+        connected_components = source_dir / constants.CONNECTED_COMPONENTS_YAML_NAME
         ligand_neighbourhood_transforms = source_dir / constants.TRANSFORMS_YAML_FILE_NAME
         conformer_sites = source_dir / constants.CONFORMER_SITE_YAML_FILE
         conformer_site_transforms = source_dir / constants.CONFORMER_SITES_TRANSFORMS_YAML_FILE_NAME
@@ -178,6 +181,7 @@ class FSModel:
             dataset_assignments,
             ligand_neighbourhoods,
             alignability_graph,
+            connected_components,
             ligand_neighbourhood_transforms,
             conformer_sites,
             conformer_site_transforms,
@@ -228,6 +232,7 @@ class FSModel:
             dataset_assignments=Path(dic['dataset_assignments']),
             ligand_neighbourhoods=Path(dic['ligand_neighbourhoods']),
             alignability_graph=Path(dic['alignability_graph']),
+            connected_components=Path(dic['connected_components']),
             ligand_neighbourhood_transforms=Path(dic['ligand_neighbourhood_transforms']),
             conformer_sites=Path(dic['conformer_sites']),
             conformer_site_transforms=Path(dic['conformer_site_transforms']),
@@ -268,6 +273,7 @@ class FSModel:
             'dataset_assignments': str(self.dataset_assignments),
             'ligand_neighbourhoods': str(self.ligand_neighbourhoods),
             'alignability_graph': str(self.alignability_graph),
+            'connected_components': str(self.connected_components),
             'ligand_neighbourhood_transforms': str(self.ligand_neighbourhood_transforms),
             'conformer_sites': str(self.conformer_sites),
             'conformer_site_transforms': str(self.conformer_site_transforms),
