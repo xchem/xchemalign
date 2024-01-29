@@ -782,12 +782,16 @@ def _update_conformer_sites(
         conformer_site_id = "+".join(conformer_site.reference_ligand_id)
         conformer_sites[conformer_site_id] = conformer_site
 
-def     _save_connected_components(fs_model, connected_components):
+def _save_connected_components(fs_model, connected_components):
     with open(fs_model.connected_components, 'w') as f:
-        yaml.safe_dump(connected_components, f)
-
-
-
+        dic = {}
+        for connected_component_reference, connected_component in connected_components.items():
+            dic["+".join(connected_component_reference)] = [
+                "+".join(member)
+                for member
+                in connected_component
+            ]
+        yaml.safe_dump(dic, f)
 
 def _save_conformer_sites(fs_model: dt.FSModel, conformer_sites: dict[str, dt.ConformerSite]):
     with open(fs_model.conformer_sites, 'w') as f:
@@ -1519,10 +1523,18 @@ def _load_alignability_graph(alignability_graph):
 
 def _load_connected_components(connected_components_yaml):
     connected_components = {}
+
     if connected_components_yaml.exists():
 
         with open(connected_components_yaml, 'r') as f:
-            connected_components = yaml.safe_load(f)
+            dic = yaml.safe_load(f)
+
+        if dic:
+            for ligand_id, neighbourhood_info in dic.items():
+                dtag, chain, residue = ligand_id.split("+")
+                neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
+                connected_components[(dtag, chain, residue)] = neighbourhood
+
 
     return connected_components
 
