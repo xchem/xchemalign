@@ -791,7 +791,7 @@ def _save_connected_components(fs_model, connected_components):
                 for member
                 in connected_component
             ]
-        yaml.safe_dump(connected_components, f)
+        yaml.safe_dump(dic, f)
 
 def _save_conformer_sites(fs_model: dt.FSModel, conformer_sites: dict[str, dt.ConformerSite]):
     with open(fs_model.conformer_sites, 'w') as f:
