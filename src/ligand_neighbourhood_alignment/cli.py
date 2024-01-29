@@ -782,12 +782,16 @@ def _update_conformer_sites(
         conformer_site_id = "+".join(conformer_site.reference_ligand_id)
         conformer_sites[conformer_site_id] = conformer_site
 
-def     _save_connected_components(fs_model, connected_components):
+def _save_connected_components(fs_model, connected_components):
     with open(fs_model.connected_components, 'w') as f:
+        dic = {}
+        for connected_component_reference, connected_component in connected_components.items():
+            dic["+".join(connected_component_reference)] = [
+                "+".join(member)
+                for member
+                in connected_component
+            ]
         yaml.safe_dump(connected_components, f)
-
-
-
 
 def _save_conformer_sites(fs_model: dt.FSModel, conformer_sites: dict[str, dt.ConformerSite]):
     with open(fs_model.conformer_sites, 'w') as f:
