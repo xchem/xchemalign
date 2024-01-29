@@ -717,7 +717,7 @@ def _get_connected_components(
     degrees = dict(nx.degree(H))
 
     # Replay cluster cores
-    used = sum([cluster for cluster in clusters.values()])
+    used = [member for cluster in clusters for member in cluster]
     for x in clusters:
         for target in H.nodes:
             if target in used:
