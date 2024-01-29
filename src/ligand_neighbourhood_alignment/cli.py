@@ -801,6 +801,7 @@ def _update_canonical_sites(
         canonical_sites: dict[str, dt.CanonicalSite],
         conformer_site: dt.ConformerSite,
         conformer_site_id,
+        min_shared_residues=6
 ):
     if len(canonical_sites) != 0:
         global_reference_dtag = [x for x in canonical_sites.values()][0].global_reference_dtag
@@ -815,7 +816,7 @@ def _update_canonical_sites(
         canonical_site_residues = [(residue[1], residue[2]) for residue in canonical_site.residues]
         if conformer_site_id not in canonical_site.conformer_site_ids:
             v = set(canonical_site_residues).intersection(set(conformer_site_residues))
-            if len(v) >= 3:
+            if len(v) >= min_shared_residues:
                 # Matched!
                 matched = True
                 canonical_site.conformer_site_ids.append(conformer_site_id)
