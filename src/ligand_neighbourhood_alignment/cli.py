@@ -550,7 +550,7 @@ def _get_structure_fragments(dataset: dt.Dataset, structure):
     for model in structure:
         for chain in model:
             source_chain, biomol_chain, transform = chain.name.split("~")
-            for residue in chain.get_ligands():
+            for residue in chain: #.get_ligands():
                 for lbe in dataset.ligand_binding_events:
                     # if (
                     #     (residue.name == "LIG")
