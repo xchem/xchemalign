@@ -816,7 +816,7 @@ def _update_canonical_sites(
         canonical_site_residues = [(residue[1], residue[2]) for residue in canonical_site.residues]
         if conformer_site_id not in canonical_site.conformer_site_ids:
             v = set(canonical_site_residues).intersection(set(conformer_site_residues))
-            if len(v) >= min_shared_residues:
+            if len(v) >= min(min_shared_residues, int((3/4)*len(canonical_site_residues))):
                 # Matched!
                 matched = True
                 canonical_site.conformer_site_ids.append(conformer_site_id)
