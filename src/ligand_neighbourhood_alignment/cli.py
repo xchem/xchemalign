@@ -1066,6 +1066,7 @@ def _update(
             structures,
         )
     _save_assignments(fs_model, dataset_assignments)
+    logger.info(f"Assigned {len(dataset_assignments)} xtalform assignments to datasets!")
 
     # Get neighbourhoods
     logger.info(f"Updating neighbourhoods")
@@ -1074,6 +1075,7 @@ def _update(
         neighborhoods = _get_neighbourhoods(dataset, xtalform, assemblies)
         for lid, neighbourhood in neighborhoods.items():
             ligand_neighbourhoods[lid] = neighbourhood
+    logger.info(f"Found {len(neighborhoods)} ligand neighbourhoods!")
     _save_neighbourhoods(fs_model, ligand_neighbourhoods)
 
     for nid, neighbourhood in ligand_neighbourhoods.items():
