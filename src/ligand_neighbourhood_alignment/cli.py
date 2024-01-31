@@ -823,7 +823,6 @@ def _update_canonical_sites(
             # if len(v) >= min(min_shared_residues, int((3/4)*len(canonical_site_residues))):
             if len(v) >= 0.5*len(canonical_site_residues):
                 # Matched!
-
                 matched = True
                 canonical_site.conformer_site_ids.append(conformer_site_id)
 
