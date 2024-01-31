@@ -820,7 +820,8 @@ def _update_canonical_sites(
         canonical_site_residues = [(residue[1], residue[2]) for residue in canonical_site.residues]
         if conformer_site_id not in canonical_site.conformer_site_ids:
             v = set(canonical_site_residues).intersection(set(conformer_site_residues))
-            if len(v) >= min(min_shared_residues, int((3/4)*len(canonical_site_residues))):
+            # if len(v) >= min(min_shared_residues, int((3/4)*len(canonical_site_residues))):
+            if len(v) >= 0.75*len(canonical_site_residues):
                 # Matched!
                 matched = True
                 canonical_site.conformer_site_ids.append(conformer_site_id)
@@ -1298,7 +1299,13 @@ def _update(
     #         conformer_site = conformer_sites[conformer_site_id]
     #         for lid in conformer_site.members:
     #             _update_aligned_xmaps()
-    reference_xmap = read_xmap_from_mtz(datasets[[x for x in canonical_sites.values()][0].global_reference_dtag].mtz)
+    reference_xmap = read_xmap_from_mtz(
+        datasets[
+            [
+                x for x in canonical_sites.values()
+            ][0].global_reference_dtag
+        ].mtz
+    )
     logger.info(f"Outputting xmaps...")
     for dtag, dataset_alignment_info in fs_model.alignments.items():
         for chain, chain_alignment_info in dataset_alignment_info.items():
@@ -1532,8 +1539,12 @@ def _load_connected_components(connected_components_yaml):
         if dic:
             for ligand_id, neighbourhood_info in dic.items():
                 dtag, chain, residue = ligand_id.split("+")
-                neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
-                connected_components[(dtag, chain, residue)] = neighbourhood
+                # neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
+                connected_components[(dtag, chain, residue)] = [
+                    _ligand_id.split("+")
+                    for _ligand_id
+                    in neighbourhood_info
+                ]
 
 
     return connected_components
