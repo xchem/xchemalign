@@ -760,9 +760,9 @@ def _get_connected_components(
 
 def _update_conformer_sites(
         conformer_sites: dict[str, dt.ConformerSite],
-        connected_component_id: tuple[str, str, str],
-        connected_component: list[tuple[str, str, str]],
-        neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
+        connected_component_id: tuple[str, str, str, str],
+        connected_component: list[tuple[str, str, str, str]],
+        neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
         structures
 ):
     matched = False

@@ -689,12 +689,12 @@ class ConformerSite:
     def __init__(
             self,
             residues: list[tuple[str, str]],
-            members: list[tuple[str, str, str]],
-            reference_ligand_id: tuple[str, str, str]
+            members: list[tuple[str, str, str, str]],
+            reference_ligand_id: tuple[str, str, str, str]
     ):
         self.residues: list[tuple[str, str]] = residues
-        self.members: list[tuple[str, str, str]] = members
-        self.reference_ligand_id: tuple[str, str, str] = reference_ligand_id
+        self.members: list[tuple[str, str, str, str]] = members
+        self.reference_ligand_id: tuple[str, str, str, str] = reference_ligand_id
 
     @staticmethod
     def from_dict(dic):
