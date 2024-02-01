@@ -1260,7 +1260,7 @@ def _update(
                         # Check for the matching conformer site
                         conformer_site = None
                         for conformer_site_id in canonical_site.conformer_site_ids:
-                            if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
+                            if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
                         if conformer_site is None:
@@ -1332,12 +1332,12 @@ def _update(
                         # Check for the matching conformer site
                         conformer_site = None
                         for conformer_site_id in canonical_site.conformer_site_ids:
-                            if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
+                            if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
 
                         if conformer_site is None:
-                            print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
+                            print(f"Skipping alignment of {dtag} {chain} {residue}π to site {canonical_site_id}!")
                             continue
 
                         moving_ligand_id = (dtag, chain, residue)
