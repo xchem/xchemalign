@@ -1337,7 +1337,7 @@ def _update(
                                 break
 
                         if conformer_site is None:
-                            print(f"Skipping alignment of {dtag} {chain} {residue}π to site {canonical_site_id}!")
+                            print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
                             continue
 
                         moving_ligand_id = (dtag, chain, residue)
