@@ -689,12 +689,12 @@ class ConformerSite:
     def __init__(
             self,
             residues: list[tuple[str, str]],
-            members: list[tuple[str, str, str]],
-            reference_ligand_id: tuple[str, str, str]
+            members: list[tuple[str, str, str, str]],
+            reference_ligand_id: tuple[str, str, str, str]
     ):
         self.residues: list[tuple[str, str]] = residues
-        self.members: list[tuple[str, str, str]] = members
-        self.reference_ligand_id: tuple[str, str, str] = reference_ligand_id
+        self.members: list[tuple[str, str, str, str]] = members
+        self.reference_ligand_id: tuple[str, str, str, str] = reference_ligand_id
 
     @staticmethod
     def from_dict(dic):
@@ -704,13 +704,13 @@ class ConformerSite:
             residues.append((chain, residue, name))
         members = []
         for member in dic['members']:
-            dtag, chain, residue = member.split("/")
-            members.append((dtag, chain, residue))
-        ref_dtag, ref_chain, ref_residue = dic["reference_ligand_id"].split("/")
+            dtag, chain, residue, version = member.split("/")
+            members.append((dtag, chain, residue, version))
+        ref_dtag, ref_chain, ref_residue, version = dic["reference_ligand_id"].split("/")
         return ConformerSite(
             residues,
             members,
-            (ref_dtag, ref_chain, ref_residue)
+            (ref_dtag, ref_chain, ref_residue, version)
         )
 
     def to_dict(self, ):
@@ -774,8 +774,8 @@ class XtalFormSite:
     def from_dict(dic):
         members = []
         for member in dic['members']:
-            dtag, chain, residue = member.split("/")
-            members.append((dtag, chain, residue))
+            dtag, chain, residue, version = member.split("/")
+            members.append((dtag, chain, residue, version))
         return XtalFormSite(
             dic['xtalform_id'],
             dic['crystallographic_chain'],

@@ -760,9 +760,9 @@ def _get_connected_components(
 
 def _update_conformer_sites(
         conformer_sites: dict[str, dt.ConformerSite],
-        connected_component_id: tuple[str, str, str],
-        connected_component: list[tuple[str, str, str]],
-        neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
+        connected_component_id: tuple[str, str, str, str],
+        connected_component: list[tuple[str, str, str, str]],
+        neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
         structures
 ):
     matched = False
@@ -951,6 +951,7 @@ def _update_fs_model(
         conformer_sites: dict[str, dt.ConformerSite],
         reference_datasets: dict[str, dt.Dataset]
 ):
+
     # Iterate over canonical sites and their members, checking if they already have an output record and
     # if not creating one
     alignments = fs_model.alignments
@@ -958,7 +959,7 @@ def _update_fs_model(
         for conformer_site_id in canonical_site.conformer_site_ids:
             conformer_site = conformer_sites[conformer_site_id]
             for member in conformer_site.members:
-                dtag, chain, residue = member
+                dtag, chain, residue, version = member
                 if dtag not in alignments:
                     alignments[dtag] = {}
                 if chain not in alignments[dtag]:
@@ -1259,13 +1260,13 @@ def _update(
                         # Check for the matching conformer site
                         conformer_site = None
                         for conformer_site_id in canonical_site.conformer_site_ids:
-                            if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
+                            if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
                         if conformer_site is None:
                             print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
                             continue
-                        moving_ligand_id = (dtag, chain, residue)
+                        moving_ligand_id = (dtag, chain, residue, version)
                         reference_ligand_id = conformer_site.reference_ligand_id
                         print(aligned_structure_path)
                         _align_structure(
@@ -1331,7 +1332,7 @@ def _update(
                         # Check for the matching conformer site
                         conformer_site = None
                         for conformer_site_id in canonical_site.conformer_site_ids:
-                            if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
+                            if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
 
@@ -1339,7 +1340,7 @@ def _update(
                             print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
                             continue
 
-                        moving_ligand_id = (dtag, chain, residue)
+                        moving_ligand_id = (dtag, chain, residue, version)
                         reference_ligand_id = conformer_site.reference_ligand_id
                         # print(ligand_neighbourhoods)
 
@@ -1356,7 +1357,7 @@ def _update(
                             xmap = read_xmap(xmap_path)
 
                             __align_xmap(
-                                ligand_neighbourhoods[(dtag, chain, residue)],
+                                ligand_neighbourhoods[(dtag, chain, residue, version)],
                                 alignability_graph,
                                 ligand_neighbourhood_transforms,
                                 reference_xmap,
@@ -1376,7 +1377,7 @@ def _update(
                         if mtz_path != "None":
                             xmap = read_xmap_from_mtz(mtz_path, "2Fo-Fc")
                             __align_xmap(
-                                ligand_neighbourhoods[(dtag, chain, residue)],
+                                ligand_neighbourhoods[(dtag, chain, residue, version)],
                                 alignability_graph,
                                 ligand_neighbourhood_transforms,
                                 reference_xmap,
@@ -1392,7 +1393,7 @@ def _update(
                             )
                             xmap = read_xmap_from_mtz(mtz_path, "Fo-Fc")
                             __align_xmap(
-                                ligand_neighbourhoods[(dtag, chain, residue)],
+                                ligand_neighbourhoods[(dtag, chain, residue, version)],
                                 alignability_graph,
                                 ligand_neighbourhood_transforms,
                                 reference_xmap,
@@ -1512,9 +1513,9 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
 
         if dic:
             for ligand_id, neighbourhood_info in dic.items():
-                dtag, chain, residue = ligand_id.split("/")
+                dtag, chain, residue, version = ligand_id.split("/")
                 neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
-                ligand_neighbourhoods[(dtag, chain, residue)] = neighbourhood
+                ligand_neighbourhoods[(dtag, chain, residue, version)] = neighbourhood
 
     return ligand_neighbourhoods
 
@@ -1552,9 +1553,9 @@ def _load_connected_components(connected_components_yaml):
 
         if dic:
             for ligand_id, neighbourhood_info in dic.items():
-                dtag, chain, residue = ligand_id.split("+")
+                dtag, chain, residue, version = ligand_id.split("+")
                 # neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
-                connected_components[(dtag, chain, residue)] = [
+                connected_components[(dtag, chain, residue, version)] = [
                     tuple([x for x in _ligand_id.split("+")])
                     for _ligand_id
                     in neighbourhood_info
@@ -1573,11 +1574,11 @@ def _load_ligand_neighbourhood_transforms(ligand_neighbourhood_transforms_yaml):
         for ligand_transform_key, ligand_transform in dic.items():
             print(ligand_transform_key)
             ligand_1_id, ligand_2_id = ligand_transform_key.split("~")
-            dtag_1, chain_1, residue_1 = ligand_1_id.split("/")
-            dtag_2, chain_2, residue_2 = ligand_2_id.split("/")
+            dtag_1, chain_1, residue_1, version = ligand_1_id.split("/")
+            dtag_2, chain_2, residue_2, version = ligand_2_id.split("/")
             ligand_neighbourhood_transforms[(
-                (dtag_1, chain_1, residue_1),
-                (dtag_2, chain_2, residue_2)
+                (dtag_1, chain_1, residue_1, version),
+                (dtag_2, chain_2, residue_2, version)
             )] = dt.Transform.from_dict(ligand_transform)
 
     return ligand_neighbourhood_transforms
