@@ -1266,7 +1266,7 @@ def _update(
                         if conformer_site is None:
                             print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
                             continue
-                        moving_ligand_id = (dtag, chain, residue)
+                        moving_ligand_id = (dtag, chain, residue, version)
                         reference_ligand_id = conformer_site.reference_ligand_id
                         print(aligned_structure_path)
                         _align_structure(
@@ -1340,7 +1340,7 @@ def _update(
                             print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
                             continue
 
-                        moving_ligand_id = (dtag, chain, residue)
+                        moving_ligand_id = (dtag, chain, residue, version)
                         reference_ligand_id = conformer_site.reference_ligand_id
                         # print(ligand_neighbourhoods)
 
