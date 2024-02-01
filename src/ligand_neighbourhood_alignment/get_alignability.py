@@ -158,9 +158,9 @@ def _match_cas(
         return False, None, None
 
 def _update_ligand_neighbourhood_transforms(
-                ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
-                lid: tuple[str, str, str],
-                ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
+                ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str, str], tuple[str, str, str, str]], dt.Transform],
+                lid: tuple[str, str, str, str],
+                ligand_neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
                 structures,
             ):
     # connectivity = []
