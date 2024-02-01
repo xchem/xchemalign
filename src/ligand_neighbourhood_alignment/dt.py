@@ -774,8 +774,8 @@ class XtalFormSite:
     def from_dict(dic):
         members = []
         for member in dic['members']:
-            dtag, chain, residue = member.split("/")
-            members.append((dtag, chain, residue))
+            dtag, chain, residue, version = member.split("/")
+            members.append((dtag, chain, residue, version))
         return XtalFormSite(
             dic['xtalform_id'],
             dic['crystallographic_chain'],
