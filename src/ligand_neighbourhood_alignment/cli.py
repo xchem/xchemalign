@@ -1515,7 +1515,7 @@ def _load_ligand_neighbourhoods(ligand_neighbourhoods_yaml):
             for ligand_id, neighbourhood_info in dic.items():
                 dtag, chain, residue, version = ligand_id.split("/")
                 neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
-                ligand_neighbourhoods[(dtag, chain, residue)] = neighbourhood
+                ligand_neighbourhoods[(dtag, chain, residue, version)] = neighbourhood
 
     return ligand_neighbourhoods
 
