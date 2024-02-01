@@ -704,13 +704,13 @@ class ConformerSite:
             residues.append((chain, residue, name))
         members = []
         for member in dic['members']:
-            dtag, chain, residue = member.split("/")
-            members.append((dtag, chain, residue))
-        ref_dtag, ref_chain, ref_residue = dic["reference_ligand_id"].split("/")
+            dtag, chain, residue, version = member.split("/")
+            members.append((dtag, chain, residue, version))
+        ref_dtag, ref_chain, ref_residue, version = dic["reference_ligand_id"].split("/")
         return ConformerSite(
             residues,
             members,
-            (ref_dtag, ref_chain, ref_residue)
+            (ref_dtag, ref_chain, ref_residue, version)
         )
 
     def to_dict(self, ):
