@@ -1574,11 +1574,11 @@ def _load_ligand_neighbourhood_transforms(ligand_neighbourhood_transforms_yaml):
         for ligand_transform_key, ligand_transform in dic.items():
             print(ligand_transform_key)
             ligand_1_id, ligand_2_id = ligand_transform_key.split("~")
-            dtag_1, chain_1, residue_1 = ligand_1_id.split("/")
-            dtag_2, chain_2, residue_2 = ligand_2_id.split("/")
+            dtag_1, chain_1, residue_1, version = ligand_1_id.split("/")
+            dtag_2, chain_2, residue_2, version = ligand_2_id.split("/")
             ligand_neighbourhood_transforms[(
-                (dtag_1, chain_1, residue_1),
-                (dtag_2, chain_2, residue_2)
+                (dtag_1, chain_1, residue_1, version),
+                (dtag_2, chain_2, residue_2, version)
             )] = dt.Transform.from_dict(ligand_transform)
 
     return ligand_neighbourhood_transforms
