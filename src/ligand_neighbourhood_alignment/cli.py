@@ -1332,7 +1332,7 @@ def _update(
                         # Check for the matching conformer site
                         conformer_site = None
                         for conformer_site_id in canonical_site.conformer_site_ids:
-                            if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
+                            if (dtag, chain, residue) in conformer_sites[conformer_site_id].members:
                                 conformer_site = conformer_sites[conformer_site_id]
                                 break
 
