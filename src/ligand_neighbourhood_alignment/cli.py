@@ -951,6 +951,7 @@ def _update_fs_model(
         conformer_sites: dict[str, dt.ConformerSite],
         reference_datasets: dict[str, dt.Dataset]
 ):
+
     # Iterate over canonical sites and their members, checking if they already have an output record and
     # if not creating one
     alignments = fs_model.alignments
