@@ -1393,7 +1393,7 @@ def _update(
                             )
                             xmap = read_xmap_from_mtz(mtz_path, "Fo-Fc")
                             __align_xmap(
-                                ligand_neighbourhoods[(dtag, chain, residue)],
+                                ligand_neighbourhoods[(dtag, chain, residue, version)],
                                 alignability_graph,
                                 ligand_neighbourhood_transforms,
                                 reference_xmap,
