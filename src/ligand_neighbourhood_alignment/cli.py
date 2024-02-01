@@ -958,7 +958,7 @@ def _update_fs_model(
         for conformer_site_id in canonical_site.conformer_site_ids:
             conformer_site = conformer_sites[conformer_site_id]
             for member in conformer_site.members:
-                dtag, chain, residue = member
+                dtag, chain, residue, version = member
                 if dtag not in alignments:
                     alignments[dtag] = {}
                 if chain not in alignments[dtag]:
