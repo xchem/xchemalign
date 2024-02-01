@@ -544,8 +544,8 @@ def _generate_assembly(
     return full_st
 
 
-def _get_structure_fragments(dataset: dt.Dataset, structure):
-    fragments: dict[tuple[str, str, str], gemmi.Residue] = {}
+def _get_structure_fragments(dataset: dt.Dataset, structure, version):
+    fragments: dict[tuple[str, str, str, str], gemmi.Residue] = {}
     # lig_number: int = 0
     for model in structure:
         for chain in model:
@@ -562,7 +562,7 @@ def _get_structure_fragments(dataset: dt.Dataset, structure):
                     #     fragments[ligand_id] = residue
                     # lig_number = lig_number + 1
                     if (str(lbe[2]) == str(residue.seqid.num)) & (str(lbe[1]) == str(source_chain)) & (transform == "x,y,z"):
-                        ligand_id = (dataset.dtag, str(lbe[1]), str(lbe[2]),)
+                        ligand_id = (dataset.dtag, str(lbe[1]), str(lbe[2]), str(version))
                         fragments[ligand_id] = residue
 
     return fragments
@@ -575,8 +575,9 @@ def _get_dataset_neighbourhoods(
         dataset: dt.Dataset,
         xtalform: dt.XtalForm,
         assemblies: dict[str, dt.Assembly],
+        version,
         max_radius: float = 9.0
-) -> dict[tuple[str, str, str], dt.Neighbourhood]:
+) -> dict[tuple[str, str, str, str], dt.Neighbourhood]:
     # Load the structure
     logger.debug(dataset.pdb)
     structure = gemmi.read_structure(dataset.pdb)
@@ -586,7 +587,11 @@ def _get_dataset_neighbourhoods(
     assembly = _generate_assembly(xtalform, structure, assemblies)
 
     # Get the bound fragments
-    fragments: dict[tuple[str, str, str], gemmi.Residue] = _get_structure_fragments(dataset, assembly)
+    fragments: dict[tuple[str, str, str, str], gemmi.Residue] = _get_structure_fragments(
+        dataset,
+        assembly,
+        version
+    )
     logger.debug(f"Get {len(fragments)} fragment neighbourhoods")
     logger.debug(fragments)
 
@@ -599,7 +604,7 @@ def _get_dataset_neighbourhoods(
 
     # For each bound fragment, identify the neighbourhood atoms and
     # partition them into model and artefact
-    fragment_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = {}
+    fragment_neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood] = {}
     for ligand_id, fragment in fragments.items():
         fragment_neighbourhoods[ligand_id] = _get_ligand_neighbourhood(
             assembly,
@@ -611,16 +616,21 @@ def _get_dataset_neighbourhoods(
     return fragment_neighbourhoods
 
 
-def _get_neighbourhoods(dataset: dt.Dataset, xtalform: dt.XtalForm, assemblies: dict[str, dt.Assembly]):
-    dataset_ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood] = _get_dataset_neighbourhoods(
-        dataset, xtalform, assemblies
+def _get_neighbourhoods(
+        dataset: dt.Dataset,
+        xtalform: dt.XtalForm,
+        assemblies: dict[str, dt.Assembly],
+        version,
+):
+    dataset_ligand_neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood] = _get_dataset_neighbourhoods(
+        dataset, xtalform, assemblies, version
     )
     return dataset_ligand_neighbourhoods
 
 
 def _save_neighbourhoods(
         fs_model: dt.FSModel,
-        ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
+        ligand_neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
 ):
     with open(fs_model.ligand_neighbourhoods, 'w') as f:
         dic = {}
@@ -1048,17 +1058,20 @@ def _update(
         assemblies: dict[str, dt.Assembly],
         xtalforms: dict[str, dt.XtalForm],
         dataset_assignments: dict[str, str],
-        ligand_neighbourhoods: dict[tuple[str, str, str], dt.Neighbourhood],
+        ligand_neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
+        # alignment_landmarks: dict[tuple[str,str,str,int], dict[tuple[str, str, str], dt.Atom]],
         alignability_graph,
         connected_components,
-        ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
+        ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str, str], tuple[str, str, str, str]], dt.Transform],
         conformer_sites: dict[str, dt.ConformerSite],
         conformer_site_transforms: dict[tuple[str, str], dt.Transform],
         canonical_sites: dict[str, dt.CanonicalSite],
         # canonical_site_transforms: dict[str, dt.Transform],
         xtalform_sites: dict[str, dt.XtalFormSite],
-        reference_structure_transforms: dict[tuple[str, str], dt.Transform]
+        reference_structure_transforms: dict[tuple[str, str], dt.Transform],
+        version
 ):
+    logger.info(f"Version is: {version}")
     # Get the structures
     structures: dict = _get_structures(datasets)
 
@@ -1078,7 +1091,7 @@ def _update(
     logger.info(f"Updating neighbourhoods")
     for dtag, dataset in new_datasets.items():
         xtalform = xtalforms[dataset_assignments[dtag]]
-        neighborhoods = _get_neighbourhoods(dataset, xtalform, assemblies)
+        neighborhoods = _get_neighbourhoods(dataset, xtalform, assemblies, version)
         logger.info(f"Dataset {dtag} has {len(neighborhoods)} ligand neighbourhoods")
         for lid, neighbourhood in neighborhoods.items():
             ligand_neighbourhoods[lid] = neighbourhood
@@ -1528,6 +1541,7 @@ def _load_alignability_graph(alignability_graph):
     else:
         return nx.Graph()
 
+
 def _load_connected_components(connected_components_yaml):
     connected_components = {}
 
@@ -1545,7 +1559,6 @@ def _load_connected_components(connected_components_yaml):
                     for _ligand_id
                     in neighbourhood_info
                 ]
-
 
     return connected_components
 
