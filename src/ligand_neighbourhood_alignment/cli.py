@@ -1553,7 +1553,7 @@ def _load_connected_components(connected_components_yaml):
 
         if dic:
             for ligand_id, neighbourhood_info in dic.items():
-                dtag, chain, residue = ligand_id.split("+")
+                dtag, chain, residue, version = ligand_id.split("+")
                 # neighbourhood = dt.Neighbourhood.from_dict(neighbourhood_info)
                 connected_components[(dtag, chain, residue)] = [
                     tuple([x for x in _ligand_id.split("+")])
