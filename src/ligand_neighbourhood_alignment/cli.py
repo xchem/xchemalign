@@ -1445,7 +1445,7 @@ def _load_xtalforms(xtalforms_file, new_xtalforms_yaml):
     if xtalforms_file.exists():
 
         with open(xtalforms_file, 'r') as f:
-            dic = yaml.safe_load(f)['xtalforms']
+            dic = yaml.safe_load(f)['crystalforms']
 
         for xtalform_id, xtalform_info in dic.items():
             xtalforms[xtalform_id] = dt.XtalForm.from_dict(xtalform_info)
@@ -1453,7 +1453,7 @@ def _load_xtalforms(xtalforms_file, new_xtalforms_yaml):
     # Load new info and update
     if new_xtalforms_yaml.exists():
         with open(new_xtalforms_yaml, 'r') as f:
-            new_xtalforms_dict = yaml.safe_load(f)['xtalforms']
+            new_xtalforms_dict = yaml.safe_load(f)['crystalforms']
     else:
         new_xtalforms_dict = {}
 
