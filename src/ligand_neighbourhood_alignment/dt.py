@@ -228,7 +228,7 @@ class FSModel:
         return FSModel(
             source_dir=Path(dic["source_dir"]),
             fs_model=Path(dic['fs_model']),
-            xtalforms=Path(dic['crytalforms']),
+            xtalforms=Path(dic['crystalforms']),
             dataset_assignments=Path(dic['dataset_assignments']),
             ligand_neighbourhoods=Path(dic['ligand_neighbourhoods']),
             alignability_graph=Path(dic['alignability_graph']),
@@ -269,7 +269,7 @@ class FSModel:
         return {
             'source_dir': str(self.source_dir),
             'fs_model': str(self.fs_model),
-            'crytalforms': str(self.xtalforms),
+            'crystalforms': str(self.xtalforms),
             'dataset_assignments': str(self.dataset_assignments),
             'ligand_neighbourhoods': str(self.ligand_neighbourhoods),
             'alignability_graph': str(self.alignability_graph),
