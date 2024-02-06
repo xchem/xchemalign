@@ -113,7 +113,7 @@ from ligand_neighbourhood_alignment import dt
 def _match_cas(
     ligand_1_neighbourhood: dt.Neighbourhood,
     ligand_2_neighbourhood: dt.Neighbourhood,
-    min_alignable_atoms: int = 5,  # 10 splits A71, but some things almost identical end up in different clusters
+    min_alignable_atoms: int = 7,  # 10 splits A71, but some things almost identical end up in different clusters
     max_alignable_rmsd: float = 2.0,
 ):
 
@@ -137,7 +137,13 @@ def _match_cas(
                         )
                     )
 
-    if len(alignable_cas) >= min_alignable_atoms:
+    if len(alignable_cas) >= min(
+            [
+                min_alignable_atoms,
+                len(ligand_1_neighbourhood.atoms),
+                len(ligand_2_neighbourhood.atoms)
+            ]
+    ):
         sup = gemmi.superpose_positions(
             [alignable_ca[0] for alignable_ca in alignable_cas],
             [alignable_ca[1] for alignable_ca in alignable_cas],
