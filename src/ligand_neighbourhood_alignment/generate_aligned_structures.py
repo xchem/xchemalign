@@ -267,6 +267,7 @@ def _align_structure(
         _structure,
         moving_ligand_id: tuple[str, str, str],
         reference_ligand_id: tuple[str, str, str],
+        neighbourhood: dt.Neighbourhood,
         g,
         neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
         conformer_site_transforms: dict[tuple[str, str], dt.Transform],
@@ -303,6 +304,13 @@ def _align_structure(
     logger.debug(f"Transform from native frame to reference frame is: {gemmi_to_transform(running_transform)}")
 
     _structure = superpose_structure(running_transform, _structure)
+
+    # Drop chains without atoms
+    neighbourhood_chains = set([_atom_id[0] for _atom_id in neighbourhood.atoms])
+    for _model in _structure:
+        for _chain in _model:
+            if _chain.name not in neighbourhood_chains:
+                _structure.remove_chain(_chain.name)
 
     # Write the fully aligned structure
     _structure.write_pdb(str(out_path))
