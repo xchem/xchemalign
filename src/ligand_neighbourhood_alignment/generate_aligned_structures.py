@@ -305,7 +305,7 @@ def _align_structure(
 
     _structure = superpose_structure(running_transform, _structure)
 
-    # Drop chains without atoms
+    # Drop chains without atoms in neighbourhood
     neighbourhood_chains = set([_atom_id[0] for _atom_id in neighbourhood.atoms])
     for _model in _structure:
         for _chain in _model:
