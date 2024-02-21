@@ -1292,6 +1292,7 @@ def _update(
                             _structure,
                             moving_ligand_id,
                             reference_ligand_id,
+                            ligand_neighbourhoods[moving_ligand_id],
                             alignability_graph,
                             ligand_neighbourhood_transforms,
                             conformer_site_transforms,
