@@ -310,7 +310,7 @@ def _align_structure(
     for _model in _structure:
         for _chain in _model:
             if _chain.name not in neighbourhood_chains:
-                _structure.remove_chain(_chain.name)
+                _model.remove_chain(_chain.name)
 
     # Write the fully aligned structure
     _structure.write_pdb(str(out_path))
