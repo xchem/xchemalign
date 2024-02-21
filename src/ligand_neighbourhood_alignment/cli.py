@@ -532,7 +532,6 @@ def _generate_assembly(
                     'You should ensure that the chain names are consistent with the reference dataset for the xtalforms.'
                 )
 
-
             for residue in chain_clone:
                 for atom in residue:
                     atom_frac = structure.cell.fractionalize(atom.pos)
