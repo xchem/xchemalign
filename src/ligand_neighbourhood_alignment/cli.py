@@ -904,6 +904,8 @@ def _update_canonical_sites(
                 conformer_site.reference_ligand_id[1]
             )
         )
+
+
         canonical_site_id = conformer_site_id
         canonical_sites[canonical_site_id] = canonical_site
 
