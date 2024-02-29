@@ -727,12 +727,14 @@ class CanonicalSite:
             conformer_site_ids: list[str],
             residues: list[tuple[str, str]],
             reference_conformer_site_id: str,
-            global_reference_dtag: str
+            global_reference_dtag: str,
+            centroid_res: tuple[str,str,str]
     ):
         self.conformer_site_ids: list[str] = conformer_site_ids
         self.residues: list[tuple[str, str]] = residues
         self.reference_conformer_site_id: str = reference_conformer_site_id
         self.global_reference_dtag: str = global_reference_dtag
+        self.centroid_res = centroid_res
 
     @staticmethod
     def from_dict(dic):
@@ -745,7 +747,8 @@ class CanonicalSite:
             dic['conformer_site_ids'],
             residues,
             dic['reference_conformer_site_id'],
-            dic['global_reference_dtag']
+            dic['global_reference_dtag'],
+            dic['centroid_res'].split('/')
 
         )
 
@@ -754,7 +757,8 @@ class CanonicalSite:
             'conformer_site_ids': self.conformer_site_ids,
             'residues': ["/".join(res) for res in self.residues],
             'reference_conformer_site_id': self.reference_conformer_site_id,
-            'global_reference_dtag': self.global_reference_dtag
+            'global_reference_dtag': self.global_reference_dtag,
+            'centroid_res': self.centroid_res
         }
 
 
