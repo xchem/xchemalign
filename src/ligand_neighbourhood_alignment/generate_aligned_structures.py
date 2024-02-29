@@ -307,7 +307,7 @@ def _align_structure(
     _structure = superpose_structure(running_transform, _structure)
 
     # Drop chains without atoms in neighbourhood
-    # neighbourhood_chains = set([_atom_id[0] for _atom_id in neighbourhood.atoms])
+    neighbourhood_chains = set([_atom_id[0] for _atom_id in neighbourhood.atoms])
     chain_assemblies = {
         _chain: _assembly
         for _assembly_name, _assembly
@@ -319,7 +319,8 @@ def _align_structure(
     for _model in _structure:
         for _chain in _model:
 
-            if _chain.name not in lig_assembly.chains:  # Remove any chain the ligand isn't modelled onto
+            if (_chain.name not in lig_assembly.chains) & (_chain.name not in neighbourhood_chains):  # Remove any chain the ligand isn't modelled onto
+
                 _model.remove_chain(_chain.name)
 
     # Write the fully aligned structure
