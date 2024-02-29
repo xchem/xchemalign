@@ -830,7 +830,7 @@ def _get_centroid_res(
     res_cas = {}
     for _residue_id in residues:
             for _atom_id, _atom in reference_neighbourhood.atoms.items()
-                if (_atom_id[0] == _residue_id[0]) & (_atom_id[1] == _residue_id[1]) & (_atom_id[2] == 'CA')
+                if (_atom_id[0] == _residue_id[0]) & (_atom_id[1] == _residue_id[1]) & (_atom_id[2] == 'CA'):
                     res_cas[_atom_id] = _atom
     id_arr = [_atom_id for _atom_id in res_cas]
     arr = np.array(
