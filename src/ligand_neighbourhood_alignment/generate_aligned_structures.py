@@ -274,6 +274,7 @@ def _align_structure(
         # canonical_site_transforms: dict[str, dt.Transform],
         canonical_site_id: str,
         conformer_site_id: str,
+        xtalform: dt.XtalForm,
         out_path: Path,
 ):
     shortest_path: list[tuple[str, str, str]] = nx.shortest_path(g, moving_ligand_id, reference_ligand_id)
@@ -306,10 +307,18 @@ def _align_structure(
     _structure = superpose_structure(running_transform, _structure)
 
     # Drop chains without atoms in neighbourhood
-    neighbourhood_chains = set([_atom_id[0] for _atom_id in neighbourhood.atoms])
+    # neighbourhood_chains = set([_atom_id[0] for _atom_id in neighbourhood.atoms])
+    chain_assemblies = {
+        _chain: _assembly
+        for _assembly_name, _assembly
+        in xtalform.assemblies.items()
+        for _chain in _assembly.chains
+    }
+    lig_assembly = chain_assemblies[moving_ligand_id[1]]
     for _model in _structure:
         for _chain in _model:
-            if _chain.name not in neighbourhood_chains:
+
+            if _chain.name not in lig_assembly.chains:  # Remove any chain the ligand isn't modelled onto
                 _model.remove_chain(_chain.name)
 
     # Write the fully aligned structure
