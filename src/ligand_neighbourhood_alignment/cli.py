@@ -1299,6 +1299,7 @@ def _update(
                             # canonical_site_transforms,
                             canonical_site_id,
                             conformer_site_id,
+                            xtalforms[dataset_assignments[dtag]],
                             aligned_structure_path,
                         )
                     else:
