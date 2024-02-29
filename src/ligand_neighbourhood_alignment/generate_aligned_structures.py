@@ -314,6 +314,7 @@ def _align_structure(
         in xtalform.assemblies.items()
         for _chain in _assembly.chains
     }
+
     lig_assembly = chain_assemblies[moving_ligand_id[1]]
     for _model in _structure:
         for _chain in _model:
