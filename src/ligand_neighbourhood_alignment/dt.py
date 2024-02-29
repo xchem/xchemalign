@@ -728,7 +728,7 @@ class CanonicalSite:
             residues: list[tuple[str, str]],
             reference_conformer_site_id: str,
             global_reference_dtag: str,
-            centroid_res: tuple[str,str,str]
+            centroid_res: tuple[str,str,str, str]
     ):
         self.conformer_site_ids: list[str] = conformer_site_ids
         self.residues: list[tuple[str, str]] = residues
