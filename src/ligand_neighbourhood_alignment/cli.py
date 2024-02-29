@@ -823,10 +823,41 @@ def _save_conformer_sites(fs_model: dt.FSModel, conformer_sites: dict[str, dt.Co
         yaml.safe_dump(dic, f)
 
 
+def _get_centroid_res(
+        residues: list[tuple[str, str]],
+        reference_neighbourhood: dt.Neighbourhood,
+):
+    res_cas = {}
+    for _residue_id in residues:
+            for _atom_id, _atom in reference_neighbourhood.atoms.items():
+                if (_atom_id[0] == _residue_id[0]) & (_atom_id[1] == _residue_id[1]) & (_atom_id[2] == 'CA'):
+                    res_cas[_atom_id] = _atom
+    id_arr = [_atom_id for _atom_id in res_cas]
+    arr = np.array(
+        [
+            [_atom.x, _atom.y, _atom.z]
+        for _atom
+        in res_cas.values()
+            ]
+    )
+    centroid = np.mean(arr, axis=0)
+    closest = np.argmin(
+        np.linalg.norm(
+            arr-centroid,
+            axis=1
+        )
+    )
+    closest_atom_id = id_arr[closest]
+
+    return (closest_atom_id[0], closest_atom_id[1])
+
+
+
 def _update_canonical_sites(
         canonical_sites: dict[str, dt.CanonicalSite],
         conformer_site: dt.ConformerSite,
         conformer_site_id,
+        neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
         min_shared_residues=6
 ):
     if len(canonical_sites) != 0:
@@ -857,12 +888,24 @@ def _update_canonical_sites(
 
     # If not matched to any existing canonical site create a new one
     if not matched:
+        centroid_res =  _get_centroid_res(
+            conformer_site.residues,
+            neighbourhoods[conformer_site.reference_ligand_id]
+        )
         canonical_site = dt.CanonicalSite(
             [conformer_site_id, ],
             conformer_site.residues,
             conformer_site_id,
-            global_reference_dtag
+            global_reference_dtag,
+            (
+                conformer_site.reference_ligand_id[0],
+                centroid_res[0],
+                centroid_res[1],
+                conformer_site.reference_ligand_id[1]
+            )
         )
+
+
         canonical_site_id = conformer_site_id
         canonical_sites[canonical_site_id] = canonical_site
 
@@ -1186,7 +1229,7 @@ def _update(
     for conformer_site_id, conformer_site in conformer_sites.items():
         # If conformer site in a canonical site, replace with new data, otherwise
         # Check if residues match as usual, otherwise create a new canon site for it
-        _update_canonical_sites(canonical_sites, conformer_site, conformer_site_id, )
+        _update_canonical_sites(canonical_sites, conformer_site, conformer_site_id, ligand_neighbourhoods)
     logger.info(f"Now have {len(canonical_sites)} canonical sites")
     logger.info(f"Global reference dtag is: {list(canonical_sites.values())[0].global_reference_dtag}")
     _save_canonical_sites(fs_model, canonical_sites)
