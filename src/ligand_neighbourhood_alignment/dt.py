@@ -758,7 +758,7 @@ class CanonicalSite:
             'residues': ["/".join(res) for res in self.residues],
             'reference_conformer_site_id': self.reference_conformer_site_id,
             'global_reference_dtag': self.global_reference_dtag,
-            'centroid_res': self.centroid_res
+            'centroid_res': '/'.join(self.centroid_res)
         }
 
 
