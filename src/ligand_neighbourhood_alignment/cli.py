@@ -526,7 +526,8 @@ def _generate_assembly(
                 chain_clone = structure[0][_chain].clone()
             except Exception as e:
                 raise Exception(
-                    f'An Exception occurred in generating the biological assemblies for {pdb}\n'
+                    f'An Exception occurred in generating the biological assemblies for\n' 
+                    f'{pdb}\n'
                     f'Based on the assembly, the expected chains were: {xtalform_assembly.chains}\n'
                     f'However the chains in the structure were: {[_x.name for _x in structure[0]]}\n'
                     'XCA does not currently handle datasets with a mis-match between the xtalform chains.\n'
