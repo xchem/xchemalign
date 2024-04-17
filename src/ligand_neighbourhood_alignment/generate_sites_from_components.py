@@ -247,10 +247,10 @@ def _update_conformer_site_transforms(
             # conformer_site_residues = conformer_site.residues
 
             transform = _get_transform_from_residues(
-
                 [(x[0], x[1]) for x in canonical_site.residues],
                 structures[conformer_site.reference_ligand_id[0]],
-                structures[ref_conformer_site.reference_ligand_id[0]])
+                structures[ref_conformer_site.reference_ligand_id[0]],
+            )
 
             conformer_site_transforms[key] = dt.Transform(transform.vec.tolist(), transform.mat.tolist())
 

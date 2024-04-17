@@ -890,7 +890,7 @@ def _update_canonical_sites(
 
     # If not matched to any existing canonical site create a new one
     if not matched:
-        centroid_res =  _get_centroid_res(
+        centroid_res = _get_centroid_res(
             conformer_site.residues,
             neighbourhoods[conformer_site.reference_ligand_id]
         )
@@ -1028,9 +1028,11 @@ def _update_fs_model(
                 if chain not in alignments[dtag]:
                     alignments[dtag][chain] = {}
                 if residue not in alignments[dtag][chain]:
-                    alignments[dtag][chain][residue] = dt.LigandNeighbourhoodOutput({}, {}, {}, {}, {})
+                    alignments[dtag][chain][version] = {}
+                if version not in alignments[dtag][chain][residue][version]:
+                    alignments[dtag][chain][residue][version] = dt.LigandNeighbourhoodOutput({}, {}, {}, {}, {})
 
-                ligand_neighbourhood_output: dt.LigandNeighbourhoodOutput = alignments[dtag][chain][residue]
+                ligand_neighbourhood_output: dt.LigandNeighbourhoodOutput = alignments[dtag][chain][residue][version]
 
                 if not (fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag).exists():
                     os.mkdir(fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag)
@@ -1038,33 +1040,33 @@ def _update_fs_model(
                 if canonical_site_id not in ligand_neighbourhood_output.aligned_structures:
                     ligand_neighbourhood_output.aligned_structures[canonical_site_id] = (
                             fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag / constants.ALIGNED_STRUCTURE_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
+                        dtag=dtag, chain=chain, residue=residue, version=version, site=canonical_site_id
                     )
                     )
 
                     ligand_neighbourhood_output.aligned_artefacts[canonical_site_id] = (
                             fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag / constants.ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
+                        dtag=dtag, chain=chain, residue=residue, version=version,site=canonical_site_id
                     )
                     )
 
                     ligand_neighbourhood_output.aligned_xmaps[canonical_site_id] = (
                             fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag / constants.ALIGNED_XMAP_TEMPLATE.format(
                         dtag=dtag, chain=chain,
-                        residue=residue,
+                        residue=residue,version=version,
                         site=canonical_site_id)
                     )
 
                     ligand_neighbourhood_output.aligned_diff_maps[canonical_site_id] = (
                             fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag / constants.ALIGNED_DIFF_TEMPLATE.format(
                         dtag=dtag, chain=chain,
-                        residue=residue,
+                        residue=residue, version=version,
                         site=canonical_site_id)
                     )
 
                     ligand_neighbourhood_output.aligned_event_maps[canonical_site_id] = (
                             fs_model.source_dir / constants.ALIGNED_FILES_DIR / dtag / constants.ALIGNED_EVENT_MAP_TEMPLATE.format(
-                        dtag=dtag, chain=chain, residue=residue, site=canonical_site_id
+                        dtag=dtag, chain=chain, residue=residue, version=version, site=canonical_site_id
                     )
                     )
 
@@ -1315,40 +1317,41 @@ def _update(
     #         for lid in conformer_site.ligand_ids:
     for dtag, dataset_alignment_info in fs_model.alignments.items():
         for chain, chain_alignment_info in dataset_alignment_info.items():
-            for residue, ligand_neighbourhood_output in chain_alignment_info.items():
-                for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
-                    if not Path(aligned_structure_path).exists():
-                        # _update_aligned_structures()
-                        _structure = structures[dtag].clone()
-                        canonical_site = canonical_sites[canonical_site_id]
-                        # Check for the matching conformer site
-                        conformer_site = None
-                        for conformer_site_id in canonical_site.conformer_site_ids:
-                            if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
-                                conformer_site = conformer_sites[conformer_site_id]
-                                break
-                        if conformer_site is None:
-                            print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
-                            continue
-                        moving_ligand_id = (dtag, chain, residue, version)
-                        reference_ligand_id = conformer_site.reference_ligand_id
-                        print(aligned_structure_path)
-                        _align_structure(
-                            _structure,
-                            moving_ligand_id,
-                            reference_ligand_id,
-                            ligand_neighbourhoods[moving_ligand_id],
-                            alignability_graph,
-                            ligand_neighbourhood_transforms,
-                            conformer_site_transforms,
-                            # canonical_site_transforms,
-                            canonical_site_id,
-                            conformer_site_id,
-                            xtalforms[dataset_assignments[dtag]],
-                            aligned_structure_path,
-                        )
-                    else:
-                        logger.info(f"Already output structure!")
+            for residue, residue_alignment_info in chain_alignment_info.items():
+                for version, ligand_neighbourhood_output in residue_alignment_info.items():
+                    for canonical_site_id, aligned_structure_path in ligand_neighbourhood_output.aligned_structures.items():
+                        if not Path(aligned_structure_path).exists():
+                            # _update_aligned_structures()
+                            _structure = structures[dtag].clone()
+                            canonical_site = canonical_sites[canonical_site_id]
+                            # Check for the matching conformer site
+                            conformer_site = None
+                            for conformer_site_id in canonical_site.conformer_site_ids:
+                                if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
+                                    conformer_site = conformer_sites[conformer_site_id]
+                                    break
+                            if conformer_site is None:
+                                print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
+                                continue
+                            moving_ligand_id = (dtag, chain, residue, version)
+                            reference_ligand_id = conformer_site.reference_ligand_id
+                            print(aligned_structure_path)
+                            _align_structure(
+                                _structure,
+                                moving_ligand_id,
+                                reference_ligand_id,
+                                ligand_neighbourhoods[moving_ligand_id],
+                                alignability_graph,
+                                ligand_neighbourhood_transforms,
+                                conformer_site_transforms,
+                                # canonical_site_transforms,
+                                canonical_site_id,
+                                conformer_site_id,
+                                xtalforms[dataset_assignments[dtag]],
+                                aligned_structure_path,
+                            )
+                        else:
+                            logger.info(f"Already output structure!")
 
     # Generate alignments of references to each canonical site
     # for canonical_site_id, canonical_site in canonical_sites.items():
@@ -1389,93 +1392,94 @@ def _update(
     logger.info(f"Outputting xmaps...")
     for dtag, dataset_alignment_info in fs_model.alignments.items():
         for chain, chain_alignment_info in dataset_alignment_info.items():
-            for residue, ligand_neighbourhood_output in chain_alignment_info.items():
-                for canonical_site_id, aligned_event_map_path in ligand_neighbourhood_output.aligned_event_maps.items():
-                    logger.info(f"Writing to: {aligned_event_map_path}")
-                    if not Path(aligned_event_map_path).exists():
-                        _structure = structures[dtag].clone()
-                        canonical_site = canonical_sites[canonical_site_id]
-                        # Check for the matching conformer site
-                        conformer_site = None
-                        for conformer_site_id in canonical_site.conformer_site_ids:
-                            if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
-                                conformer_site = conformer_sites[conformer_site_id]
-                                break
+            for residue, residue_alignment_info in chain_alignment_info.items():
+                for version, ligand_neighbourhood_output in residue_alignment_info.items():
+                    for canonical_site_id, aligned_event_map_path in ligand_neighbourhood_output.aligned_event_maps.items():
+                        logger.info(f"Writing to: {aligned_event_map_path}")
+                        if not Path(aligned_event_map_path).exists():
+                            _structure = structures[dtag].clone()
+                            canonical_site = canonical_sites[canonical_site_id]
+                            # Check for the matching conformer site
+                            conformer_site = None
+                            for conformer_site_id in canonical_site.conformer_site_ids:
+                                if (dtag, chain, residue, version) in conformer_sites[conformer_site_id].members:
+                                    conformer_site = conformer_sites[conformer_site_id]
+                                    break
 
-                        if conformer_site is None:
-                            print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
-                            continue
+                            if conformer_site is None:
+                                print(f"Skipping alignment of {dtag} {chain} {residue} to site {canonical_site_id}!")
+                                continue
 
-                        moving_ligand_id = (dtag, chain, residue, version)
-                        reference_ligand_id = conformer_site.reference_ligand_id
-                        # print(ligand_neighbourhoods)
+                            moving_ligand_id = (dtag, chain, residue, version)
+                            reference_ligand_id = conformer_site.reference_ligand_id
+                            # print(ligand_neighbourhoods)
 
-                        xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
+                            xmap_path = datasets[dtag].ligand_binding_events[(dtag, chain, residue)].xmap
 
-                        aligned_structure_path = ligand_neighbourhood_output.aligned_structures[canonical_site_id]
-                        aligned_structure = gemmi.read_structure(str(aligned_structure_path))
-                        aligned_res = aligned_structure[0][chain][str(residue)][0]
+                            aligned_structure_path = ligand_neighbourhood_output.aligned_structures[canonical_site_id]
+                            aligned_structure = gemmi.read_structure(str(aligned_structure_path))
+                            aligned_res = aligned_structure[0][chain][str(residue)][0]
 
-                        # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
-                        # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
-                        # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
-                        if (xmap_path != "None") and (xmap_path is not None):
-                            xmap = read_xmap(xmap_path)
+                            # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].dtag)
+                            # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].chain)
+                            # logger.info(datasets[dtag].ligand_binding_events[(dtag, chain, residue)].residue)   # *
+                            if (xmap_path != "None") and (xmap_path is not None):
+                                xmap = read_xmap(xmap_path)
 
-                            __align_xmap(
-                                ligand_neighbourhoods[(dtag, chain, residue, version)],
-                                alignability_graph,
-                                ligand_neighbourhood_transforms,
-                                reference_xmap,
-                                reference_ligand_id,
-                                moving_ligand_id,
-                                xmap,
-                                conformer_site_transforms,
-                                conformer_site_id,
-                                # canonical_site_transforms,
-                                canonical_site_id,
-                                aligned_event_map_path,
-                                aligned_res
-                            )
-                        mtz_path = datasets[dtag].mtz
-                        # print(f"Mtz path: {mtz_path}")
-                        # raise Exception
-                        if mtz_path != "None":
-                            xmap = read_xmap_from_mtz(mtz_path, "2Fo-Fc")
-                            __align_xmap(
-                                ligand_neighbourhoods[(dtag, chain, residue, version)],
-                                alignability_graph,
-                                ligand_neighbourhood_transforms,
-                                reference_xmap,
-                                reference_ligand_id,
-                                moving_ligand_id,
-                                xmap,
-                                conformer_site_transforms,
-                                conformer_site_id,
-                                # canonical_site_transforms,
-                                canonical_site_id,
-                                ligand_neighbourhood_output.aligned_xmaps[canonical_site_id],
-                                aligned_res
-                            )
-                            xmap = read_xmap_from_mtz(mtz_path, "Fo-Fc")
-                            __align_xmap(
-                                ligand_neighbourhoods[(dtag, chain, residue, version)],
-                                alignability_graph,
-                                ligand_neighbourhood_transforms,
-                                reference_xmap,
-                                reference_ligand_id,
-                                moving_ligand_id,
-                                xmap,
-                                conformer_site_transforms,
-                                conformer_site_id,
-                                # canonical_site_transforms,
-                                canonical_site_id,
-                                ligand_neighbourhood_output.aligned_diff_maps[canonical_site_id],
-                                aligned_res
-                            )
+                                __align_xmap(
+                                    ligand_neighbourhoods[(dtag, chain, residue, version)],
+                                    alignability_graph,
+                                    ligand_neighbourhood_transforms,
+                                    reference_xmap,
+                                    reference_ligand_id,
+                                    moving_ligand_id,
+                                    xmap,
+                                    conformer_site_transforms,
+                                    conformer_site_id,
+                                    # canonical_site_transforms,
+                                    canonical_site_id,
+                                    aligned_event_map_path,
+                                    aligned_res
+                                )
+                            mtz_path = datasets[dtag].mtz
+                            # print(f"Mtz path: {mtz_path}")
+                            # raise Exception
+                            if mtz_path != "None":
+                                xmap = read_xmap_from_mtz(mtz_path, "2Fo-Fc")
+                                __align_xmap(
+                                    ligand_neighbourhoods[(dtag, chain, residue, version)],
+                                    alignability_graph,
+                                    ligand_neighbourhood_transforms,
+                                    reference_xmap,
+                                    reference_ligand_id,
+                                    moving_ligand_id,
+                                    xmap,
+                                    conformer_site_transforms,
+                                    conformer_site_id,
+                                    # canonical_site_transforms,
+                                    canonical_site_id,
+                                    ligand_neighbourhood_output.aligned_xmaps[canonical_site_id],
+                                    aligned_res
+                                )
+                                xmap = read_xmap_from_mtz(mtz_path, "Fo-Fc")
+                                __align_xmap(
+                                    ligand_neighbourhoods[(dtag, chain, residue, version)],
+                                    alignability_graph,
+                                    ligand_neighbourhood_transforms,
+                                    reference_xmap,
+                                    reference_ligand_id,
+                                    moving_ligand_id,
+                                    xmap,
+                                    conformer_site_transforms,
+                                    conformer_site_id,
+                                    # canonical_site_transforms,
+                                    canonical_site_id,
+                                    ligand_neighbourhood_output.aligned_diff_maps[canonical_site_id],
+                                    aligned_res
+                                )
 
-                    else:
-                        logger.info(f"Already output xmap!")
+                        else:
+                            logger.info(f"Already output xmap!")
     return fs_model
 
 
