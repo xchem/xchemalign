@@ -1028,8 +1028,8 @@ def _update_fs_model(
                 if chain not in alignments[dtag]:
                     alignments[dtag][chain] = {}
                 if residue not in alignments[dtag][chain]:
-                    alignments[dtag][chain][version] = {}
-                if version not in alignments[dtag][chain][residue][version]:
+                    alignments[dtag][chain][residue] = {}
+                if version not in alignments[dtag][chain][residue]:
                     alignments[dtag][chain][residue][version] = dt.LigandNeighbourhoodOutput({}, {}, {}, {}, {})
 
                 ligand_neighbourhood_output: dt.LigandNeighbourhoodOutput = alignments[dtag][chain][residue][version]
