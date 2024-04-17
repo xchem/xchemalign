@@ -37,7 +37,7 @@ ALIGNED_STRUCTURE_TEMPLATE: str = "{dtag}_{chain}_{residue}_{version}_{site}.pdb
 ALIGNED_STRUCTURE_ARTEFACTS_TEMPLATE: str = "{dtag}_{chain}_{residue}_{version}_{site}_artefacts.pdb"
 ALIGNED_XMAP_TEMPLATE: str = "{dtag}_{chain}_{residue}_{version}_{site}_2FoFc.ccp4"
 ALIGNED_DIFF_TEMPLATE: str = "{dtag}_{chain}_{residue}_{version}_{site}_FoFc.ccp4"
-ALIGNED_EVENT_MAP_TEMPLATE: str = "{dtag}_{chain}_{residue}_{version}_{site}_{}_event.ccp4"
+ALIGNED_EVENT_MAP_TEMPLATE: str = "{dtag}_{chain}_{residue}_{version}_{site}_event.ccp4"
 
 
 FS_MODEL_YAML_FILE_NAME = "fs_model.yaml"
