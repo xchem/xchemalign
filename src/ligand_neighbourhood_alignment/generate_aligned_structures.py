@@ -212,15 +212,15 @@ def expand_structure(_structure, xtalforms: AssignedXtalForms, moving_ligand_id)
 
 
 def align_structure(
-        _structure,
-        moving_ligand_id,
-        reference_ligand_id,
-        g,
-        transforms,
-        site_transforms: SiteTransforms,
-        canonical_site_id,
-        conformer_site_id,
-        out_path,
+    _structure,
+    moving_ligand_id,
+    reference_ligand_id,
+    g,
+    transforms,
+    site_transforms: SiteTransforms,
+    canonical_site_id,
+    conformer_site_id,
+    out_path,
 ):
     shortest_path = nx.shortest_path(g, moving_ligand_id, reference_ligand_id)
     logger.debug(f"Shortest path: {shortest_path}")
@@ -264,18 +264,18 @@ from ligand_neighbourhood_alignment import dt
 
 
 def _align_structure(
-        _structure,
-        moving_ligand_id: tuple[str, str, str],
-        reference_ligand_id: tuple[str, str, str],
-        neighbourhood: dt.Neighbourhood,
-        g,
-        neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
-        conformer_site_transforms: dict[tuple[str, str], dt.Transform],
-        # canonical_site_transforms: dict[str, dt.Transform],
-        canonical_site_id: str,
-        conformer_site_id: str,
-        xtalform: dt.XtalForm,
-        out_path: Path,
+    _structure,
+    moving_ligand_id: tuple[str, str, str],
+    reference_ligand_id: tuple[str, str, str],
+    neighbourhood: dt.Neighbourhood,
+    g,
+    neighbourhood_transforms: dict[tuple[tuple[str, str, str], tuple[str, str, str]], dt.Transform],
+    conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+    # canonical_site_transforms: dict[str, dt.Transform],
+    canonical_site_id: str,
+    conformer_site_id: str,
+    xtalform: dt.XtalForm,
+    out_path: Path,
 ):
     shortest_path: list[tuple[str, str, str]] = nx.shortest_path(g, moving_ligand_id, reference_ligand_id)
     logger.debug(f"Shortest path: {shortest_path}")
@@ -286,16 +286,21 @@ def _align_structure(
         # Get the transform from previous frame to new one
         # Transform is 2 onto 1
         if next_ligand_id != previous_ligand_id:
-            transform = transform_to_gemmi(neighbourhood_transforms[(next_ligand_id, previous_ligand_id,)])
+            transform = transform_to_gemmi(
+                neighbourhood_transforms[
+                    (
+                        next_ligand_id,
+                        previous_ligand_id,
+                    )
+                ]
+            )
             running_transform = transform.combine(running_transform)
 
         # Apply the translation to the new frame
         previous_ligand_id = next_ligand_id
 
     # Subsite alignment transform
-    confomer_site_transform = transform_to_gemmi(
-        conformer_site_transforms[(canonical_site_id, conformer_site_id)]
-    )
+    confomer_site_transform = transform_to_gemmi(conformer_site_transforms[(canonical_site_id, conformer_site_id)])
     running_transform = confomer_site_transform.combine(running_transform)
 
     # Site alignment transform
@@ -309,17 +314,16 @@ def _align_structure(
     # Drop chains without atoms in neighbourhood
     neighbourhood_chains = set([_atom_id[0] for _atom_id in neighbourhood.atoms])
     chain_assemblies = {
-        _chain: _assembly
-        for _assembly_name, _assembly
-        in xtalform.assemblies.items()
-        for _chain in _assembly.chains
+        _chain: _assembly for _assembly_name, _assembly in xtalform.assemblies.items() for _chain in _assembly.chains
     }
 
     lig_assembly = chain_assemblies[moving_ligand_id[1]]
     for _model in _structure:
         for _chain in _model:
 
-            if (_chain.name not in lig_assembly.chains) & (_chain.name not in neighbourhood_chains):  # Remove any chain the ligand isn't modelled onto
+            if (_chain.name not in lig_assembly.chains) & (
+                _chain.name not in neighbourhood_chains
+            ):  # Remove any chain the ligand isn't modelled onto
 
                 _model.remove_chain(_chain.name)
 
@@ -328,18 +332,18 @@ def _align_structure(
 
 
 def _align_reference_structure(
-        _structure,
-        dtag: str,
-        # moving_ligand_id: tuple[str,str,str],
-        # reference_ligand_id: tuple[str,str,str],
-        # g,
-        # neighbourhood_transforms: dict[tuple[tuple[str,str,str], tuple[str,str,str]], dt.Transform],
-        # conformer_site_transforms: dict[tuple[str, str], dt.Transform],
-        reference_structure_transforms: dict[tuple[str, str], dt.Transform],
-        # canonical_site_transforms: dict[str, dt.Transform],
-        canonical_site_id: str,
-        # conformer_site_id: str,
-        out_path: Path,
+    _structure,
+    dtag: str,
+    # moving_ligand_id: tuple[str,str,str],
+    # reference_ligand_id: tuple[str,str,str],
+    # g,
+    # neighbourhood_transforms: dict[tuple[tuple[str,str,str], tuple[str,str,str]], dt.Transform],
+    # conformer_site_transforms: dict[tuple[str, str], dt.Transform],
+    reference_structure_transforms: dict[tuple[str, str], dt.Transform],
+    # canonical_site_transforms: dict[str, dt.Transform],
+    canonical_site_id: str,
+    # conformer_site_id: str,
+    out_path: Path,
 ):
     running_transform = transform_to_gemmi(reference_structure_transforms[(dtag, canonical_site_id)])
 
@@ -377,17 +381,17 @@ def _align_reference_structure(
 
 
 def _align_structures_from_sites(
-        structures,
-        canonical_sites: CanonicalSites,
-        conformer_sites: ConformerSites,
-        transforms: Transforms,
-        neighbourhoods: LigandNeighbourhoods,
-        xtalforms: XtalForms,
-        assigned_xtalforms: AssignedXtalForms,
-        g,
-        site_transforms: SiteTransforms,
-        # _output_dir: Path,
-        output: Output,
+    structures,
+    canonical_sites: CanonicalSites,
+    conformer_sites: ConformerSites,
+    transforms: Transforms,
+    neighbourhoods: LigandNeighbourhoods,
+    xtalforms: XtalForms,
+    assigned_xtalforms: AssignedXtalForms,
+    g,
+    site_transforms: SiteTransforms,
+    # _output_dir: Path,
+    output: Output,
 ):
     # asd = _output_dir / "aligned"
     # if not asd.exists():
@@ -429,10 +433,10 @@ def _align_structures_from_sites(
                 # Get output path
                 aod = Path(output.source_dir)
                 output_path = (
-                        aod
-                        / output.dataset_output[moving_ligand_id.dtag][moving_ligand_id.chain][
-                            moving_ligand_id.residue
-                        ].aligned_structures[canonical_site_id]
+                    aod
+                    / output.dataset_output[moving_ligand_id.dtag][moving_ligand_id.chain][
+                        moving_ligand_id.residue
+                    ].aligned_structures[canonical_site_id]
                 )
                 # Align the ligand
                 align_structure(
