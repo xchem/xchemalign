@@ -42,7 +42,7 @@ ALIGNED_EVENT_MAP_TEMPLATE: str = "{dtag}_{chain}_{residue}_{version}_{site}_eve
 
 FS_MODEL_YAML_FILE_NAME = "fs_model.yaml"
 ASSEMBLIES_YAML_FILE_NAME = "assemblies.yaml"
-XTALFORMS_YAML_FILEπ_NAME = "xtalforms.yaml"
+XTALFORMS_YAML_FILE_NAME = "xtalforms.yaml"
 ASSIGNED_XTALFORMS_YAML_FILE_NAME = "assigned_xtalforms.yaml"
 NEIGHBOURHOODS_YAML_FILE_NAME = "neighbourhoods.yaml"
 CONNECTED_COMPONENTS_YAML_NAME = "connected_components.yaml"
