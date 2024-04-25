@@ -25,9 +25,10 @@ def match_cas(
         ligand_1_atom_id,
         ligand_1_atom,
     ) in zip(ligand_1_neighbourhood.atom_ids, ligand_1_neighbourhood.atoms):
-        for (ligand_2_atom_id, ligand_2_atom,) in zip(
-            ligand_2_neighbourhood.atom_ids, ligand_2_neighbourhood.atoms
-        ):
+        for (
+            ligand_2_atom_id,
+            ligand_2_atom,
+        ) in zip(ligand_2_neighbourhood.atom_ids, ligand_2_neighbourhood.atoms):
             if ligand_1_atom_id.atom == "CA":
                 if match_atom(ligand_1_atom, ligand_2_atom, ignore_chain=True):
                     alignable_cas.append(
@@ -53,14 +54,11 @@ def match_cas(
 
         rmsd = sup.rmsd
         if rmsd < max_alignable_rmsd:
-            return True, Transform(
-                vec=sup.transform.vec.tolist(), mat=sup.transform.mat.tolist()
-            )
+            return True, Transform(vec=sup.transform.vec.tolist(), mat=sup.transform.mat.tolist())
         else:
             return False, None
     else:
         return False, None
-
 
 
 def get_alignability(
@@ -88,9 +86,7 @@ def get_alignability(
             ligand_neighbourhoods.ligand_neighbourhoods,
         ):
             # See if atoms match - transform is frame 2 to frame 1
-            ca_match, transform = match_cas(
-                ligand_1_neighbourhood, ligand_2_neighbourhood
-            )
+            ca_match, transform = match_cas(ligand_1_neighbourhood, ligand_2_neighbourhood)
 
             if ca_match:
                 connectivities.append(1)
@@ -103,9 +99,8 @@ def get_alignability(
 
     logger.debug(connectivity)
 
-    return np.array(connectivity), Transforms(
-        ligand_ids=transform_ids, transforms=transforms
-    )
+    return np.array(connectivity), Transforms(ligand_ids=transform_ids, transforms=transforms)
+
 
 from ligand_neighbourhood_alignment import dt
 
@@ -138,11 +133,7 @@ def _match_cas(
                     )
 
     if len(alignable_cas) >= min(
-            [
-                min_alignable_atoms,
-                len(ligand_1_neighbourhood.atoms),
-                len(ligand_2_neighbourhood.atoms)
-            ]
+        [min_alignable_atoms, len(ligand_1_neighbourhood.atoms), len(ligand_2_neighbourhood.atoms)]
     ):
         sup = gemmi.superpose_positions(
             [alignable_ca[0] for alignable_ca in alignable_cas],
@@ -153,22 +144,23 @@ def _match_cas(
 
         rmsd = sup.rmsd
         if rmsd < max_alignable_rmsd:
-            return True, dt.Transform(
-                vec=transform.vec.tolist(), mat=transform.mat.tolist()
-            ), dt.Transform(
-                vec=inverse_transform.vec.tolist(), mat=inverse_transform.mat.tolist()
+            return (
+                True,
+                dt.Transform(vec=transform.vec.tolist(), mat=transform.mat.tolist()),
+                dt.Transform(vec=inverse_transform.vec.tolist(), mat=inverse_transform.mat.tolist()),
             )
         else:
             return False, None, None
     else:
         return False, None, None
 
+
 def _update_ligand_neighbourhood_transforms(
-                ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str, str], tuple[str, str, str, str]], dt.Transform],
-                lid: tuple[str, str, str, str],
-                ligand_neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
-                structures,
-            ):
+    ligand_neighbourhood_transforms: dict[tuple[tuple[str, str, str, str], tuple[str, str, str, str]], dt.Transform],
+    lid: tuple[str, str, str, str],
+    ligand_neighbourhoods: dict[tuple[str, str, str, str], dt.Neighbourhood],
+    structures,
+):
     # connectivity = []
     # transform_ids = []
     # transforms = []
@@ -181,11 +173,12 @@ def _update_ligand_neighbourhood_transforms(
     ligand_1_id = lid
     ligand_1_neighbourhood = ligand_neighbourhoods[lid]
     matches = []
-    for (ligand_2_id, ligand_2_neighbourhood,) in ligand_neighbourhoods.items():
+    for (
+        ligand_2_id,
+        ligand_2_neighbourhood,
+    ) in ligand_neighbourhoods.items():
         # See if atoms match - transform is frame 2 to frame 1
-        ca_match, transform, inverse_transform = _match_cas(
-            ligand_1_neighbourhood, ligand_2_neighbourhood
-        )
+        ca_match, transform, inverse_transform = _match_cas(ligand_1_neighbourhood, ligand_2_neighbourhood)
 
         if ca_match:
             # connectivities.append(1)
@@ -198,8 +191,8 @@ def _update_ligand_neighbourhood_transforms(
     if len(matches) == 0:
         rprint(f"No Matches For {ligand_1_id}! No alignments will be generated!")
 
-            # else:
-            #     connectivities.append(0)
+        # else:
+        #     connectivities.append(0)
 
         # connectivity.append(connectivities)
 

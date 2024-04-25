@@ -61,7 +61,8 @@ def get_transform_from_residues(rs: list[ResidueID], srs, ssrs):
 
     return sup.transform
 
-def _get_transform_from_residues(rs: list[tuple[str,str]], srs, ssrs):
+
+def _get_transform_from_residues(rs: list[tuple[str, str]], srs, ssrs):
     # Transform from ssrs to srs
     acs = []
     for resid in rs:
