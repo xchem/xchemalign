@@ -509,6 +509,8 @@ def resample_xmap(new_xmap, aligned_res):
     cell = get_cell(frame_array, step)
     # print(cell)
 
+    print(f'Origin for xmap is now: {frame_lower_bound}')
+
     new_map = get_new_map(cell, frame_array, frame_lower_bound, step)
     return new_map
 
