@@ -13,7 +13,7 @@ If you have seen XChemAlign fail to correctly parse data, identify sites or subs
 ============== ==============================================================
 PyPI           ``pip install xchemalign``
 Source code    https://github.com/xchem/xchemalign
-Documentation  https://xchem.github.io/xchemalign
+Documentation  https://xchemalign.readthedocs.io
 Releases       https://github.com/xchem/xchemalign/releases
 ============== ==============================================================
 
